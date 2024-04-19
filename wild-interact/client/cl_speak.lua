@@ -294,14 +294,12 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 			if randomChat ~= "NONE" then
 				line = randomChat
 				DecorSetInt(targetPed, "player_chat_progress", 0)
-				ShowText("Conv started")
 			end
 		end
 
 		if DecorExistOn(targetPed, "player_chat_progress") and DecorGetInt(targetPed, "player_chat_progress") == 1 then
 			line = "GENERIC_GOODBYE"
 			DecorSetInt(targetPed, "player_chat_progress", 2)
-			ShowText("Bye")
 		end
 
 		-- zero = random variation
