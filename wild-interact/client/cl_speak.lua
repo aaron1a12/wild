@@ -211,7 +211,7 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 	-- Convert from network id to local
 	local sourcePed = NetToPed(playerPed_net)
 	local targetPed = NetToPed(targetPed_net)
-	
+
 	-- Speak
 	--https://raw.githubusercontent.com/femga/rdr3_discoveries/a63669efcfea34915c53dbd29724a2a7103f822f/audio/audio_banks/audio_banks.lua
 	--https://www.rdr2mods.com/wiki/speech/ambient-characters/0589_a_m_m_civ_white_13/
@@ -251,7 +251,7 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 
 		-- For Arthur peds
 		if not CanPlayAmbientSpeech(sourcePed, "GREET_GENERAL_FAMILIAR") then
-			if IsPedMale(target) then
+			if IsPedMale(targetPed) then
 				line = "GREET_MALE"
 			else
 				line = "GREET_FEMALE"
@@ -382,8 +382,12 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 
 		local line = "WHATS_YOUR_PROBLEM"
 
-		if CanPlayAmbientSpeech(sourcePed, "INSULT_MALE_CONV_PART1") and math.random() > 0.0 then
+		if CanPlayAmbientSpeech(sourcePed, "INSULT_MALE_CONV_PART1") and IsPedMale(targetPed) and math.random() > 0.0 then
 			line = "INSULT_MALE_CONV_PART1"
+		end
+
+		if CanPlayAmbientSpeech(sourcePed, "INSULT_FEMALE_CONV_PART1") and not IsPedMale(targetPed) and math.random() > 0.0 then
+			line = "INSULT_FEMALE_CONV_PART1"
 		end
 
 		if CanPlayAmbientSpeech(sourcePed, "GENERIC_ANTISOCIAL_MALE_EVENT_COMMENT") and math.random() < 0.2 then
