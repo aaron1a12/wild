@@ -109,11 +109,21 @@ Citizen.CreateThread(function()
 				Citizen.InvokeNative(0x4A48B6E03BABB4AC, entity, "Stranger")
 				Citizen.InvokeNative(0x19B14E04B009E28B, entity, "Stranger")
 
+				local playerPed = GetPlayerPed(PlayerId())
+
+				if IsAmbientSpeechPlaying(playerPed) or IsScriptedSpeechPlaying(playerPed) then
+					PromptSetEnabled(greetPrompt, false)
+					PromptSetEnabled(antagonizePrompt, false)
+				else
+					PromptSetEnabled(greetPrompt, true)
+					PromptSetEnabled(antagonizePrompt, true)
+				end
+
 				-- R to greet, F to antagonize
 				if IsControlJustPressed(0, 'INPUT_INTERACT_LOCKON_POS') or IsControlJustPressed(0, 'INPUT_INTERACT_LOCKON_NEG') then
 					local bAntagonize = IsControlJustPressed(0, 'INPUT_INTERACT_LOCKON_NEG')
 		
-					local playerPed = GetPlayerPed(PlayerId())
+					
 					local playerPed_net = PedToNet(playerPed)
 					local targetPed_net = PedToNet(entity)
 
@@ -284,12 +294,14 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 			if randomChat ~= "NONE" then
 				line = randomChat
 				DecorSetInt(targetPed, "player_chat_progress", 0)
+				ShowText("Conv started")
 			end
 		end
 
 		if DecorExistOn(targetPed, "player_chat_progress") and DecorGetInt(targetPed, "player_chat_progress") == 1 then
 			line = "GENERIC_GOODBYE"
 			DecorSetInt(targetPed, "player_chat_progress", 2)
+			ShowText("Bye")
 		end
 
 		-- zero = random variation
