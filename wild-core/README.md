@@ -1,0 +1,2 @@
+# wild-core
+Base resource
