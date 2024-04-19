@@ -287,7 +287,7 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 		end
 
 		-- Randomly initiate a chat if already greeted
-		if DecorExistOn(targetPed, "player_greeted") and not DecorExistOn(targetPed, "player_chat_progress") and math.random() < 0.3 then
+		if DecorExistOn(targetPed, "player_greeted") and not DecorExistOn(targetPed, "player_chat_progress") and math.random() < 0.5 then
 
 			randomChat = GetRandomChatLine(sourcePed, targetPed)
 
