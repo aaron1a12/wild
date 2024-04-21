@@ -4,6 +4,7 @@
 
 -- Returns 1 or false depending if the ped's audio bank contains the specified speech line
 -- Example: CanPlayAmbientSpeech(ped, "WHATS_YOUR_PROBLEM") = false when using as mary linton
+-- IMPORTANT: Not reliable on remote clients when used on a player ped
 function CanPlayAmbientSpeech(ped, soundName) -- ped:int, soundName:str
 	return Citizen.InvokeNative(0x9D6DEC9791A4E501, ped, soundName, 0, 1)
 end
@@ -16,6 +17,11 @@ end
 -- Gets the hash for the last played speech line
 function GetLastAmbientSpeech(ped) -- ped:int
 	return Citizen.InvokeNative(0x6BFFB7C276866996, ped)
+end
+
+-- Seems to return horse ped when really close (facing, directly riding, etc)
+function GetNearByHorse()
+	return Citizen.InvokeNative(0x0501D52D24EA8934, 1, Citizen.ResultAsInteger())
 end
 
 -- Original code from https://github.com/femga/rdr3_discoveries/
@@ -39,9 +45,9 @@ function PlayAmbientSpeechFromEntity(entity_id, sound_ref_string, sound_name_str
     struct:SetInt32(16, speech_line) -- variation
     struct:SetInt64(24, speech_params_BigInt:GetInt64(0)) -- speechParamHash
     struct:SetInt32(32, 0) -- listenerPed
-    struct:SetInt32(40, 1) -- syncOverNetwork
-	struct:SetInt32(48, 1) -- v7
-	struct:SetInt32(56, 1) -- v8
+    struct:SetInt32(40, 0) -- syncOverNetwork
+	struct:SetInt32(48, 0) -- v7
+	struct:SetInt32(56, 0) -- v8
 
 	return Citizen.InvokeNative(0x8E04FEDD28D42462, entity_id, struct:Buffer());
 end

@@ -12,9 +12,14 @@ client_script
 
 server_script
 {
+	"server/sv_main.lua",
 	"server/sv_horse.lua"
 }
 
 files
 {
+	'html/**/*',
+	"peds.json"
 }
+
+ui_page 'html/index.html'
