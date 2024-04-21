@@ -71,8 +71,6 @@ local DECOR_WAS_ANTAGONIZED = "was_antagonized"..tostring(PlayerId())
 
 local function RegisterDecorTypes()
 	DecorRegister(DECOR_IGNORING_PLAYER, 2);
-
-	-- These names are actually the same ones used natively
 	DecorRegister(DECOR_PLAYER_GREETED, 2);
 	DecorRegister(DECOR_PLAYER_CHAT_PROGRESS, 3);
 	DecorRegister(DECOR_PLAYER_ANTAGONIZED, 2);
@@ -121,15 +119,13 @@ local function GetRandomGreetLine(sourcePed, targetPed)
 		table.insert(pool, "HOWS_IT_GOING")
 	end
 
-	if  math.random() < 0.5 then
-		if GetClockHours() > 4 and GetClockHours() < 12 then
-			if CanPlayAmbientSpeech(sourcePed, "GREET_MORNING") then
-				table.insert(pool, "GREET_MORNING")
-			end
-		elseif GetClockHours() > 16 then
-			if CanPlayAmbientSpeech(sourcePed, "GREET_EVENING") then
-				table.insert(pool, "GREET_EVENING")
-			end
+	if GetClockHours() > 4 and GetClockHours() < 12 then
+		if CanPlayAmbientSpeech(sourcePed, "GREET_MORNING") then
+			table.insert(pool, "GREET_MORNING")
+		end
+	elseif GetClockHours() > 16 then
+		if CanPlayAmbientSpeech(sourcePed, "GREET_EVENING") then
+			table.insert(pool, "GREET_EVENING")
 		end
 	end
 
