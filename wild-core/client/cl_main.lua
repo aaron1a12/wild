@@ -1,6 +1,9 @@
+--
+-- Money NUI
+--
+
 local timeSinceShown = 0
 local bIsHUDVisible = false
-
 
 local function SetMoneyVisible(bVisible)
     SendNUIMessage({type = "setVisibility", visible = bVisible})
@@ -25,8 +28,6 @@ Citizen.CreateThread(function()
 	end
 end)
 
-
-
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
@@ -45,30 +46,55 @@ Citizen.CreateThread(function()
 	end
 end)
 
+--
+-- Player Money/Loadout
+--
+
+local bPlayerSpawned = false
 local playerMoney = 0.0
-
-RegisterNetEvent("wild:cl_onLoadMoney")
-AddEventHandler("wild:cl_onLoadMoney", function(fAmount)
-	playerMoney = fAmount
-end)
-
 
 function GetPlayerMoney()
     return playerMoney
 end
 
-local function OnStartUp()
+function UpdateMoney(fAmount)
+    playerMoney = fAmount
+    SetMoneyAmount(fAmount)
+end
+
+AddEventHandler("playerSpawned", function(spawn)
+    if not bPlayerSpawned then
+	    TriggerServerEvent("wild:sv_onPlayerSpawned")
+        bPlayerSpawned = true
+    end
+end)
+
+AddEventHandler("onResourceStart", function(resource)
+	if resource == GetCurrentResourceName() then
+        if not bPlayerSpawned then
+            TriggerServerEvent("wild:sv_onPlayerSpawned")
+            bPlayerSpawned = true
+        end
+	end
+end)
+
+RegisterNetEvent("wild:cl_onPlayerSpawned")
+AddEventHandler("wild:cl_onPlayerSpawned", function(userData)
+
     -- Hide money
     Citizen.InvokeNative(0x4CC5F2FC1332577F, -66088566)
     -- Hide skill cards
     Citizen.InvokeNative(0x4CC5F2FC1332577F, 1058184710)
 
     Citizen.Wait(1000)
-    SetMoneyAmount(0.0)
-end
-OnStartUp()
 
+    UpdateMoney(userData["money"])   
+end)
 
+RegisterNetEvent("wild:cl_onUpdateMoney")
+AddEventHandler("wild:cl_onUpdateMoney", function(fAmount)
+    UpdateMoney(fAmount)
+end)
 
 Citizen.CreateThread(function()
 	while true do

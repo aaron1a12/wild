@@ -19,7 +19,8 @@ server_script
 files
 {
 	'html/**/*',
-	"peds.json"
+	"peds.json",
+	"players.json"
 }
 
 ui_page 'html/index.html'
