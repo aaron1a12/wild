@@ -99,8 +99,68 @@ function ShowHelpText(strMessage, durationMs)
     Citizen.InvokeNative(0x049D5C615BD38BAD, struct1:Buffer(), struct2:Buffer(), true)
 end
 
+function StringSplit(inputstr, delimiter)
+	if delimiter == nil then
+		delimiter = "%s"
+	end
+	local t={}
+	for str in string.gmatch(inputstr, "([^"..delimiter.."]+)") do
+			table.insert(t, str)
+	end
+	return t
+end
+
+function FormatMoney(fMoney)
+	local strMoney = tostring(fMoney)
+	local parts = StringSplit(strMoney, ".")
+	local dollars = "0"
+	local cents = "00"
+	local retStr = ""
+
+	if #parts > 1 then -- Have cents
+		local part = parts[2]
+		part = string.sub(part, 1, 2) -- truncate
+
+		if #part == 1 then -- str length of 1
+			cents = part .. "0" -- right pad zero
+		else
+			cents = part
+		end
+	end
+
+	dollars = parts[1]
+	local nDigits = #parts[1]
+	local periodSize = 3
+
+	local nPeriods = nDigits / periodSize
+	local integerPart, fractionalPart = math.modf(nPeriods)
+	nPeriods = integerPart
+
+	local periodRemainder = math.fmod(nDigits, periodSize)
+
+	local finalChars = {}
+	local digitsProcessed = 0
+
+	-- Iteract backwards
+	for i = nDigits, 1, -1 do 
+		local char = string.sub(dollars, i, i)
+		table.insert(finalChars, char)
+		digitsProcessed = digitsProcessed + 1
+
+		local _, frac = math.modf(digitsProcessed/periodSize)
+		if frac == 0.0 and periodRemainder > 0 then -- Time to add separator
+			table.insert(finalChars, ',')
+		end
+	end
+
+	finalChars = table.concat(finalChars, "")
+	dollars = string.reverse(finalChars)
+	
+	return dollars .. "." .. cents
+end
+
 function ShowCashPickup(fAmount, durationMs)
-	local strAmount = tostring(fAmount)
+	local strAmount = FormatMoney(fAmount)
 	local str1 = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", strAmount, Citizen.ResultAsLong())
 	local str2 = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", "ITEMTYPE_TEXTURES", Citizen.ResultAsLong())
 
