@@ -26,29 +26,29 @@ end
 
 -- Original code from https://github.com/femga/rdr3_discoveries/
 function PlayAmbientSpeechFromEntity(entity_id, sound_ref_string, sound_name_string, speech_params_string, speech_line)
-    local sound_name = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", sound_name_string,Citizen.ResultAsLong())
-    local sound_ref  = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING",sound_ref_string,Citizen.ResultAsLong())
-    local speech_params = GetHashKey(speech_params_string)
-
-    local sound_name_BigInt =  DataView.ArrayBuffer(16) 
-    sound_name_BigInt:SetInt64(0,sound_name)
-
-    local sound_ref_BigInt =  DataView.ArrayBuffer(16)
-    sound_ref_BigInt:SetInt64(0,sound_ref)
-
-    local speech_params_BigInt = DataView.ArrayBuffer(16)
-    speech_params_BigInt:SetInt64(0,speech_params)
-
+	local sound_name = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", sound_name_string,Citizen.ResultAsLong())
+	local sound_ref  = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING",sound_ref_string,Citizen.ResultAsLong())
+	local speech_params = GetHashKey(speech_params_string)
+	
+	local sound_name_BigInt =  DataView.ArrayBuffer(16) 
+	sound_name_BigInt:SetInt64(0,sound_name)
+	
+	local sound_ref_BigInt =  DataView.ArrayBuffer(16)
+	sound_ref_BigInt:SetInt64(0,sound_ref)
+	
+	local speech_params_BigInt = DataView.ArrayBuffer(16)
+	speech_params_BigInt:SetInt64(0,speech_params)
+	
 	local struct = DataView.ArrayBuffer(128)
-    struct:SetInt64(0, sound_name_BigInt:GetInt64(0)) -- speechName
-    struct:SetInt64(8, sound_ref_BigInt:GetInt64(0)) -- voiceName
-    struct:SetInt32(16, speech_line) -- variation
-    struct:SetInt64(24, speech_params_BigInt:GetInt64(0)) -- speechParamHash
-    struct:SetInt32(32, 0) -- listenerPed
-    struct:SetInt32(40, 0) -- syncOverNetwork
+	struct:SetInt64(0, sound_name_BigInt:GetInt64(0)) -- speechName
+	struct:SetInt64(8, sound_ref_BigInt:GetInt64(0)) -- voiceName
+	struct:SetInt32(16, speech_line) -- variation
+	struct:SetInt64(24, speech_params_BigInt:GetInt64(0)) -- speechParamHash
+	struct:SetInt32(32, 0) -- listenerPed
+	struct:SetInt32(40, 0) -- syncOverNetwork
 	struct:SetInt32(48, 0) -- v7
 	struct:SetInt32(56, 0) -- v8
-
+	
 	return Citizen.InvokeNative(0x8E04FEDD28D42462, entity_id, struct:Buffer());
 end
 
@@ -73,7 +73,6 @@ end
 
 function ShowText(text)
 	Citizen.CreateThread(function()
-	
 		local timeLeft = 1.0
 		
 		while timeLeft > 0 do
@@ -88,15 +87,15 @@ end
 --See for more: https://gist.github.com/nonameset/b338aab76bbaa0c4f879630a61d97122
 function ShowHelpText(strMessage, durationMs)
 	local str = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", strMessage, Citizen.ResultAsLong())
-
-    local struct1 = DataView.ArrayBuffer(8*13)
-    struct1:SetInt32(0, durationMs)
-
-    local struct2 = DataView.ArrayBuffer(8*8)
-    struct2:SetInt64(8*1, str)
-    struct2:SetInt64(8*2, str)
-
-    Citizen.InvokeNative(0x049D5C615BD38BAD, struct1:Buffer(), struct2:Buffer(), true)
+	
+	local struct1 = DataView.ArrayBuffer(8*13)
+	struct1:SetInt32(0, durationMs)
+	
+	local struct2 = DataView.ArrayBuffer(8*8)
+	struct2:SetInt64(8*1, str)
+	struct2:SetInt64(8*2, str)
+	
+	Citizen.InvokeNative(0x049D5C615BD38BAD, struct1:Buffer(), struct2:Buffer(), true)
 end
 
 function StringSplit(inputstr, delimiter)
@@ -163,14 +162,14 @@ function ShowCashPickup(fAmount, durationMs)
 	local strAmount = FormatMoney(fAmount)
 	local str1 = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", strAmount, Citizen.ResultAsLong())
 	local str2 = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", "ITEMTYPE_TEXTURES", Citizen.ResultAsLong())
-
+	
 	local charPtr0 =  DataView.ArrayBuffer(16) 
-    charPtr0:SetInt64(0, str1)
+	charPtr0:SetInt64(0, str1)
 	local charPtr1 =  DataView.ArrayBuffer(16) 
-    charPtr1:SetInt64(0, str2)
-
-    local struct1 = DataView.ArrayBuffer(128)
-    struct1:SetInt32(8*0, durationMs) --duration
+	charPtr1:SetInt64(0, str2)
+	
+	local struct1 = DataView.ArrayBuffer(128)
+	struct1:SetInt32(8*0, durationMs) --duration
 	struct1:SetInt64(8*1, 0) -- const char*
 	struct1:SetInt64(8*2, 0) -- const char*
 	struct1:SetInt32(8*3, 0) --int
@@ -183,11 +182,11 @@ function ShowCashPickup(fAmount, durationMs)
 	struct1:SetInt32(8*10, 0) --int
 	struct1:SetInt32(8*11, 0) --int
 	struct1:SetInt32(8*12, 0) --int
-
-    local struct2 = DataView.ArrayBuffer(128)
+	
+	local struct2 = DataView.ArrayBuffer(128)
 	struct2:SetInt32(8*0, 0) --unk0
-    struct2:SetInt64(8*1, charPtr0:GetInt64(0)) -- title
-    struct2:SetInt64(8*2, charPtr1:GetInt64(0)) -- subtitle
+	struct2:SetInt64(8*1, charPtr0:GetInt64(0)) -- title
+	struct2:SetInt64(8*2, charPtr1:GetInt64(0)) -- subtitle
 	struct2:SetInt32(8*3, `ITEMTYPE_CASH`) -- TRANSACTION_HONOR_BAD
 	struct2:SetInt32(8*4, 0)
 	struct2:SetInt32(8*5, `COLOR_PURE_WHITE`) --COLOR_GOLD
@@ -195,7 +194,7 @@ function ShowCashPickup(fAmount, durationMs)
 	struct2:SetInt32(8*7, 0) 
 
 	--_UI_FEED_POST_SAMPLE_TOAST_RIGHT. Part of HUD_TOASTS, I believe
-    Citizen.InvokeNative(0xB249EBCB30DD88E0, struct1:Buffer(), struct2:Buffer(), 1)
+    	Citizen.InvokeNative(0xB249EBCB30DD88E0, struct1:Buffer(), struct2:Buffer(), 1)
 
 	-- Could this prevent the above buffers from deleting before RAGE can use them?
 	Citizen.Wait(durationMs)
