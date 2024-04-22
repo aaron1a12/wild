@@ -30,11 +30,6 @@ Citizen.CreateThread(function()
 	                            
 	                            Citizen.Wait(500)
 	
-	                            local soundset_ref = "Ledger_Sounds"
-	                            local soundset_name =  "PURCHASE"
-	                            Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
-	                            Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
-	
 	                            math.randomseed(GetGameTimer()/7)
 	                            local money = math.random(1, 50) / 100
 	
