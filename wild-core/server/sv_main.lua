@@ -1,4 +1,5 @@
 local Players = {}
+local PlayerSources = {}
 
 local function LoadData()
     Players = json.decode(LoadResourceFile(GetCurrentResourceName(), "players.json"))
@@ -40,5 +41,15 @@ end)
 
 RegisterNetEvent('wild:sv_onPlayerSpawned', function()
     local playerName = GetPlayerName(source)
+    PlayerSources[playerName] = source
     TriggerClientEvent("wild:cl_onPlayerSpawned", source, Players[playerName])
+end)
+
+RegisterNetEvent("wild:sv_giveMoney")
+AddEventHandler("wild:sv_giveMoney", function(strPlayerName, fAmount)
+    local newTotal = Players[strPlayerName]["money"] + fAmount
+    Players[strPlayerName]["money"] = newTotal
+
+    TriggerClientEvent("wild:cl_onUpdateMoney", PlayerSources[strPlayerName], newTotal)
+    SaveData()
 end)

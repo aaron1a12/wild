@@ -7,6 +7,7 @@ client_script
 	"client/functions/cl_dataview.lua",
 	"client/functions/cl_general.lua",
 	"client/cl_horse.lua",
+	"client/cl_loot.lua",
 	"client/cl_main.lua",
 }
 

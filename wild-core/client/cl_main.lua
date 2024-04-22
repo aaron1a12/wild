@@ -22,7 +22,7 @@ Citizen.CreateThread(function()
     while true do
         Citizen.Wait(100)
 
-        if bIsHUDVisible and timeSinceShown < 10.0 and (IsRadarHidden() or IsPauseMenuActive()) then
+        if bIsHUDVisible and timeSinceShown < 3.0 and IsPauseMenuActive() then
             SetMoneyVisible(false)
         end
 	end
@@ -35,7 +35,7 @@ Citizen.CreateThread(function()
         if bIsHUDVisible then
 		    timeSinceShown = timeSinceShown + GetFrameTime()
 
-            if timeSinceShown > 10.0 then
+            if timeSinceShown > 3.0 then
                 SetMoneyVisible(false)
             end
         end
@@ -60,6 +60,7 @@ end
 function UpdateMoney(fAmount)
     playerMoney = fAmount
     SetMoneyAmount(fAmount)
+    SetMoneyVisible(true)
 end
 
 AddEventHandler("playerSpawned", function(spawn)

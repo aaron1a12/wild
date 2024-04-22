@@ -84,3 +84,34 @@ function ShowText(text)
 		end
 	end)
 end
+
+function GetPedsInArea(coords, radius)
+	local peds = {}
+    
+    for _, ped in ipairs(GetGamePool('CPed')) do
+		local dist = GetDistanceBetweenCoords(coords, GetEntityCoords(ped), true)
+
+		if dist < radius then
+			table.insert(peds, ped)
+		end
+    end
+
+    return peds
+end
+
+function GetClosestPedTo(entity, maxDist)
+	local coords = GetEntityCoords(entity)
+	local peds = GetPedsInArea(GetEntityCoords(entity), maxDist)
+	local smallestDist = 99999999.0
+	local candidate = 0
+
+	for i = 1, #peds do 
+		local dist = GetDistanceBetweenCoords(coords, GetEntityCoords(peds[i]), true)
+
+		if dist < smallestDist and peds[i] ~= entity then
+			candidate = peds[i]
+		end
+	end
+
+	return candidate
+end
