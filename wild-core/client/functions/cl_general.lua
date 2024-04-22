@@ -85,6 +85,62 @@ function ShowText(text)
 	end)
 end
 
+--See for more: https://gist.github.com/nonameset/b338aab76bbaa0c4f879630a61d97122
+function ShowHelpText(strMessage, durationMs)
+	local str = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", strMessage, Citizen.ResultAsLong())
+
+    local struct1 = DataView.ArrayBuffer(8*13)
+    struct1:SetInt32(0, durationMs)
+
+    local struct2 = DataView.ArrayBuffer(8*8)
+    struct2:SetInt64(8*1, str)
+    struct2:SetInt64(8*2, str)
+
+    Citizen.InvokeNative(0x049D5C615BD38BAD, struct1:Buffer(), struct2:Buffer(), true)
+end
+
+function ShowCashPickup(fAmount, durationMs)
+	local strAmount = tostring(fAmount)
+	local str1 = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", strAmount, Citizen.ResultAsLong())
+	local str2 = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", "ITEMTYPE_TEXTURES", Citizen.ResultAsLong())
+
+	local charPtr0 =  DataView.ArrayBuffer(16) 
+    charPtr0:SetInt64(0, str1)
+	local charPtr1 =  DataView.ArrayBuffer(16) 
+    charPtr1:SetInt64(0, str2)
+
+    local struct1 = DataView.ArrayBuffer(128)
+    struct1:SetInt32(8*0, durationMs) --duration
+	struct1:SetInt64(8*1, 0) -- const char*
+	struct1:SetInt64(8*2, 0) -- const char*
+	struct1:SetInt32(8*3, 0) --int
+	struct1:SetInt32(8*4, 0) --int
+	struct1:SetInt32(8*5, 0) --int
+	struct1:SetInt64(8*6, 0) -- const char* 2ndSubtitle
+	struct1:SetInt32(8*7, 0) --int
+	struct1:SetInt32(8*8, 0) --int
+	struct1:SetInt32(8*9, 0) --int
+	struct1:SetInt32(8*10, 0) --int
+	struct1:SetInt32(8*11, 0) --int
+	struct1:SetInt32(8*12, 0) --int
+
+    local struct2 = DataView.ArrayBuffer(128)
+	struct2:SetInt32(8*0, 0) --unk0
+    struct2:SetInt64(8*1, charPtr0:GetInt64(0)) -- title
+    struct2:SetInt64(8*2, charPtr1:GetInt64(0)) -- subtitle
+	struct2:SetInt32(8*3, `ITEMTYPE_CASH`) -- TRANSACTION_HONOR_BAD
+	struct2:SetInt32(8*4, 0)
+	struct2:SetInt32(8*5, `COLOR_PURE_WHITE`) --COLOR_GOLD
+	struct2:SetInt32(8*6, 0) 
+	struct2:SetInt32(8*7, 0) 
+
+	--_UI_FEED_POST_SAMPLE_TOAST_RIGHT. Part of HUD_TOASTS, I believe
+    Citizen.InvokeNative(0xB249EBCB30DD88E0, struct1:Buffer(), struct2:Buffer(), 1)
+
+	-- Could this prevent the above buffers from deleting before RAGE can use them?
+	Citizen.Wait(durationMs)
+end
+
 function GetPedsInArea(coords, radius)
 	local peds = {}
     

@@ -58,7 +58,11 @@ function GetPlayerMoney()
 end
 
 function UpdateMoney(fAmount)
+    local diff = fAmount - playerMoney
+    ShowCashPickup(diff, 2000)
+
     playerMoney = fAmount
+    
     SetMoneyAmount(fAmount)
     SetMoneyVisible(true)
 end
