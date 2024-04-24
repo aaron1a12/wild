@@ -345,12 +345,10 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 
 	-- Fix for when not using OneSync
 	if not DoesEntityExist(sourcePed) then
-		ShowText("source ped does not exist")
 		return -- EXIT
 	end
 
 	if not DoesEntityExist(targetPed) then
-		ShowText("targetPed ped does not exist")
 		return -- EXIT
 	end
 
