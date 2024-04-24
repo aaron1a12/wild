@@ -1,3 +1,13 @@
+-- Start
+--
+
+CONFIG = {}
+
+local function LoadConfig()
+    CONFIG = json.decode(LoadResourceFile(GetCurrentResourceName(), "config.json"))
+end
+LoadConfig()
+
 --
 -- Money NUI
 --

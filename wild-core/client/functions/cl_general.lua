@@ -62,7 +62,7 @@ end
 
 function PrintText(x, y, scale, center, text, r, g, b, a)
 	local str = CreateVarString(10, "LITERAL_STRING", text)
-	SetTextColor(255, 255, 255, 255)
+	SetTextColor(r, g, b, a)
 	SetTextFontForCurrentCommand(0)
 	SetTextDropshadow(2, 0, 0, 0, 200)
 	SetTextScale(scale, scale)
