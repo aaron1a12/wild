@@ -182,6 +182,10 @@ local function DumpIpls()
     TriggerServerEvent("wild:sv_dumpIpls", hashes)
 end
 
+RegisterNetEvent("wild:cl_dumpIplsDone")
+AddEventHandler("wild:cl_dumpIplsDone", function()
+    ShowText("Saved to ipls.json")
+end)
 
 local function CycleIpl(bForward)
     if bForward then
@@ -273,7 +277,7 @@ AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
                 PrintText(0.025, 0.56, 0.3, false, tostring(z), 255, 255, 255, 255)
 
                 PrintText(0.01, 0.1, 0.3, false, "ALT + 1 : Kill self", 255, 50, 255, 255)
-                PrintText(0.01, 0.13, 0.3, false, "ALT + 2 : Dump Enabled IPLs", 255, 150, 0, 255)
+                PrintText(0.01, 0.13, 0.3, false, "ALT + 2 : Save Enabled IPLs", 255, 150, 0, 255)
 
                 PrintText(0.01, 0.16, 0.3, false, "Active IPL:", 155, 120, 22, 255)
 
