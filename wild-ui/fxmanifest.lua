@@ -11,6 +11,13 @@ client_script {
 server_script {
 }
 
+files
+{
+	'html/**/*',
+}
+
+ui_page 'html/index.html'
+
 dependencies {
     'wild-core'
 }

@@ -74,6 +74,10 @@
         <div id="moneyContainer">$<span id="moneyDollars">0</span><sup id="moneyCents">00</sup></div>
 
         <script>
+
+            window.addEventListener("load", (event) => {
+                fetch(`https://${GetParentResourceName()}/ready`);
+            });
             
             // 4K fix
             var x = (window.screen.width / 1920);

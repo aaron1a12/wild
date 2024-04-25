@@ -23,11 +23,8 @@ server_script
 
 files
 {
-	'html/**/*',
 	"ipls.json",
 	"config.json",
 	"peds.json",
 	"players.json"
 }
-
-ui_page 'html/index.html'

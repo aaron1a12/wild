@@ -246,3 +246,38 @@ end
 function DrawDebugSphere(vCenter, fRadius, iR, iG, iB, iAlpha)
 	Citizen.InvokeNative(0x2A32FAA57B937173, 0x50638AB9, vCenter.x, vCenter.y, vCenter.z, 0, 0, 0, 0, 0, 0, fRadius, fRadius, fRadius, iR, iG, iB, iAlpha, 0, 0, 2, 0, 0, 0, 0)
 end
+
+--
+-- Global WILD-UI Functions
+-- These functions are available everywhere
+--
+
+local bWildUiReady = false
+
+RegisterNetEvent("wild:cl_onUiPingBack")
+AddEventHandler("wild:cl_onUiPingBack", function()
+    bWildUiReady = true
+end)
+
+-- Ensures that the wild-ui resource has been loaded
+function WildUIWaitUntilReady()
+	if bWildUiReady then
+		return
+	else
+		TriggerEvent('wild:cl_uiPing')
+
+		while not bWildUiReady do
+			Citizen.Wait(0)
+		end
+	end
+end
+
+-- Same as RegisterNUICallback
+function WildUICallback(cbName, func)
+	TriggerEvent('wild:cl_registerCallback', cbName, func)
+end
+
+-- Same as SendNUIMessage
+function WildUI(messageObj)
+	TriggerEvent('wild:cl_sendNuiMessage', messageObj)
+end

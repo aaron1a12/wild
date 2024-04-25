@@ -104,3 +104,28 @@ AddEventHandler("wild:sv_dumpIpls", function(ipls)
     SaveResourceFile(GetCurrentResourceName(), "ipls.json", json.encode(ipls), -1)
     TriggerClientEvent("wild:cl_dumpIplsDone", source)
 end)
+
+--
+-- Auto-start resources
+--
+
+AddEventHandler("onResourceStart", function(resource)   
+	if resource == GetCurrentResourceName() then
+
+        Citizen.CreateThread(function()
+            while GetResourceState(resource) ~= "started" do -- Wait until state changes
+                Citizen.Wait(1)
+            end
+
+            -- Even though we've "started," it still won't register to other resources
+            -- so wait a little more
+            Citizen.Wait(1)
+
+            -- wild-core has fully restarted
+
+            -- Start resources that depend on wild-core
+            StartResource("wild-ui")
+        end)
+        
+	end
+end)

@@ -49,7 +49,8 @@ local timeSinceShown = 0
 local bIsHUDVisible = false
 
 local function SetMoneyVisible(bVisible)
-    SendNUIMessage({type = "setVisibility", visible = bVisible})
+    WildUIWaitUntilReady()
+    WildUI({type = "setVisibility", visible = bVisible})
     bIsHUDVisible = bVisible
 
     if bVisible then
@@ -58,7 +59,8 @@ local function SetMoneyVisible(bVisible)
 end
 
 local function SetMoneyAmount(fAmount)
-    SendNUIMessage({type = "setMoneyAmount", amount = fAmount})
+    WildUIWaitUntilReady()
+    WildUI({type = "setMoneyAmount", amount = fAmount})
 end
 
 Citizen.CreateThread(function()
