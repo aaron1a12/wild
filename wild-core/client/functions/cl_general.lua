@@ -63,6 +63,7 @@ end
 function PrintText(x, y, scale, center, text, r, g, b, a)
 	local str = CreateVarString(10, "LITERAL_STRING", text)
 	SetTextColor(r, g, b, a)
+	BgSetTextColor(r, g, b, a)
 	SetTextFontForCurrentCommand(0)
 	SetTextDropshadow(2, 0, 0, 0, 200)
 	SetTextScale(scale, scale)
@@ -229,4 +230,19 @@ function GetClosestPedTo(entity, maxDist)
 	end
 
 	return candidate
+end
+
+function GetTableSize(t)
+	local n = 0
+	for _ in pairs(t) do n = n + 1 end
+	return n
+end
+
+function GetFirstInTable(t)
+	for _, imap in pairs(all_imaps_list) do
+	end
+end
+
+function DrawDebugSphere(vCenter, fRadius, iR, iG, iB, iAlpha)
+	Citizen.InvokeNative(0x2A32FAA57B937173, 0x50638AB9, vCenter.x, vCenter.y, vCenter.z, 0, 0, 0, 0, 0, 0, fRadius, fRadius, fRadius, iR, iG, iB, iAlpha, 0, 0, 2, 0, 0, 0, 0)
 end

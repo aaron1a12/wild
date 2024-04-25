@@ -6,10 +6,13 @@ client_script
 {
 	"client/functions/cl_dataview.lua",
 	"client/functions/cl_general.lua",
+	"client/imaps/cl_imaps.lua",
 	"client/cl_main.lua",
-	"client/cl_debug.lua",
+	"client/cl_spawn.lua",	
 	"client/cl_horse.lua",
 	"client/cl_loot.lua",
+	"client/cl_map.lua",
+	"client/cl_debug.lua",
 }
 
 server_script
@@ -21,6 +24,7 @@ server_script
 files
 {
 	'html/**/*',
+	"ipls.json",
 	"config.json",
 	"peds.json",
 	"players.json"

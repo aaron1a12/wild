@@ -9,6 +9,39 @@ end
 LoadConfig()
 
 --
+-- Player Data
+--
+
+local playerData = nil
+local _playerData = nil
+
+RegisterNetEvent("wild:cl_onReceivePlayerData")
+AddEventHandler("wild:cl_onReceivePlayerData", function(newPlayerData)
+    _playerData = newPlayerData
+end)
+
+-- Synchronously loads player data (money, spawn pos, etc) from the server
+function RefreshPlayerData()
+    TriggerServerEvent("wild:sv_getPlayerData", GetPlayerName(PlayerId()))
+
+    while _playerData == nil do
+        Citizen.Wait(0)
+    end
+
+    playerData = _playerData
+    _playerData = nil
+end
+
+-- Returns the locally cached player data.
+function GetPlayerData()
+    if playerData == nil then
+        RefreshPlayerData()
+    end 
+
+    return playerData
+end
+
+--
 -- Money NUI
 --
 
@@ -56,15 +89,8 @@ Citizen.CreateThread(function()
 	end
 end)
 
---
--- Player Money/Loadout
---
-
-local bPlayerSpawned = false
-local playerMoney = 0.0
-
 function GetPlayerMoney()
-    return playerMoney
+    return playerData["money"]
 end
 
 function UpdateMoney(fAmount)
@@ -73,34 +99,17 @@ function UpdateMoney(fAmount)
     Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
     Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
     
-    local diff = fAmount - playerMoney
+    local diff = fAmount - GetPlayerMoney()
     ShowCashPickup(diff, 2000)
 
-    playerMoney = fAmount
+    playerData["money"] = fAmount
     
     SetMoneyAmount(fAmount)
     SetMoneyVisible(true)
 end
 
-AddEventHandler("playerSpawned", function(spawn)
-    if not bPlayerSpawned then
-	    TriggerServerEvent("wild:sv_onPlayerSpawned")
-        bPlayerSpawned = true
-    end
-end)
-
-AddEventHandler("onResourceStart", function(resource)
-	if resource == GetCurrentResourceName() then
-        if not bPlayerSpawned then
-            TriggerServerEvent("wild:sv_onPlayerSpawned")
-            bPlayerSpawned = true
-        end
-	end
-end)
-
-RegisterNetEvent("wild:cl_onPlayerSpawned")
-AddEventHandler("wild:cl_onPlayerSpawned", function(userData)
-
+RegisterNetEvent("wild:cl_onPlayerFirstSpawn")
+AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
     -- Hide money
     Citizen.InvokeNative(0x4CC5F2FC1332577F, -66088566)
     -- Hide skill cards
@@ -108,13 +117,18 @@ AddEventHandler("wild:cl_onPlayerSpawned", function(userData)
 
     Citizen.Wait(1000)
 
-    UpdateMoney(userData["money"])   
+    -- Show the correct initial amount in NUI
+    SetMoneyAmount(GetPlayerMoney()) 
 end)
 
 RegisterNetEvent("wild:cl_onUpdateMoney")
 AddEventHandler("wild:cl_onUpdateMoney", function(fAmount)
     UpdateMoney(fAmount)
 end)
+
+--
+--
+--
 
 Citizen.CreateThread(function()
 	while true do
@@ -127,5 +141,29 @@ Citizen.CreateThread(function()
             local ped = GetPlayerPed(player)
             SetEntityCanBeDamagedByRelationshipGroup(ped, true, `PLAYER`)
         end
+	end
+end)
+
+AddEventHandler("onResourceStart", function(resource)
+    Citizen.Wait(1000)
+    
+	if resource == GetCurrentResourceName() then
+        RequestIplHash(`amb_camp_cml_story_valentine`)
+        RequestIplHash(-87826930)
+
+        RequestIplHash(286801141)
+        RequestIplHash(-87826930)
+
+        RequestImap(286801141)
+        RequestImap(-87826930)
+
+        Citizen.InvokeNative(0x59767C5A7A9AE6DA, 286801141)
+        Citizen.InvokeNative(0x59767C5A7A9AE6DA, -87826930)
+        
+        RequestIplHash(-2016771661)
+
+        Citizen.Wait(1000)
+
+--        ShowText(tostring(IsIplActiveHash(`amb_camp_roa_story_pigfarm`)))
 	end
 end)
