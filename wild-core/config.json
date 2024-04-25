@@ -1,7 +1,0 @@
-{
-    "respawnRadius": 50.0,
-    "respawnDelay": 5000,
-    "positionalSaveInterval": 4000,
-    "debugMode": false,
-    "debugIplRange": 5.0
-}
