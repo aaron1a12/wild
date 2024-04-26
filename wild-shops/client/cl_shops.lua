@@ -1,3 +1,9 @@
+-- Resources external to wild-core need to get the same instance of W this way
+W = exports["wild-core"]:Get()
+
+-- How to get money:  W.GetPlayerMoney()
+-- How to give/remove money:  TriggerServerEvent("wild:sv_giveMoney", GetPlayerName(PlayerId()), amount)
+
 Citizen.CreateThread(function()
 
     -- Gun smith counter in Valentine
