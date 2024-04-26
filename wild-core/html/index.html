@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+        @font-face {
+            font-family: rdr;
+            src: url(fonts/rdrlino-regular-webfont.woff);
+        }
+
+        *,div {font-family: 'rdr';color:#fff;}
+
+        /*@media (resolution: 96dpi) {html {zoom: 600%;}}*/
+       /* @media screen and (min-width: 2440px) and (height: 1440px) {
+            body {
+                max-width: 2440px;
+                max-height: 1440px;
+                position: relative;
+                margin-left: calc((100% - 2440px)/2);
+            }
+        }*/
+
+        body,html {margin:0;padding:0;height:100%;}
+        
+        body {
+            max-width: 1920px;
+            max-height: 1080px;
+            visibility: hidden;
+        }
+
+        body.visible {
+            visibility: visible;
+        }
+
+        body.not-redm {
+            background-image: url("textures/test.jpg");
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+
+        #moneyContainer {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            width: 200px;
+            font-size: 28pt;
+            text-align: right;
+            text-shadow: 2px 2px black;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out; /* fade-out */
+
+        }
+
+        .visible #moneyContainer {
+            opacity: 1;
+            transition: opacity 0.0s; /* instantly show */
+        }
+
+        #moneyDollars {
+            margin-left: 4px;
+            margin-right: 4px;
+        }
+
+        #moneyCents {
+            vertical-align: initial;
+            font-size: 19pt;
+            position: relative;
+            transform: translate(0px, -9px);
+            display: inline-block;
+        }
+
+        #moneyCents::after {
+            content: "";
+            box-shadow: 2px 2px #000;
+            width: calc(100% - 4px);
+            background-color: #fff;
+            height: 2px;
+            display: inline-block;
+            color: transparent;
+            z-index: -1;
+            position: absolute;
+            left: 2px;
+            top: 34px;
+        }
+
+        .menu {
+            /*background-image: url("textures/inkroller_1a.png");*/
+            position: absolute;
+            margin: 0%;
+            width:550px;
+            top: 40px;
+            left: 40px;
+            bottom: 40px;
+            clip-path: inset(0 0 100% 0);
+            transition: clip-path 0.2s ease-in-out;
+            display: none;
+        }
+
+        .menu.visible {
+            display: block;
+            clip-path: inset(0 0 0% 0);
+        }
+
+        .menuBg {
+            background-image: url("textures/inkroller_1a.png");
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            filter: brightness(0%);
+            width: 100%;
+            height: 100%;
+            position: relative;
+            opacity: 0.9;
+        }
+
+        .menuHeader {
+            background-image: url(textures/menu_header_1a.png);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            width: 432px;
+            height: 108px;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .menuHeader h1 {
+            display: table-cell;
+            font-size: 30px;
+            margin: 0;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .menuBody {
+            position: absolute;
+            top:0;
+            left:0;
+            bottom:0;
+            right:0;
+            padding:50px;
+        }
+
+        .menuSubtitle {
+            margin-left:auto;
+            margin-right:auto;
+            vertical-align: middle;
+            text-align: center;      
+            font-size: 20px;      
+            margin-top: 10px;
+        }
+
+        </style>
+    </head>
+    <body>
+
+
+        <!--<div class="menu">
+            <div class="menuBg"></div>
+            <div class="menuBody">
+                <div class="menuHeader">
+                    <h1>War</h1>
+                </div>
+                <div class="menuSubtitle">
+                    Not in faction
+                </div>
+            </div>
+        </div>-->
+
+        <div id="moneyContainer">$<span id="moneyDollars">0</span><sup id="moneyCents">00</sup></div>
+
+        <script>     
+            function IsRedM()
+            {
+                return (typeof GetParentResourceName != 'undefined') ? true : false
+            }       
+
+            function SetVisible(bVisible) 
+            {
+                if (IsAnyMenuOpen()) {
+                    //console.log("Menus are open");
+                   // return;
+
+                }
+
+                if (bVisible)
+                {
+                    document.body.style.visibility = "visible";
+                }
+                else
+                {
+                    setTimeout(function(){
+                        if (!document.body.classList.contains("visible"))
+                        {
+                            document.body.style.visibility = "hidden";
+                        }
+                    }, 1000);
+                }
+
+                if (bVisible) 
+                {
+                    document.body.classList.add("visible");
+                }
+                else
+                {
+                    document.body.classList.remove("visible");
+                }
+            }
+
+
+
+            var menus = [];
+            var activeMenu = "";
+            var bMenuLock = false
+
+            function CreateMenu(strMenuId, strMenuTitle)
+            {
+                if (typeof menus[strMenuId] != "undefined")
+                {
+                    return; // Existing menu
+                }
+
+                menus[strMenuId] = []
+
+                var menuDiv = document.createElement("DIV");
+                menuDiv.classList.add("menu");
+                menuDiv.id = 'menu_' + strMenuId;
+
+                var menuBgDiv = document.createElement("DIV");
+                menuBgDiv.classList.add("menuBg");
+                menuDiv.appendChild(menuBgDiv);
+
+                var menuBodyDiv = document.createElement("DIV");
+                menuBodyDiv.classList.add("menuBody");
+                menuDiv.appendChild(menuBodyDiv);
+
+                // Menu Body
+                {
+                    var menuHeaderDiv = document.createElement("DIV");
+                    menuHeaderDiv.classList.add("menuHeader");
+                    menuBodyDiv.appendChild(menuHeaderDiv);
+
+                    // Header 
+                    {
+                        var menuHeaderH1 = document.createElement("H1");
+                        menuHeaderH1.innerText = strMenuTitle;
+                        menuHeaderDiv.appendChild(menuHeaderH1);
+                    }
+
+                    // Subtitle 
+                    {
+                        var menuSubtitle = document.createElement("H1");
+                        menuSubtitle.classList.add("menuSubtitle");
+                        menuSubtitle.innerText = strMenuTitle;
+                        menuBodyDiv.appendChild(menuSubtitle);
+                    }
+                }
+
+                document.body.appendChild(menuDiv)
+            }
+
+            function OpenMenu(strMenuId, bOpen)
+            {
+                if (activeMenu!="" && activeMenu.classList.contains("visible"))
+                {
+                    activeMenu.classList.remove("visible");
+
+                    let menuDiv = activeMenu;
+                    setTimeout(function(){
+                        if (!menuDiv.classList.contains("visible"))
+                        {
+                            menuDiv.style.display = "none";
+                        }
+
+                        activeMenu = ""
+                    }, 1000);
+                }
+
+                if (!bOpen) return;
+
+                activeMenu = document.getElementById("menu_" + strMenuId);
+                activeMenu.style.display = "block";
+
+                setTimeout(function(){
+                    activeMenu.classList.add("visible");
+                }, 1);       
+            }
+
+            function SetElementTextByClass(strMenuId, strClass, strText)
+            {
+                const el = document.querySelector(`#menu_${strMenuId} .${strClass}`);
+                el.innerText = strText;
+            }
+
+            function SetElementTextById(strMenuId, strId, strText)
+            {
+            }
+
+            function IsAnyMenuOpen()
+            {
+                return (activeMenu!="" && activeMenu.classList.contains("visible"))
+            }
+
+            window.addEventListener("load", (event) => {
+                if (!IsRedM())
+                {
+                    
+                    document.body.classList.add("not-redm")
+
+                    document.getElementById("moneyDollars").innerText = "0";
+                    document.getElementById("moneyCents").innerText = "00";
+
+                    SetVisible(true);
+
+                    setTimeout(function(){
+                        //SetVisible(false);
+                    }, 1000);
+                }
+            });
+
+
+            if (IsRedM())
+            {
+                // 4K fix
+                var x = (window.screen.width / 1920);
+                document.body.style.zoom = x;
+            }
+            else
+            {
+                // Simulate RedM zoom for chrome
+                document.body.style.zoom = window.screen.width / 1920;
+
+                CreateMenu("debug1", "Menu 1");
+                CreateMenu("debug2", "Menu 2");
+
+                OpenMenu("debug2", true);
+
+                setTimeout(function(){
+                    OpenMenu("debug1", false);
+                }, 1000);
+                
+            }
+
+            window.addEventListener('message', function(event) {
+
+                if (event.data.type == "ping")
+                {
+                    console.log("Ping received.")
+                }
+
+
+                if (event.data.type == "setVisibility")
+                {
+                    SetVisible(event.data.visible);
+                }
+
+                if (event.data.type == "setMoneyAmount")
+                {
+    
+                    let USDollar = new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                    });
+
+                    var money = USDollar.format(event.data.amount).replace('$','');
+                    money = money.split(".");
+
+
+                    document.getElementById("moneyDollars").innerText = money[0];
+                    document.getElementById("moneyCents").innerText = money[1];
+                }
+
+                if (event.data.type == "createMenu")
+                {
+                    CreateMenu(event.data.menuId, event.data.menuTitle);
+                }
+
+                if (event.data.type == "openMenu")
+                {
+                    OpenMenu(event.data.menuId, event.data.open);
+                }
+            });
+
+
+        </script>
+    </body>
+</html>

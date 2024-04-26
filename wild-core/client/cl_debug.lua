@@ -160,7 +160,7 @@ local function RefreshNearIpls()
     local smallestDist = 99999999.0
     local candidate = 0
 
-    local maxDist = CONFIG['debugIplRange']
+    local maxDist = W.Config['debugIplRange']
 
     for hash, imap in pairs(all_imaps_list) do
 
@@ -241,9 +241,9 @@ local function ToggleIpl()
 end
 
 AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
-    if CONFIG['debugMode'] == true then
+    if W.Config['debugMode'] == true then
 
-        CONFIG['respawnDelay'] = 0
+        W.Config['respawnDelay'] = 0
 
         Citizen.CreateThread(function()
             while true do

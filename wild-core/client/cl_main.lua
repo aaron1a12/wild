@@ -1,19 +1,36 @@
--- Start
---
-
-CONFIG = {}
-
-local function LoadConfig()
-    CONFIG = json.decode(LoadResourceFile(GetCurrentResourceName(), "config.json"))
-end
-LoadConfig()
 
 --
 -- Player Data
 --
 
-local playerData = nil
+W.PlayerData = nil
 local _playerData = nil
+
+-- Returns the locally cached player data.
+function W.GetPlayerData()
+    RefreshPlayerData()
+    return W.PlayerData
+end
+
+function W.GetPlayerMoney()
+    RefreshPlayerData()
+    return W.PlayerData["money"]
+end
+
+function W.UpdatePlayerMoney(fNewTotal)
+    local soundset_ref = "Ledger_Sounds"
+    local soundset_name =  "PURCHASE"
+    Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
+    Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+    
+    local diff = fNewTotal - W.GetPlayerMoney()
+    ShowCashPickup(diff, 2000)
+
+    W.PlayerData["money"] = fNewTotal
+    
+    W.UI.SetMoneyAmount(fNewTotal)
+    W.UI.SetVisible(true)
+end
 
 RegisterNetEvent("wild:cl_onReceivePlayerData")
 AddEventHandler("wild:cl_onReceivePlayerData", function(newPlayerData)
@@ -22,93 +39,18 @@ end)
 
 -- Synchronously loads player data (money, spawn pos, etc) from the server
 function RefreshPlayerData()
-    TriggerServerEvent("wild:sv_getPlayerData", GetPlayerName(PlayerId()))
+    if W.PlayerData == nil then -- TODO: Maybe include data age in W.PlayerData so we can check if outdated (1 min, 5 mins, etc.)
+        TriggerServerEvent("wild:sv_getPlayerData", GetPlayerName(PlayerId()))
 
-    while _playerData == nil do
-        Citizen.Wait(0)
-    end
+        while _playerData == nil do
+            Citizen.Wait(0)
+        end
 
-    playerData = _playerData
-    _playerData = nil
-end
-
--- Returns the locally cached player data.
-function GetPlayerData()
-    if playerData == nil then
-        RefreshPlayerData()
-    end 
-
-    return playerData
-end
-
---
--- Money NUI
---
-
-local timeSinceShown = 0
-local bIsHUDVisible = false
-
-local function SetMoneyVisible(bVisible)
-    WildUIWaitUntilReady()
-    WildUI({type = "setVisibility", visible = bVisible})
-    bIsHUDVisible = bVisible
-
-    if bVisible then
-        timeSinceShown = 0 
+        W.PlayerData = _playerData
+        _playerData = nil
     end
 end
 
-local function SetMoneyAmount(fAmount)
-    WildUIWaitUntilReady()
-    WildUI({type = "setMoneyAmount", amount = fAmount})
-end
-
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(100)
-
-        if bIsHUDVisible and timeSinceShown < 3.0 and IsPauseMenuActive() then
-            SetMoneyVisible(false)
-        end
-	end
-end)
-
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(0)
-
-        if bIsHUDVisible then
-		    timeSinceShown = timeSinceShown + GetFrameTime()
-
-            if timeSinceShown > 3.0 then
-                SetMoneyVisible(false)
-            end
-        end
-        
-        if IsControlJustPressed(0, "INPUT_REVEAL_HUD") then
-            SetMoneyVisible(true)
-        end
-	end
-end)
-
-function GetPlayerMoney()
-    return playerData["money"]
-end
-
-function UpdateMoney(fAmount)
-    local soundset_ref = "Ledger_Sounds"
-    local soundset_name =  "PURCHASE"
-    Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
-    Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
-    
-    local diff = fAmount - GetPlayerMoney()
-    ShowCashPickup(diff, 2000)
-
-    playerData["money"] = fAmount
-    
-    SetMoneyAmount(fAmount)
-    SetMoneyVisible(true)
-end
 
 RegisterNetEvent("wild:cl_onPlayerFirstSpawn")
 AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
@@ -120,12 +62,12 @@ AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
     Citizen.Wait(1000)
 
     -- Show the correct initial amount in NUI
-    SetMoneyAmount(GetPlayerMoney()) 
+    W.UI.SetMoneyAmount(W.GetPlayerMoney()) 
 end)
 
 RegisterNetEvent("wild:cl_onUpdateMoney")
 AddEventHandler("wild:cl_onUpdateMoney", function(fAmount)
-    UpdateMoney(fAmount)
+    W.UpdatePlayerMoney(fAmount)
 end)
 
 --
@@ -143,29 +85,5 @@ Citizen.CreateThread(function()
             local ped = GetPlayerPed(player)
             SetEntityCanBeDamagedByRelationshipGroup(ped, true, `PLAYER`)
         end
-	end
-end)
-
-AddEventHandler("onResourceStart", function(resource)
-    Citizen.Wait(1000)
-    
-	if resource == GetCurrentResourceName() then
-        RequestIplHash(`amb_camp_cml_story_valentine`)
-        RequestIplHash(-87826930)
-
-        RequestIplHash(286801141)
-        RequestIplHash(-87826930)
-
-        RequestImap(286801141)
-        RequestImap(-87826930)
-
-        Citizen.InvokeNative(0x59767C5A7A9AE6DA, 286801141)
-        Citizen.InvokeNative(0x59767C5A7A9AE6DA, -87826930)
-        
-        RequestIplHash(-2016771661)
-
-        Citizen.Wait(1000)
-
---        ShowText(tostring(IsIplActiveHash(`amb_camp_roa_story_pigfarm`)))
 	end
 end)

@@ -13,7 +13,7 @@ local function ChooseSpawnPoint(deathCoords)
     SpawnpointsCancelSearch()
 
     -- Spawn radius (in meters)
-    local spawnRadius = CONFIG["respawnRadius"]
+    local spawnRadius = W.Config["respawnRadius"]
 
     math.randomseed(123)
     local noiseX = math.random() * spawnRadius
@@ -82,8 +82,14 @@ end
 -- A little hack to simulate player joining when restarting the resource
 AddEventHandler("onResourceStart", function(resource)
 	if resource == GetCurrentResourceName() then
-        TriggerServerEvent("wild:sv_updateSourceMap")
-        SpawnPlayer()
+        Citizen.CreateThread(function()
+            while GetResourceState(resource) ~= "started" do -- Wait until state changes
+                Citizen.Wait(1)
+            end
+            print("Wild-core has restarted. Trigger sv_updateSourceMap")
+            TriggerServerEvent("wild:sv_updateSourceMap")
+            SpawnPlayer()
+        end)
 	end
 end)
 
@@ -98,7 +104,7 @@ function SpawnPlayer()
 
     bSpawning = true
 
-    local playerData = GetPlayerData()
+    local playerData = W.GetPlayerData()
 
     local spawnCoords = vector3(0,0,0)
     local spawnHeading = 0
@@ -205,7 +211,7 @@ Citizen.CreateThread(function()
             if not bRespawning then
                 bRespawning = true
 
-                local delayDivided = math.floor(CONFIG["respawnDelay"]/3)
+                local delayDivided = math.floor(W.Config["respawnDelay"]/3)
 
                 AnimpostfxPlay("MP_SuddenDeath")
 
@@ -231,7 +237,7 @@ end)
 
 AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
     Citizen.CreateThread(function()
-        local interval = CONFIG["positionalSaveInterval"]
+        local interval = W.Config["positionalSaveInterval"]
         while true do
             Citizen.Wait(interval)
     

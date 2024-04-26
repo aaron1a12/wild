@@ -4,9 +4,9 @@ rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aw
 
 client_script
 {
-	"client/functions/cl_dataview.lua",
-	"client/functions/cl_general.lua",
+	"client/functions/cl_utilities.lua",
 	"client/imaps/cl_imaps.lua",
+	"client/cl_w.lua",
 	"client/cl_main.lua",
 	"client/cl_spawn.lua",	
 	"client/cl_horse.lua",
@@ -23,8 +23,11 @@ server_script
 
 files
 {
+	'html/**/*',
 	"ipls.json",
 	"config.json",
 	"peds.json",
 	"players.json"
 }
+
+ui_page 'html/index.html'

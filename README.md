@@ -10,5 +10,6 @@ It does not use a database connection. Instead, it simply uses a local JSON file
 ensure wild-core
 start wild-interact
 start wild-shops
+start wild-war
 ```
 3. Go to `wild-core` and rename `_config.json` and `_players.json` to `config.json` and `players.json`

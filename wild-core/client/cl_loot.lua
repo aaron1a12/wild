@@ -32,7 +32,7 @@ Citizen.CreateThread(function()
 	
 	                            math.randomseed(GetGameTimer()/7)
 	                            local money = math.random(1, 50) / 100
-	
+
 	                            TriggerServerEvent("wild:sv_giveMoney", GetPlayerName(PlayerId()), money)
 	                        end
 	                    end
