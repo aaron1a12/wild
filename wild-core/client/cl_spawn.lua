@@ -124,25 +124,25 @@ function SpawnPlayer()
     -- MODEL
     --
 
-    local model = `player_zero`
-    RequestModel(model)
-
-    -- load the model for this spawn
-    while not HasModelLoaded(model) do
+    if not bPlayerAlreadySpawnedOnce then
+        local model = `player_zero`
         RequestModel(model)
 
-        Wait(0)
-    end
+        -- load the model for this spawn
+        while not HasModelLoaded(model) do
+            RequestModel(model)
 
-    -- change the player model. Set preset after spawning
-    SetPlayerModel(PlayerId(), model)
+            Wait(0)
+        end
 
-    -- release the player model
-    SetModelAsNoLongerNeeded(model)
-    
-    -- RDR3 player model bits
-    if N_0x283978a15512b2fe then
-        N_0x283978a15512b2fe(PlayerPedId(), true)
+        -- change the player model. Set preset after spawning
+        SetPlayerModel(PlayerId(), model)
+
+        -- release the player model
+        SetModelAsNoLongerNeeded(model)
+        
+        -- Only for player?
+        SetRandomOutfitVariation(PlayerPedId(), true)
     end
 
     --
@@ -156,7 +156,9 @@ function SpawnPlayer()
     local playerPed = PlayerPedId()
 
     -- Ped preset
-    EquipMetaPedOutfitPreset(PlayerPedId(), 3, 0)
+    if not bPlayerAlreadySpawnedOnce then
+        EquipMetaPedOutfitPreset(PlayerPedId(), 3, 0)
+    end
 
     --SetEntityCoordsNoOffset(ped, spawnCoords.x, spawnCoords.y, spawnCoords.z, false, false, false, true)
     SetEntityCoordsAndHeadingNoOffset(playerPed, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnHeading, 1, 1)
