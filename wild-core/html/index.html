@@ -290,12 +290,14 @@
 
             function SetElementTextByClass(strMenuId, strClass, strText)
             {
-                const el = document.querySelector(`#menu_${strMenuId} .${strClass}`);
+                let el = document.querySelector(`#menu_${strMenuId} .${strClass}`);
                 el.innerText = strText;
             }
 
             function SetElementTextById(strMenuId, strId, strText)
             {
+                let el = document.getElementById(strMenuId + "_" + strId);
+                el.innerText = strText;                
             }
 
             function IsAnyMenuOpen()
@@ -380,6 +382,16 @@
                 if (event.data.type == "openMenu")
                 {
                     OpenMenu(event.data.menuId, event.data.open);
+                }
+
+                if (event.data.type == "setElementTextByClass")
+                {
+                    SetElementTextByClass(event.data.menuId, event.data.class, event.data.text);
+                }
+
+                if (event.data.type == "setElementTextById")
+                {
+                    SetElementTextById(event.data.menuId, event.data.id, event.data.text);
                 }
             });
 

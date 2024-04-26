@@ -23,6 +23,9 @@ Citizen.CreateThread(function()
                 PromptSetControlAction(prompt, GetHashKey("INPUT_PLAYER_MENU")) -- L key
                 PromptSetText(prompt, CreateVarString(10, "LITERAL_STRING", "Open War Menu"))
                 UiPromptSetHoldMode(prompt, 1000)
+                UiPromptSetAttribute(prompt, 2, true) 
+                UiPromptSetAttribute(prompt, 4, true) 
+                UiPromptSetAttribute(prompt, 9, true) 
                 UiPromptSetAttribute(prompt, 10, true) -- kPromptAttrib_NoButtonReleaseCheck. Immediately becomes pressed
                 PromptRegisterEnd(prompt)
 
@@ -51,18 +54,17 @@ local MenuBase = {}
 
 function OnStart()
     W.UI.CreateMenu("warMenu", "War")
-    --WildUISetElementTextByClass("warMenu", "menuSubtitle", "Not in faction")
+    W.UI.SetElementTextByClass("warMenu", "menuSubtitle", "Not in faction")
 end
 OnStart()
 
 Citizen.CreateThread(function()
-    Citizen.Wait(1000)
-
     if W.Config["debugMode"] == true then
-        while true do          
+        while true do    
+            Citizen.Wait(0)             
             local playerPed = GetPlayerPed(player)
             local playerCoords = GetEntityCoords(playerPed)
-
+            
              -- ALT + 3
             if IsControlJustPressed(0, "INPUT_EMOTE_TWIRL_GUN_VAR_D") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
                 TestGang()

@@ -94,6 +94,10 @@ function W.UI.OpenMenu(strMenuId, bOpen)
 		return -- Reopening same menu, exit
 	end
 
+	if not bOpen and currentMenu == "" then
+		return -- Closing menu that isn't open, ext
+	end
+
 	if not bIsVisible then -- ui not visible
 		W.UI.SetVisible(true)
 	end
@@ -102,8 +106,17 @@ function W.UI.OpenMenu(strMenuId, bOpen)
 
 	if bOpen then
 		currentMenu = strMenuId
+		--SetPlayerControl(PlayerId(), false, 0, true) -- Does not work, disables all frontend controls too\
+		
+		-- Zoom focus
+		local forward = GetCamForward(10.0)
+		SetGameplayCoordHint( forward.x,  forward.y, forward.z, -1, 2000, 2000, 0)
+
 	else
 		currentMenu = ""
+		--SetPlayerControl(PlayerId(), true, 0, true)
+		StopGameplayHint(true)
+		StopCodeGameplayHint(true)
 	end
 
 	local soundset_ref = "Study_Sounds"
@@ -121,9 +134,11 @@ function W.UI.IsAnyMenuOpen()
 end
 
 function W.UI.SetElementTextByClass(strMenuId, strClass, strText)
+	SendNUIMessage({type = "setElementTextByClass", menuId = strMenuId, class = strClass, text = strText})
 end
 
 function W.UI.SetElementTextById(strMenuId, strId, strText)
+	SendNUIMessage({type = "setElementTextById", menuId = strMenuId, id = strId, text = strText})
 end
 
 Citizen.CreateThread(function()
@@ -145,11 +160,18 @@ Citizen.CreateThread(function()
 
 			if currentMenu ~= "" then
 				HideHudAndRadarThisFrame()
+				DisableFrontendThisFrame()
+				
 			end
         end
         
         if IsControlJustPressed(0, "INPUT_REVEAL_HUD") then
             W.UI.SetVisible(true)
+        end
+
+		if IsControlJustPressed(0, "INPUT_QUIT") then
+			-- Close the open menu
+			W.UI.OpenMenu(currentMenu, false)
         end
 	end
 end)

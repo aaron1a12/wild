@@ -396,3 +396,49 @@ end
 function DrawDebugSphere(vCenter, fRadius, iR, iG, iB, iAlpha)
 	Citizen.InvokeNative(0x2A32FAA57B937173, 0x50638AB9, vCenter.x, vCenter.y, vCenter.z, 0, 0, 0, 0, 0, 0, fRadius, fRadius, fRadius, iR, iG, iB, iAlpha, 0, 0, 2, 0, 0, 0, 0)
 end
+
+function DrawDebugSphereTimed(vCenter, fRadius, iR, iG, iB, iAlpha, durationMs)
+	Citizen.CreateThread(function()
+		local timeLeft = durationMs/1000
+		
+		while timeLeft > 0 do
+			Citizen.Wait(0)
+			Citizen.InvokeNative(0x2A32FAA57B937173, 0x50638AB9, vCenter.x, vCenter.y, vCenter.z, 0, 0, 0, 0, 0, 0, fRadius, fRadius, fRadius, iR, iG, iB, iAlpha, 0, 0, 2, 0, 0, 0, 0)
+			
+			timeLeft = timeLeft - GetFrameTime()
+		end
+	end)
+end
+
+function RotateVectorYaw(vec, degrees)
+    local radians = degrees * (math.pi/180)
+
+    local x = vec.x * math.cos(radians) - vec.y * math.sin(radians);
+    local y = vec.x * math.sin(radians) + vec.y * math.cos(radians);
+
+    return vector3(x, y, vec.z)
+end
+
+function RotateVectorPitch(vec, degrees)
+    local radians = degrees * (math.pi / 180)
+
+    local x = vec.x
+    local y = vec.y * math.cos(radians) - vec.z * math.sin(radians)
+    local z = vec.y * math.sin(radians) + vec.z * math.cos(radians)
+
+    return vector3(x, y, z)
+end
+
+function GetCamForward(dist)
+    local camCoords = GetFinalRenderedCamCoord()
+    local camRot = GetFinalRenderedCamRot(0)
+    local pitch = camRot.x
+    local yaw = camRot.z
+    local v = vector3(0.0, 1.0, 0.0)
+
+    v = RotateVectorPitch(v, pitch)
+    v = RotateVectorYaw(v, yaw)
+	v = v * dist
+    v = v + camCoords
+    return v
+end
