@@ -362,11 +362,38 @@ function ShowCashPickup(fAmount, durationMs)
 end
 
 -- https://pastebin.com/h1YzycuR
-function ShowLocalInfo(strLocation, strCustomMessage, duration)
-    local struct1 = DataView.ArrayBuffer(128)
+local localInfoTimeLeft = -1.0
+function ShowLocalInfo(strLocation, strCustomMessage, duration)	
+	if localInfoTimeLeft <= -1.0 then
+		Citizen.CreateThread(function()
+			Citizen.Wait(200)
+			while localInfoTimeLeft > -0.5 do
+				Citizen.Wait(0)
+
+				local str = CreateVarString(10, "LITERAL_STRING", text)
+				SetTextColor(255, 255, 255, 255)
+				BgSetTextColor(255, 255, 255, 255)
+				SetTextFontForCurrentCommand(1)
+				SetTextDropshadow(2, 128, 128, 128, 255)
+				SetTextScale(0.7, 0.7)
+				SetTextCentre(true)
+			
+				DisplayText(strLocation, 0.5, 0.05)
+
+				localInfoTimeLeft = localInfoTimeLeft - GetFrameTime()
+			end
+			localInfoTimeLeft = -1.0
+		end)
+	else
+		return
+	end
+
+	local struct1 = DataView.ArrayBuffer(128)
     struct1:SetInt32(0, duration);
 
-    local locationNameStr = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", strLocation, Citizen.ResultAsLong())
+	localInfoTimeLeft = duration / 1000
+
+    local locationNameStr = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", "NONE", Citizen.ResultAsLong())
     local subtitleStr = 0
 
     if not strCustomMessage or strCustomMessage == "" or strCustomMessage == 0 then
@@ -418,7 +445,7 @@ function ShowLocalInfo(strLocation, strCustomMessage, duration)
     struct2:SetInt64(16, pStr2:GetInt64(0));
     struct2:SetInt64(24, 0);
     struct2:SetInt64(32, 0);
-    Citizen.InvokeNative(0xD05590C1AB38F068, struct1:Buffer(), struct2:Buffer(), 1, 1);
+    Citizen.InvokeNative(0xD05590C1AB38F068, struct1:Buffer(), struct2:Buffer(), 1, 1);	
 end
 
 function GetPedsInArea(coords, radius)
@@ -511,4 +538,17 @@ function GetCamForward(dist)
 	v = v * dist
     v = v + camCoords
     return v
+end
+
+-- Fast vector dist. Avoids native invocation
+function GetVectorDistSqr(a, b)
+	local x = b.x-a.x
+	local y = b.y-a.y
+	local z = b.z-a.z
+
+	return (x*x) + (y*y) + (z*z)
+end
+
+function GetVectorDist(a, b)
+	return math.sqrt(GetVectorDistSqr(a, b));
 end

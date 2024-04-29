@@ -266,7 +266,7 @@ Citizen.CreateThread(function()
             W.UI.SetVisible(true)
 			
 			-- TODO: Get current town (e.g., TOWN_BLACKWATER)
-			ShowLocalInfo("TOWN", "", 2000) 
+			ShowLocalInfo("Wild Server", "", 2000) 
         end
 
 		if IsControlJustPressed(0, "INPUT_FRONTEND_CANCEL") then -- or IsControlJustPressed(0, "INPUT_QUIT")
@@ -274,4 +274,38 @@ Citizen.CreateThread(function()
 			W.UI.OpenMenu(currentMenu, false)
         end
 	end
+end)
+
+
+--
+-- Prompt Management (garbage collection)
+--
+-- Got tired of having leftover prompts blocking everything
+
+W.Prompts = {}
+
+function W.Prompts.AddToGarbageCollector(promptId)
+	local resourceName = GetInvokingResource()
+	
+	if W.Prompts[resourceName] == nil then
+		W.Prompts[resourceName] = {}
+	end
+
+	table.insert(W.Prompts[resourceName], promptId)
+end
+
+-- The garbage collection
+AddEventHandler('onResourceStop', function(resourceName)
+	local resourcePrompts = W.Prompts[resourceName]
+
+	if resourcePrompts == nil then
+		return
+	end
+
+    -- Prompt cleanup when stopping resource
+    for i = 1, #resourcePrompts do
+        PromptDelete(resourcePrompts[i])
+    end
+
+	W.Prompts[resourceName] = {}
 end)
