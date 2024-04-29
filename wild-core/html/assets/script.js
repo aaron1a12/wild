@@ -479,10 +479,11 @@ function IsAnyMenuOpen()
 
 function DestroyMenuAndData(strMenuId)
 {
+    if (menus[strMenuId] == undefined)
+        return;
+
     if (currentMenuId==strMenuId)
-    {
-        OpenMenu(strMenuId, false);
-    }
+        OpenMenu(strMenuId, false);    
 
     var menuEl = document.getElementById('menu_' + strMenuId);
     menuEl.remove();
@@ -538,7 +539,7 @@ else
 
     setTimeout(function(){
         //OpenMenu("debug1", false);
-        DestroyMenuAndData("onlineMenu");
+        //DestroyMenuAndData("onlineMenu");
     }, 1000);
     
 }
@@ -625,10 +626,10 @@ document.onkeydown = function(evt) {
         break;
 
     case 'ArrowDown':
-        MoveSelection(true)
+        //MoveSelection(true)
         break;
     case 'ArrowUp':
-        MoveSelection(false)
+        //MoveSelection(false)
         break;    
     }
 };
