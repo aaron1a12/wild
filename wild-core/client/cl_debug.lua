@@ -82,7 +82,7 @@ local function AddFlyImpulse(vec)
     local speed = baseSpeed
 
     if IsControlPressed(0, "INPUT_FRONTEND_Y") then
-        speed = speed * 4.0
+        speed = speed * 8.0
     end
     impulse = impulse + vec * speed
 end
@@ -253,14 +253,16 @@ AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
 
         W.Config['respawnDelay'] = 0
 
-        Citizen.CreateThread(function()
-            while true do
-                Citizen.Wait(1000)
+        if W.Config['debugIpl'] then
+            Citizen.CreateThread(function()
+                while true do
+                    Citizen.Wait(1000)
 
-                -- Refresh near ipls
-                RefreshNearIpls()
-            end
-        end)
+                    -- Refresh near ipls
+                    RefreshNearIpls()
+                end
+            end)
+        end
 
         Citizen.CreateThread(function()
             while true do
@@ -275,58 +277,89 @@ AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
 
                 --x = 
 
-                PrintText(0.01, 0.5, 0.3, false, "X:", 255, 50, 50, 255)
-                PrintText(0.025, 0.5, 0.3, false, tostring(x), 255, 255, 255, 255)
+                PrintText(0.01, 0.4, 0.3, false, "X:", 255, 50, 50, 255)
+                PrintText(0.025, 0.4, 0.3, false, tostring(x), 255, 255, 255, 255)
 
-                PrintText(0.01, 0.53, 0.3, false, "Y:", 50, 255, 50, 255)
-                PrintText(0.025, 0.53, 0.3, false, tostring(y), 255, 255, 255, 255)
+                PrintText(0.01, 0.43, 0.3, false, "Y:", 50, 255, 50, 255)
+                PrintText(0.025, 0.43, 0.3, false, tostring(y), 255, 255, 255, 255)
 
-                PrintText(0.01, 0.56, 0.3, false, "Z:", 50, 50, 255, 255)
-                PrintText(0.025, 0.56, 0.3, false, tostring(z), 255, 255, 255, 255)
+                PrintText(0.01, 0.46, 0.3, false, "Z:", 50, 50, 255, 255)
+                PrintText(0.025, 0.46, 0.3, false, tostring(z), 255, 255, 255, 255)
+
+                PrintText(0.01, 0.49, 0.3, false, "H:", 50, 255, 255, 255)
+                PrintText(0.025, 0.49, 0.3, false, tostring(GetEntityHeading(ped)), 255, 255, 255, 255)
+
+                -- Cam
+
+                local camCoords = GetFinalRenderedCamCoord()
+                local camRot = GetFinalRenderedCamRot(0)
+
+                PrintText(0.01, 0.55, 0.2, false, "Cam X:", 255, 50, 50, 255)
+                PrintText(0.045, 0.55, 0.2, false, tostring(camCoords.x), 255, 255, 255, 255)
+
+                PrintText(0.01, 0.57, 0.2, false, "Cam Y:", 50, 255, 50, 255)
+                PrintText(0.045, 0.57, 0.2, false, tostring(camCoords.y), 255, 255, 255, 255)
+
+                PrintText(0.01, 0.59, 0.2, false, "Cam Z:", 50, 50, 255, 255)
+                PrintText(0.045, 0.59, 0.2, false, tostring(camCoords.z), 255, 255, 255, 255)
+
+                PrintText(0.01, 0.61, 0.2, false, "Cam RX:", 255, 50, 50, 255)
+                PrintText(0.045, 0.61, 0.2, false, tostring(camRot.x), 255, 255, 255, 255)
+
+                PrintText(0.01, 0.63, 0.2, false, "Cam RY:", 50, 255, 50, 255)
+                PrintText(0.045, 0.63, 0.2, false, tostring(camRot.y), 255, 255, 255, 255)
+
+                PrintText(0.01, 0.65, 0.2, false, "Cam RZ:", 50, 50, 255, 255)
+                PrintText(0.045, 0.65, 0.2, false, tostring(camRot.z), 255, 255, 255, 255)
 
                 PrintText(0.01, 0.1, 0.3, false, "ALT + 1 : Kill self", 255, 50, 255, 255)
-                PrintText(0.01, 0.13, 0.3, false, "ALT + 2 : Save Enabled IPLs", 255, 150, 0, 255)
-
-                PrintText(0.01, 0.16, 0.3, false, "Active IPL:", 155, 120, 22, 255)
-
-                if imapsNear[selectedIpl] ~= nil then
-                    local hash = imapsNear[selectedIpl][1]
-                    local r, g, b = GetIplColor(hash)
-
-                    PrintText(0.06, 0.16, 0.3, false, tostring(hash), r, g, b, 255)
-                    PrintText(0.12, 0.16, 0.3, false, tostring(selectedIpl) .. " / " .. tostring(#imapsNear), 255, 255, 255, 255)
-
-                    local state = "off" if IsIplActiveHash(hash) then state = "on" end
-                    PrintText(0.16, 0.16, 0.3, false, state, 255, 255, 255, 255)
-                end
-
-                PrintText(0.01, 0.18, 0.2, false, "IPL Controls : Cycle (ALT + PAGE UP/DOWN), Toggle (ALT + DEL)", 155, 120, 22, 255)
+                
 
                 if IsControlJustPressed(0, "INPUT_EMOTE_TWIRL_GUN_VAR_B") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
                     ApplyDamageToPed(ped, 500000, false, true, true)
                 end
 
-                if IsControlJustPressed(0, "INPUT_SELECT_QUICKSELECT_DUALWIELD") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
-                    DumpIpls()
-                end
+                if W.Config['debugIpl'] then
+                    PrintText(0.01, 0.13, 0.3, false, "ALT + 2 : Save Enabled IPLs", 255, 150, 0, 255)
 
-                -- Cycle IPL Back ( ALT + PAGE DOWN )
-                if IsControlJustPressed(0, "INPUT_FRONTEND_LT") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
-                    CycleIpl(false)
-                end
+                    PrintText(0.01, 0.16, 0.3, false, "Active IPL:", 155, 120, 22, 255)
 
-                -- Cycle IPL Forward ( ALT + PAGE UP )
-                if IsControlJustPressed(0, "INPUT_FRONTEND_RT") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
-                    CycleIpl(true)
-                end
+                    if imapsNear[selectedIpl] ~= nil then
+                        local hash = imapsNear[selectedIpl][1]
+                        local r, g, b = GetIplColor(hash)
 
-                -- Toggle IPL ( ALT + DEL )
-                if IsControlJustPressed(0, "INPUT_FRONTEND_DELETE") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
-                    ToggleIpl()
-                end
+                        PrintText(0.06, 0.16, 0.3, false, tostring(hash), r, g, b, 255)
+                        PrintText(0.12, 0.16, 0.3, false, tostring(selectedIpl) .. " / " .. tostring(#imapsNear), 255, 255, 255, 255)
 
-                -- Ipl (imap)
-                DrawNearIpls()                    
+                        local state = "off" if IsIplActiveHash(hash) then state = "on" end
+                        PrintText(0.16, 0.16, 0.3, false, state, 255, 255, 255, 255)
+                    end
+
+                    PrintText(0.01, 0.18, 0.2, false, "IPL Controls : Cycle (ALT + PAGE UP/DOWN), Toggle (ALT + DEL)", 155, 120, 22, 255)
+
+                    if IsControlJustPressed(0, "INPUT_SELECT_QUICKSELECT_DUALWIELD") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
+                        DumpIpls()
+                    end
+
+                    -- Cycle IPL Back ( ALT + PAGE DOWN )
+                    if IsControlJustPressed(0, "INPUT_FRONTEND_LT") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
+                        CycleIpl(false)
+                    end
+
+                    -- Cycle IPL Forward ( ALT + PAGE UP )
+                    if IsControlJustPressed(0, "INPUT_FRONTEND_RT") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
+                        CycleIpl(true)
+                    end
+
+                    -- Toggle IPL ( ALT + DEL )
+                    if IsControlJustPressed(0, "INPUT_FRONTEND_DELETE") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
+                        ToggleIpl()
+                    end
+
+                    -- Ipl (imap)
+                    DrawNearIpls()     
+                end           
+                    
 
                 -- FLY MODE
 
@@ -348,12 +381,13 @@ AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
                         AddFlyImpulse(vector3(0.0, 0.0, -1.0))
                     end
 
-                    if IsControlPressed(0, "INPUT_FRONTEND_NAV_UP") then
+                    if IsControlPressed(0, "INPUT_MOVE_UP_ONLY") then
                         local vec = RotateVectorYaw(vector3(0.0, 1.0, 0.0), heading)
                         AddFlyImpulse(vec)
+
                     end
 
-                    if IsControlPressed(0, "INPUT_FRONTEND_NAV_DOWN") then
+                    if IsControlPressed(0, "INPUT_MOVE_DOWN_ONLY") then
                         local vec = RotateVectorYaw(vector3(0.0, -1.0, 0.0), heading)
                         AddFlyImpulse(vec)
                     end
