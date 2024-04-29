@@ -18,10 +18,11 @@ function W.GetPlayerMoney()
 end
 
 function W.UpdatePlayerMoney(fNewTotal)
-    local soundset_ref = "Ledger_Sounds"
-    local soundset_name =  "PURCHASE"
-    Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
-    Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+    --Sounds are now played on ShowCashPickup()
+    --local soundset_ref = "Ledger_Sounds"
+    --local soundset_name =  "PURCHASE"
+    --Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
+    --Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
     
     local diff = fNewTotal - W.GetPlayerMoney()
     ShowCashPickup(diff, 2000)
