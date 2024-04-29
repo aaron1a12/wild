@@ -361,6 +361,66 @@ function ShowCashPickup(fAmount, durationMs)
 	Citizen.Wait(durationMs)
 end
 
+-- https://pastebin.com/h1YzycuR
+function ShowLocalInfo(strLocation, strCustomMessage, duration)
+    local struct1 = DataView.ArrayBuffer(128)
+    struct1:SetInt32(0, duration);
+
+    local locationNameStr = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", strLocation, Citizen.ResultAsLong())
+    local subtitleStr = 0
+
+    if not strCustomMessage or strCustomMessage == "" or strCustomMessage == 0 then
+        -- Time and temp
+
+        local coords = GetEntityCoords(PlayerPedId())
+
+        local hours = GetClockHours()
+        local minutes = GetClockMinutes()
+        local PM = "AM"
+
+        if not ShouldUse_24HourClock() and hours > 12 then
+            hours = hours - 12
+            PM = "PM"
+        elseif ShouldUse_24HourClock() then
+            PM = ""
+        end
+
+        local paddingMin = ""
+        if minutes < 10 then
+            paddingMin = "0"
+        end
+
+        local format = "TIME_AND_TEMP_C"
+        local temperature = GetTemperatureAtCoords(coords)
+
+        if not ShouldUseMetricTemperature() then
+            format = "TIME_AND_TEMP_F"
+            temperature = (temperature * (9/5)) + 32 -- convert to farenheit
+        end
+
+        local strHours = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", tostring(hours), Citizen.ResultAsLong())
+        local strMinutes = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", paddingMin .. tostring(minutes) .. " ", Citizen.ResultAsLong())
+        local strTemperature = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", tostring(math.floor(temperature)), Citizen.ResultAsLong())
+
+        subtitleStr = Citizen.InvokeNative(0xFA925AC00EB830B9, 674, format, hours, strMinutes, PM, strTemperature, Citizen.ResultAsLong())        
+    else
+        subtitleStr = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", strCustomMessage, Citizen.ResultAsLong())
+    end
+
+    local pStr1 =  DataView.ArrayBuffer(16) 
+	pStr1:SetInt64(0, locationNameStr)
+    local pStr2 =  DataView.ArrayBuffer(16) 
+	pStr2:SetInt64(0, subtitleStr)
+   
+    local struct2 = DataView.ArrayBuffer(128)
+    struct2:SetInt64(0, 0);
+    struct2:SetInt64(8, pStr1:GetInt64(0));
+    struct2:SetInt64(16, pStr2:GetInt64(0));
+    struct2:SetInt64(24, 0);
+    struct2:SetInt64(32, 0);
+    Citizen.InvokeNative(0xD05590C1AB38F068, struct1:Buffer(), struct2:Buffer(), 1, 1);
+end
+
 function GetPedsInArea(coords, radius)
 	local peds = {}
     

@@ -264,6 +264,9 @@ Citizen.CreateThread(function()
         
         if IsControlJustPressed(0, "INPUT_REVEAL_HUD") then
             W.UI.SetVisible(true)
+			
+			-- TODO: Get current town (e.g., TOWN_BLACKWATER)
+			ShowLocalInfo("TOWN", "", 2000) 
         end
 
 		if IsControlJustPressed(0, "INPUT_FRONTEND_CANCEL") then -- or IsControlJustPressed(0, "INPUT_QUIT")
