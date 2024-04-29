@@ -55,8 +55,44 @@ local MenuBase = {}
 function OnStart()
     W.UI.CreateMenu("warMenu", "War")
     W.UI.SetElementTextByClass("warMenu", "menuSubtitle", "Not in faction")
+
+    W.UI.CreatePage("warMenu", "root", 0, 4);
+    W.UI.SetMenuRootPage("warMenu", "root");
+
+    local params = {}
+    params.text = "Join a Faction";
+    params.description = "Allows you to join an existing War faction.";
+    W.UI.CreatePageItem("warMenu", "root", 0, params);
+
+    local params = {}
+    params.text = "Create New Faction";
+    params.description = "Allows you to create a new War faction which other players can join.";
+    W.UI.CreatePageItem("warMenu", "root", 0, params);
+
+    Citizen.Wait(1000)
+    
+    --DestroyAllCams()
+
+--    SetPlayerControl(PlayerId(), true, 0, true)
+
+    --print(GetCurrentControlContext(0))
+
+    SetControlContext(0, `OnFoot`)
+
+    --SetControlContext(0, `OnlinePlayerMenu`)
+    
+    
+
 end
 OnStart()
+
+Citizen.CreateThread(function()
+    while true do    
+        Citizen.Wait(0)             
+        
+    end     
+end)
+
 
 Citizen.CreateThread(function()
     if W.Config["debugMode"] == true then

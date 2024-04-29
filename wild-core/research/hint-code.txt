@@ -1,0 +1,15 @@
+    Citizen.Wait(1000)
+
+    -- Zoom focus
+    local forward = GetCamForward(10.0)
+    SetGameplayHintCameraRelativeSideOffset(-0.5)
+    --SetGameplayHintCameraRelativeVerticalOffset(-0.5)
+    SetGameplayHintFollowDistanceScalar(1.0)
+    SetGameplayCoordHint( forward.x,  forward.y, forward.z, -1, 3000, 3000, 0)
+
+    SetGameplayHintFov(50)
+
+    Citizen.Wait(7000)
+
+    StopGameplayHint(true)
+    StopCodeGameplayHint(true)

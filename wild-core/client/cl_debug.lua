@@ -12,8 +12,13 @@ local function lerp(a, b, t)
     return a + (b - a) * t
 end
 
+local prevCtrlCtx = 0
 local function StartFlyMode()
     ShowHelpText("Fly mode ON", 2000)
+
+    --prevCtrlCtx = GetCurrentControlContext(0)
+    --SetControlContext(0, `FrontendMenu`)
+
     local soundset_ref = "Photo_Mode_Sounds"
     local soundset_name =  "lens_up"
     Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
@@ -56,6 +61,9 @@ end
 
 local function EndFlyMode()
     ShowHelpText("Fly mode OFF", 2000)
+
+    --SetControlContext(0, prevCtrlCtx)
+
     local soundset_ref = "Photo_Mode_Sounds"
     local soundset_name =  "lens_down"
     Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
@@ -340,12 +348,12 @@ AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
                         AddFlyImpulse(vector3(0.0, 0.0, -1.0))
                     end
 
-                    if IsControlPressed(0, "INPUT_MOVE_UP_ONLY") then
+                    if IsControlPressed(0, "INPUT_FRONTEND_NAV_UP") then
                         local vec = RotateVectorYaw(vector3(0.0, 1.0, 0.0), heading)
                         AddFlyImpulse(vec)
                     end
 
-                    if IsControlPressed(0, "INPUT_MOVE_DOWN_ONLY") then
+                    if IsControlPressed(0, "INPUT_FRONTEND_NAV_DOWN") then
                         local vec = RotateVectorYaw(vector3(0.0, -1.0, 0.0), heading)
                         AddFlyImpulse(vec)
                     end

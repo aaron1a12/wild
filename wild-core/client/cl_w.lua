@@ -52,9 +52,12 @@ W.UI = {}
 local timeVisible = 0
 local bIsVisible = false
 local currentMenu = ""
+local tempCam = 0
+local bMenuLock = false
+local prevCtrlCtx = 0
 
 function W.UI.SetVisible(bVisible)
-    W.UI.Message({type = "setVisibility", visible = bVisible})
+    W.UI.Message({cmd = "setVisibility", visible = bVisible})
     bIsVisible = bVisible
 
     if bVisible then
@@ -67,11 +70,11 @@ function W.UI.IsVisible()
 end
 
 function W.UI.SetMoneyAmount(fAmount)
-    W.UI.Message({type = "setMoneyAmount", amount = fAmount})
+    W.UI.Message({cmd = "setMoneyAmount", amount = fAmount})
 end
 
 function W.UI.Ping()
-    SendNUIMessage({type = "ping"})
+    SendNUIMessage({cmd = "ping"})
 end
 
 -- Same as SendNUIMessage
@@ -86,10 +89,14 @@ end
 
 -- Create a ui app-style menu
 function W.UI.CreateMenu(strMenuId, strMenuTitle)
-    SendNUIMessage({type = "createMenu", menuId = strMenuId, menuTitle = strMenuTitle})
+    SendNUIMessage({cmd = "createMenu", menuId = strMenuId, menuTitle = strMenuTitle})
 end
 
 function W.UI.OpenMenu(strMenuId, bOpen)
+	if bMenuLock then
+		return -- Opening too soon after closing, exit
+	end
+
 	if bOpen and currentMenu == strMenuId then
 		return -- Reopening same menu, exit
 	end
@@ -98,25 +105,58 @@ function W.UI.OpenMenu(strMenuId, bOpen)
 		return -- Closing menu that isn't open, ext
 	end
 
+	bMenuLock = true
+
 	if not bIsVisible then -- ui not visible
 		W.UI.SetVisible(true)
 	end
 
-    SendNUIMessage({type = "openMenu", menuId = strMenuId, open = bOpen})
-
+    SendNUIMessage({cmd = "openMenu", menuId = strMenuId, open = bOpen})
+	
 	if bOpen then
 		currentMenu = strMenuId
-		--SetPlayerControl(PlayerId(), false, 0, true) -- Does not work, disables all frontend controls too\
-		
-		-- Zoom focus
-		local forward = GetCamForward(10.0)
-		SetGameplayCoordHint( forward.x,  forward.y, forward.z, -1, 2000, 2000, 0)
+		-- RedM has a bug where if you focus the nui while running (or pressing any other control)
+		-- the game never receives the key-up message and the player character will continue to run forever.
+		-- A solution is to set control context to frontend (blocks movement input) and use SetMouseCursorActiveThisFrame().
+		-- With SetNuiFocusKeepInput(), we'll use input from the game and only use SetNuiFocus() when entering text.
 
+		prevCtrlCtx = GetCurrentControlContext(0)
+		SetControlContext(0, `FrontendMenu`)
+		SetNuiFocusKeepInput(true)
+
+		--ClearPedTasksImmediately(PlayerPedId(), true, false)
+		
+		local camCoords = GetFinalRenderedCamCoord()
+		local camRot = GetFinalRenderedCamRot()
+		local camFov = GetFinalRenderedCamFov() - 5
+	
+		tempCam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", camCoords.x, camCoords.y, camCoords.z, camRot.x, camRot.y, camRot.z, camFov, false, 0)
+
+		SetCamActive(tempCam, true)
+		RenderScriptCams(true, true, 400, true, true, 0)
+
+		Citizen.CreateThread(function()
+			Citizen.Wait(1)
+			SetNuiFocus(true)
+			bMenuLock = false
+		end)
 	else
 		currentMenu = ""
-		--SetPlayerControl(PlayerId(), true, 0, true)
-		StopGameplayHint(true)
-		StopCodeGameplayHint(true)
+
+		SetNuiFocus(false)
+		
+
+		RenderScriptCams(false, true, 400, true, true, 0)
+		SetPlayerControl(PlayerId(), true, 0, true)
+
+		-- Release menu lock after fully blended out
+		Citizen.CreateThread(function()
+			Citizen.Wait(400)
+			SetControlContext(0, prevCtrlCtx)
+			SetCamActive(tempCam, false)
+			DestroyCam(tempCam, true)
+			bMenuLock = false
+		end)
 	end
 
 	local soundset_ref = "Study_Sounds"
@@ -134,12 +174,47 @@ function W.UI.IsAnyMenuOpen()
 end
 
 function W.UI.SetElementTextByClass(strMenuId, strClass, strText)
-	SendNUIMessage({type = "setElementTextByClass", menuId = strMenuId, class = strClass, text = strText})
+	SendNUIMessage({cmd = "setElementTextByClass", menuId = strMenuId, class = strClass, text = strText})
 end
 
 function W.UI.SetElementTextById(strMenuId, strId, strText)
-	SendNUIMessage({type = "setElementTextById", menuId = strMenuId, id = strId, text = strText})
+	SendNUIMessage({cmd = "setElementTextById", menuId = strMenuId, id = strId, text = strText})
 end
+
+function W.UI.CreatePage(strMenuId, strPageId, iType, iDetailPanelSize)	
+	SendNUIMessage({cmd = "createPage", menuId = strMenuId, pageId = strPageId, type = iType, detailPanelSize = iDetailPanelSize})
+end
+
+function W.UI.SetMenuRootPage(strMenuId, strPageId)	
+	SendNUIMessage({cmd = "setMenuRootPage", menuId = strMenuId, pageId = strPageId})
+end
+
+function W.UI.CreatePageItem(strMenuId, strPageId, strItemId, oExtraItemParams)
+	SendNUIMessage({cmd = "createPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId, extraItemParams = oExtraItemParams})
+end
+
+W.UI.RegisterCallback("closeAllMenus", function(data, cb)
+	W.UI.OpenMenu(currentMenu, false)
+	cb('ok')
+end)
+
+W.UI.RegisterCallback("playNavUpSound", function(data, cb)
+	local soundset_ref = "HUD_DOMINOS_SOUNDSET"
+	local soundset_name =  "NAV_UP"
+	Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
+	Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+
+	cb('ok')
+end)
+
+W.UI.RegisterCallback("playNavDownSound", function(data, cb)
+	local soundset_ref = "HUD_DOMINOS_SOUNDSET"
+	local soundset_name =  "NAV_DOWN"
+	Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
+	Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+	
+	cb('ok')
+end)
 
 Citizen.CreateThread(function()
     while true do
@@ -161,7 +236,25 @@ Citizen.CreateThread(function()
 			if currentMenu ~= "" then
 				HideHudAndRadarThisFrame()
 				DisableFrontendThisFrame()
-				
+				SetMouseCursorActiveThisFrame(true)
+
+				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_DOWN--") then
+					local soundset_ref = "HUD_DOMINOS_SOUNDSET"
+					local soundset_name =  "NAV_DOWN"
+					Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
+					Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+
+					SendNUIMessage({cmd = "moveSelection", forward = true})
+				end
+
+				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_UP--") then
+					local soundset_ref = "HUD_DOMINOS_SOUNDSET"
+					local soundset_name =  "NAV_UP"
+					Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
+					Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+
+					SendNUIMessage({cmd = "moveSelection", forward = false})
+				end
 			end
         end
         
@@ -169,7 +262,7 @@ Citizen.CreateThread(function()
             W.UI.SetVisible(true)
         end
 
-		if IsControlJustPressed(0, "INPUT_QUIT") then
+		if IsControlJustPressed(0, "INPUT_FRONTEND_CANCEL") then -- or IsControlJustPressed(0, "INPUT_QUIT")
 			-- Close the open menu
 			W.UI.OpenMenu(currentMenu, false)
         end
