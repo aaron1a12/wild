@@ -168,6 +168,7 @@ function OpenMenu(strMenuId, bOpen)
             }
 
             activeMenu = "";
+            currentMenuId = "";
         }, 1000);
     }
 
@@ -458,13 +459,13 @@ function MoveSelection(bForward)
     
     SelectPageItem(currentMenuId, currentPage, itemToSelect);    
     
-    if (IsRedM())
+    /*if (IsRedM())
     {
         if (bForward)
             fetch(`https://${GetParentResourceName()}/playNavDownSound`);
         else
             fetch(`https://${GetParentResourceName()}/playNavUpSound`);
-    }
+    }*/
 }
 
 function SetPageItemExtraParams(strMenuId, strPageId, strItemId, extraItemParams)
@@ -474,6 +475,19 @@ function SetPageItemExtraParams(strMenuId, strPageId, strItemId, extraItemParams
 function IsAnyMenuOpen()
 {
     return (activeMenu!="" && activeMenu.classList.contains("visible"))
+}
+
+function DestroyMenuAndData(strMenuId)
+{
+    if (currentMenuId==strMenuId)
+    {
+        OpenMenu(strMenuId, false);
+    }
+
+    var menuEl = document.getElementById('menu_' + strMenuId);
+    menuEl.remove();
+
+    menus[strMenuId] = undefined;
 }
 
 window.addEventListener("load", (event) => {
@@ -524,6 +538,7 @@ else
 
     setTimeout(function(){
         //OpenMenu("debug1", false);
+        DestroyMenuAndData("onlineMenu");
     }, 1000);
     
 }
@@ -594,6 +609,11 @@ window.addEventListener('message', function(event) {
     if (event.data.cmd == "moveSelection")
     {
         MoveSelection(event.data.forward);
+    }
+
+    if (event.data.cmd == "destroyMenuAndData")
+    {
+        DestroyMenuAndData(event.data.menuId)
     }
 });
 

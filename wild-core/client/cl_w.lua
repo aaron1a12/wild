@@ -185,6 +185,10 @@ function W.UI.CreatePage(strMenuId, strPageId, iType, iDetailPanelSize)
 	SendNUIMessage({cmd = "createPage", menuId = strMenuId, pageId = strPageId, type = iType, detailPanelSize = iDetailPanelSize})
 end
 
+function W.UI.DestroyMenuAndData(strMenuId)	
+	SendNUIMessage({cmd = "destroyMenuAndData", menuId = strMenuId})
+end
+
 function W.UI.SetMenuRootPage(strMenuId, strPageId)	
 	SendNUIMessage({cmd = "setMenuRootPage", menuId = strMenuId, pageId = strPageId})
 end
@@ -238,7 +242,7 @@ Citizen.CreateThread(function()
 				DisableFrontendThisFrame()
 				SetMouseCursorActiveThisFrame(true)
 
-				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_DOWN--") then
+				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_DOWN") then
 					local soundset_ref = "HUD_DOMINOS_SOUNDSET"
 					local soundset_name =  "NAV_DOWN"
 					Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
@@ -247,7 +251,7 @@ Citizen.CreateThread(function()
 					SendNUIMessage({cmd = "moveSelection", forward = true})
 				end
 
-				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_UP--") then
+				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_UP") then
 					local soundset_ref = "HUD_DOMINOS_SOUNDSET"
 					local soundset_name =  "NAV_UP"
 					Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
