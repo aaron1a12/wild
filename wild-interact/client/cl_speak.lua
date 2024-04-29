@@ -360,6 +360,19 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 
 	PlayAmbientSpeechFromEntity(sourcePed, "", line, "Speech_Params_Beat_Shouted_Clear_AllowPlayAfterDeath", 0) -- 0 = random variation (different per client)
 
+	-- Disable auto greet for a while
+
+	Citizen.CreateThread(function()
+		local timeLeft = 10.0 -- in seconds
+		
+		while timeLeft > 0 do
+			Citizen.Wait(0)
+			Citizen.InvokeNative(0x9F9A829C6751F3C7, NetworkGetPlayerIndexFromPed(sourcePed), 31, 1) -- PLAYER_RESET_FLAG_DISABLE_AMBIENT_GREETS
+			
+			timeLeft = timeLeft - GetFrameTime()
+		end
+	end)
+
 	while IsAmbientSpeechPlaying(sourcePed) or IsScriptedSpeechPlaying(sourcePed) do
 		Citizen.Wait(0)
 	end
