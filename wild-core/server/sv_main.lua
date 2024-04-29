@@ -111,7 +111,6 @@ end)
 
 RegisterNetEvent("wild:sv_setPlayerKeyValue")
 AddEventHandler("wild:sv_setPlayerKeyValue", function(strPlayerName, key, value)
-    print("sv_setPlayerKeyValue. " .. key .. "->" .. value)
     Players[strPlayerName][key] = value
     SaveData()
 end)
