@@ -53,7 +53,13 @@ end)
 local MenuBase = {}
 
 function OnStart()
-    W.UI.CreateMenu("warMenu", "War")
+
+    -- Destroy existing menu (useful for when restarting resource)
+    W.UI.DestroyMenuAndData("warMenu")
+
+    Citizen.Wait(1000)
+
+    W.UI.CreateMenu("warMenu", "WAR")
     W.UI.SetElementTextByClass("warMenu", "menuSubtitle", "Not in faction")
 
     W.UI.CreatePage("warMenu", "root", 0, 4);
@@ -69,28 +75,20 @@ function OnStart()
     params.description = "Allows you to create a new War faction which other players can join.";
     W.UI.CreatePageItem("warMenu", "root", 0, params);
 
-    Citizen.Wait(1000)
-    
     --DestroyAllCams()
-
 --    SetPlayerControl(PlayerId(), true, 0, true)
-
     --print(GetCurrentControlContext(0))
-
-    SetControlContext(0, `OnFoot`)
-
+    --SetControlContext(0, `OnFoot`)
     --SetControlContext(0, `OnlinePlayerMenu`)
-    
-    
+
 
 end
 OnStart()
 
-Citizen.CreateThread(function()
-    while true do    
-        Citizen.Wait(0)             
-        
-    end     
+W.Events.AddHandler(`EVENT_ENTITY_EXPLOSION`, function(data)
+    -- Access data members like so:
+    -- data[1]
+    print("EVT EXPLOSION HANDLED - PED : " .. tostring(data[1]))
 end)
 
 
