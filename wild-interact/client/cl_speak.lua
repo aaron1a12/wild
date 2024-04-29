@@ -2,6 +2,7 @@
 -- // cl_speak.lua
 -- // Purpose: adds greet and antagonize prompts to peds
 -- // TODO: Use SetAmbientVoiceName() when ped has no voice (mp_male, mp_female)
+-- // TODO: Fix, 2nd antagonize is interrupted.
 -- ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 --------------------
