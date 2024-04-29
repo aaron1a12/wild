@@ -33,6 +33,27 @@ function W.UpdatePlayerMoney(fNewTotal)
     W.UI.SetVisible(true)
 end
 
+function W.GetPlayerWorld()
+    RefreshPlayerData()
+    return W.PlayerData["world"]
+end
+
+function W.SetPlayerWorld(worldHash)
+    W.PlayerData["world"] = worldHash
+    TriggerServerEvent("wild:sv_setPlayerKeyValue", GetPlayerName(PlayerId()), "world", worldHash)
+
+    -- Update game
+    if worldHash == `guarma` then
+        SetGuarmaWorldhorizonActive(true)
+        SetWorldWaterType(1)
+    elseif worldHash == `world` then
+        SetGuarmaWorldhorizonActive(false)
+        SetWorldWaterType(0)
+    end
+
+    SetMinimapZone(worldHash)
+end
+
 RegisterNetEvent("wild:cl_onReceivePlayerData")
 AddEventHandler("wild:cl_onReceivePlayerData", function(newPlayerData)
     _playerData = newPlayerData

@@ -143,6 +143,9 @@ function SpawnPlayer()
         
         -- Only for player?
         SetRandomOutfitVariation(PlayerPedId(), true)
+
+        -- Were you in Guarma?
+        W.SetPlayerWorld(W.GetPlayerWorld())
     end
 
     --

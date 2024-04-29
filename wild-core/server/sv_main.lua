@@ -11,6 +11,10 @@ local function ValidatePlayerProps(playerEntry)
     if playerEntry["position"] == nil then
         playerEntry["position"] = {-136.0, -20.0, 96.0, 0.0} -- Horseshoe overlook
     end
+
+    if playerEntry["world"] == nil then
+        playerEntry["world"] = `world`
+    end
 end
 
 local function LoadData()
@@ -105,6 +109,12 @@ AddEventHandler("wild:sv_dumpIpls", function(ipls)
     TriggerClientEvent("wild:cl_dumpIplsDone", source)
 end)
 
+RegisterNetEvent("wild:sv_setPlayerKeyValue")
+AddEventHandler("wild:sv_setPlayerKeyValue", function(strPlayerName, key, value)
+    print("sv_setPlayerKeyValue. " .. key .. "->" .. value)
+    Players[strPlayerName][key] = value
+    SaveData()
+end)
 --
 -- Auto-restart resources (glitchy)
 --
