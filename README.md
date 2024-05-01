@@ -11,5 +11,6 @@ ensure wild-core
 start wild-interact
 start wild-shops
 start wild-war
+start wild-guarma
 ```
 3. Go to `wild-core` and rename `_config.json` and `_players.json` to `config.json` and `players.json`
