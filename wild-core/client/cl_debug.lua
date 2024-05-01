@@ -135,7 +135,9 @@ local function DrawNearIpls()
             end
         end
 
-        Citizen.InvokeNative(`DRAW_LINE` & 0xFFFFFFFF, imapCoords.x, imapCoords.y, imapCoords.z, imapCoords.x, imapCoords.y, 500.0,  red, green, blue, 255)
+        --Citizen.InvokeNative(`DRAW_LINE` & 0xFFFFFFFF, imapCoords.x, imapCoords.y, imapCoords.z, imapCoords.x, imapCoords.y, 500.0,  red, green, blue, 255)
+
+        Citizen.InvokeNative(0x2A32FAA57B937173, 0x94FDAE17, imapCoords.x, imapCoords.y, imapCoords.z, 0, 0, 0, 0, 0, 0, 0.1, 0.1, 100.0, red, green, blue, alpha + 64, 0, 0, 2, 0, 0, 0, 0)
 
         local _, iplRealPos, radius = GetIplBoundingSphere(hash)
 
@@ -156,7 +158,7 @@ local function DrawNearIpls()
         end
 
         -- Don't draw too many
-        if i > 10 then
+        if i > W.Config['debugIplMaxDraw'] then
             return
         end
     end
@@ -252,6 +254,10 @@ AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
     if W.Config['debugMode'] == true then
 
         W.Config['respawnDelay'] = 0
+
+        if W.Config['debugIplMaxDraw'] == nil then
+            W.Config['debugIplMaxDraw'] = 10
+        end
 
         if W.Config['debugIpl'] then
             Citizen.CreateThread(function()

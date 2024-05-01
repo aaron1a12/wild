@@ -3,5 +3,7 @@
     "respawnDelay": 5000,
     "positionalSaveInterval": 4000,
     "debugMode": false,
-    "debugIplRange": 5.0
+    "debugIpl": false,
+    "debugIplRange": 5.0,
+    "debugIplMaxDraw": 200
 }
