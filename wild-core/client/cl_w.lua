@@ -181,8 +181,16 @@ function W.UI.SetElementTextById(strMenuId, strId, strText)
 	SendNUIMessage({cmd = "setElementTextById", menuId = strMenuId, id = strId, text = strText})
 end
 
-function W.UI.CreatePage(strMenuId, strPageId, iType, iDetailPanelSize)	
-	SendNUIMessage({cmd = "createPage", menuId = strMenuId, pageId = strPageId, type = iType, detailPanelSize = iDetailPanelSize})
+function W.UI.CreatePage(strMenuId, strPageId, strPageTitle, strPageSubtitle, iType, iDetailPanelSize)	
+	SendNUIMessage({cmd = "createPage", menuId = strMenuId, pageId = strPageId, pageTitle = strPageTitle, pageSubtitle = strPageSubtitle, type = iType, detailPanelSize = iDetailPanelSize})
+end
+
+function W.UI.GoToPage(strMenuId, strPageId)	
+	SendNUIMessage({cmd = "goToPage", menuId = strMenuId, pageId = strPageId})
+end
+
+function W.UI.GoBack()	
+	SendNUIMessage({cmd = "goBack"})
 end
 
 function W.UI.DestroyMenuAndData(strMenuId)	
@@ -193,9 +201,31 @@ function W.UI.SetMenuRootPage(strMenuId, strPageId)
 	SendNUIMessage({cmd = "setMenuRootPage", menuId = strMenuId, pageId = strPageId})
 end
 
+local pageItemActions = {}
+local pageItemAutoId = 0
+
 function W.UI.CreatePageItem(strMenuId, strPageId, strItemId, oExtraItemParams)
+	if strItemId == 0 or strItemId == "" or strItemId == nil then
+		itemId = tostring(pageItemAutoId)
+	end
+
+	pageItemAutoId = pageItemAutoId + 1
+
+	if oExtraItemParams.action ~= nil then
+		pageItemActions[itemId] = oExtraItemParams.action
+	else
+		pageItemActions[itemId] = function()
+			ShowText("No action assigned")
+		end
+	end
+
 	SendNUIMessage({cmd = "createPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId, extraItemParams = oExtraItemParams})
 end
+
+W.UI.RegisterCallback("triggerSelectedItem", function(data, cb)
+	pageItemActions[data.itemId]()
+	cb('ok')
+end)
 
 W.UI.RegisterCallback("closeAllMenus", function(data, cb)
 	W.UI.OpenMenu(currentMenu, false)
@@ -217,6 +247,24 @@ W.UI.RegisterCallback("playNavDownSound", function(data, cb)
 	Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
 	Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
 	
+	cb('ok')
+end)
+
+W.UI.RegisterCallback("playNavEnterSound", function(data, cb)
+	local soundset_ref = "HUD_SHOP_SOUNDSET"
+	local soundset_name =  "SELECT"
+	Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
+	Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+
+	cb('ok')
+end)
+
+W.UI.RegisterCallback("playNavBackSound", function(data, cb)
+	local soundset_ref = "HUD_SHOP_SOUNDSET"
+	local soundset_name =  "BACK"
+	Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
+	Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+
 	cb('ok')
 end)
 
@@ -259,6 +307,20 @@ Citizen.CreateThread(function()
 
 					SendNUIMessage({cmd = "moveSelection", forward = false})
 				end
+
+				if IsControlJustPressed(0, "INPUT_FRONTEND_ACCEPT") then
+					local soundset_ref = "HUD_SHOP_SOUNDSET"
+					local soundset_name =  "SELECT"
+					Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
+					Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+
+					SendNUIMessage({cmd = "triggerSelectedItem"})
+				end
+
+				if IsControlJustPressed(0, "INPUT_FRONTEND_CANCEL") then -- or IsControlJustPressed(0, "INPUT_QUIT")
+					W.UI.GoBack()
+					--W.UI.OpenMenu(currentMenu, false)
+				end
 			end
         end
         
@@ -269,10 +331,6 @@ Citizen.CreateThread(function()
 			ShowLocalInfo("Wild Server", "", 2000) 
         end
 
-		if IsControlJustPressed(0, "INPUT_FRONTEND_CANCEL") then -- or IsControlJustPressed(0, "INPUT_QUIT")
-			-- Close the open menu
-			W.UI.OpenMenu(currentMenu, false)
-        end
 	end
 end)
 
@@ -283,20 +341,21 @@ end)
 -- Got tired of having leftover prompts blocking everything
 
 W.Prompts = {}
+W.Prompts.Pool = {}
 
 function W.Prompts.AddToGarbageCollector(promptId)
 	local resourceName = GetInvokingResource()
 	
-	if W.Prompts[resourceName] == nil then
-		W.Prompts[resourceName] = {}
+	if W.Prompts.Pool[resourceName] == nil then
+		W.Prompts.Pool[resourceName] = {}
 	end
 
-	table.insert(W.Prompts[resourceName], promptId)
+	table.insert(W.Prompts.Pool[resourceName], promptId)
 end
 
 -- The garbage collection
 AddEventHandler('onResourceStop', function(resourceName)
-	local resourcePrompts = W.Prompts[resourceName]
+	local resourcePrompts = W.Prompts.Pool[resourceName]
 
 	if resourceName ~= GetCurrentResourceName() then
 		if resourcePrompts == nil then
@@ -308,10 +367,10 @@ AddEventHandler('onResourceStop', function(resourceName)
 			PromptDelete(resourcePrompts[i])
 		end
 	
-		W.Prompts[resourceName] = {}		
+		W.Prompts.Pool[resourceName] = {}		
 	else -- wild-core is stopping, clean everything
 
-		for _, resourcePrompts in pairs(W.Prompts) do
+		for _, resourcePrompts in pairs(W.Prompts.Pool) do
 			for i = 1, #resourcePrompts do
 				PromptDelete(resourcePrompts[i])
 			end
