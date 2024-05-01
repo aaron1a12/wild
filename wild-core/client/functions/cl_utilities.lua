@@ -405,6 +405,10 @@ function ShowLocalInfo(strLocation, strCustomMessage, duration)
         local minutes = GetClockMinutes()
         local PM = "AM"
 
+		if not ShouldUse_24HourClock() and hours == 0 then
+			hours = 12
+		end
+
         if not ShouldUse_24HourClock() and hours > 12 then
             hours = hours - 12
             PM = "PM"
