@@ -46,9 +46,15 @@ function W.SetPlayerWorld(worldHash)
     if worldHash == `guarma` then
         SetGuarmaWorldhorizonActive(true)
         SetWorldWaterType(1)
+        DisableFarArtificialLights(true)
+        Citizen.InvokeNative(0xF01D21DF39554115, 0); 
+        Citizen.InvokeNative(0xC63540AEF8384732, 0.0, 50.04, 1, 1.15, 1.28, -1082130432, 1.86, 8.1, 1);
     elseif worldHash == `world` then
         SetGuarmaWorldhorizonActive(false)
         SetWorldWaterType(0)
+        DisableFarArtificialLights(false)
+        Citizen.InvokeNative(0xF01D21DF39554115, 1); 
+        ResetGuarmaWaterState()
     end
 
     SetMinimapZone(worldHash)
