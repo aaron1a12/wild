@@ -190,13 +190,23 @@ h1, h2, h3 {font-family: 'rdr-lino';}
     height: calc(52px * 2);
     overflow: hidden;
     position: relative;
+    transition: opacity 0.2s;
+}
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.menuPage {
+    display: none;
 }
 
 .menuScrollerTop, .menuScrollerBottom { 
     display: flex;
 }
 
-.menuScrollerTop div, .menuScrollerBottom div{ 
+.menuScrollerTop > div, .menuScrollerBottom > div{ 
     height: 24px;
     background-size: 100% 24px;
     background-repeat: repeat-x;
@@ -204,45 +214,53 @@ h1, h2, h3 {font-family: 'rdr-lino';}
 
 /* Scroller top */
 
-.menuScrollerTop div:nth-child(1) {
+.menuScrollerTop > div:nth-child(1) {
     background-image: url(scroller_left_top.png);
     flex-grow: 1;
 }
 
-.menuScrollerTop div:nth-child(2) {
+.menuScrollerTop > div:nth-child(2) {
     background-image: url(scroller_line_up.png);
     width: 24px;
 }
 
-.menuScrollerTop div:nth-child(3) {
+.menuScrollerTop > div:nth-child(3) {
     background-image: url(scroller_right_top.png);
     flex-grow: 1;
 }
 
-.menuScrollerTop.arrow div:nth-child(2){
+.menuScrollerTop.arrow div:nth-child(2) {
     background-image: url(scroller_arrow_top.png);
 }
 
 /* Scroller bottom */
 
-.menuScrollerBottom div:nth-child(1) {
+.menuScrollerBottom > div:nth-child(1) {
     background-image: url(scroller_left_bottom.png);
     flex-grow: 1;
 }
 
-.menuScrollerBottom div:nth-child(2) {
+.menuScrollerBottom > div:nth-child(2) {
     background-image: url(scroller_line_down.png);
     width: 24px;
 }
 
-.menuScrollerBottom div:nth-child(3) {
+.menuScrollerBottom > div:nth-child(3) {
     background-image: url(scroller_right_bottom.png);
     flex-grow: 1;
+    position: relative;
 }
 
-.menuScrollerBottom.arrow div:nth-child(2){
+.menuScrollerBottom.arrow div:nth-child(2) {
     background-image: url(scroller_arrow_bottom.png);
 }
+
+.menuScrollerCount {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
+
 
 .menuItem {
     height: 55px;

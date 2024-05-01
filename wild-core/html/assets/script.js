@@ -55,7 +55,9 @@ var activeMenu = "";
 var currentMenuId = "";
 var bMenuLock = false
 
-function CreateMenu(strMenuId, strMenuTitle)
+var pageItemAutoId = 0
+
+function CreateMenu(strMenuId)
 {
     if (typeof menus[strMenuId] != "undefined")
     {
@@ -65,7 +67,8 @@ function CreateMenu(strMenuId, strMenuTitle)
     menus[strMenuId] = { 
         pages: [],
         root: "",
-        currentPage: ""
+        currentPage: "",
+        history: []
     }
 
     var menuDiv = document.createElement("DIV");
@@ -89,7 +92,6 @@ function CreateMenu(strMenuId, strMenuTitle)
         // Header 
         {
             var menuHeaderH1 = document.createElement("H1");
-            menuHeaderH1.innerText = strMenuTitle;
             menuHeaderDiv.appendChild(menuHeaderH1);
         }
 
@@ -97,7 +99,6 @@ function CreateMenu(strMenuId, strMenuTitle)
         {
             var menuSubtitle = document.createElement("H2");
             menuSubtitle.classList.add("menuSubtitle");
-            menuSubtitle.innerText = "";
             menuBodyDiv.appendChild(menuSubtitle);
         }
 
@@ -130,8 +131,19 @@ function CreateMenu(strMenuId, strMenuTitle)
             menuScrollerBottomDiv.classList.add("menuScrollerBottom");
             menuScrollerBottomDiv.appendChild(document.createElement("DIV"))
             menuScrollerBottomDiv.appendChild(document.createElement("DIV"))
-            menuScrollerBottomDiv.appendChild(document.createElement("DIV"))
-            menuBodyDiv.appendChild(menuScrollerBottomDiv);            
+
+            var rightDiv = document.createElement("DIV");
+            {
+                // Scroller count
+                var menuScrollerCountDiv = document.createElement("DIV");
+                menuScrollerCountDiv.classList.add("menuScrollerCount");
+                menuScrollerCountDiv.innerText = "1 of 8";
+                rightDiv.appendChild(menuScrollerCountDiv);
+            }
+
+            menuScrollerBottomDiv.appendChild(rightDiv)
+
+            menuBodyDiv.appendChild(menuScrollerBottomDiv);   
         }
 
         // Detail Pane
@@ -212,7 +224,12 @@ function SetElementTextById(strMenuId, strId, strText)
     el.innerText = strText;                
 }
 
-function CreatePage(strMenuId, strPageId, iType, iDetailPanelSize)
+function SetMenuRootPage(strMenuId, strPageId)
+{
+    menus[strMenuId]["root"] = strPageId;
+}
+
+function CreatePage(strMenuId, strPageId, strPageTitle, strPageSubtitle, iType, iDetailPanelSize)
 {
     if (typeof menus[strMenuId] == "undefined")
     {
@@ -221,8 +238,11 @@ function CreatePage(strMenuId, strPageId, iType, iDetailPanelSize)
     }
 
     var pageDiv = document.createElement("DIV");
+    pageDiv.className = "menuPage";
 
     menus[strMenuId]["pages"][strPageId] = {
+        title: strPageTitle, 
+        subtitle: strPageSubtitle,
         element: pageDiv,
         detailPanelSize: iDetailPanelSize,
         items: [],
@@ -244,13 +264,15 @@ function CreatePage(strMenuId, strPageId, iType, iDetailPanelSize)
     menus[strMenuId].mainAreaElement.appendChild(pageDiv);
 }
 
-function SetMenuRootPage(strMenuId, strPageId)
-{
-    menus[strMenuId]["root"] = strPageId;
-}
+let navigationLock = false;
 
-function GoToPage(strMenuId, strPageId)
+function GoToPage(strMenuId, strPageId, bGoingBack)
 {
+    if (navigationLock) 
+        return;
+
+    navigationLock = true;
+
     var currentPage = menus[strMenuId].currentPage;
     if (currentPage != "") // Hide current page
     {
@@ -259,21 +281,75 @@ function GoToPage(strMenuId, strPageId)
     }
 
     // Set the page as current
-    currentPage = strPageId;
     menus[strMenuId].currentPage = strPageId;
+    currentPage = strPageId;
 
-    // Display it
-    let currentPageElement = menus[strMenuId]["pages"][currentPage].element;
-    currentPageElement.style.display = "block";
 
-    let page = menus[strMenuId].pages[currentPage];
+    let menuBodyMainArea = document.querySelector(`#menu_${strMenuId} .menuBodyMainArea`);
+    menuBodyMainArea.classList.add("fade-out");
 
-    if (page.selectedItem == undefined)
+    setTimeout(()=>{
+        menuBodyMainArea.classList.remove("fade-out");
+
+        // Display it
+        let currentPageElement = menus[strMenuId]["pages"][currentPage].element;
+        currentPageElement.style.display = "block";
+
+        let page = menus[strMenuId].pages[currentPage];
+
+        // Update titles
+
+        let titleElement = document.querySelector(`#menu_${strMenuId} h1`);
+        let menuSubtitleElement = document.querySelector(`#menu_${strMenuId} h2`);
+
+        titleElement.innerText = page.title;
+        menuSubtitleElement.innerText = page.subtitle;
+
+        // Select automatically any item
+
+        if (page.selectedItem == undefined && page.items.length > 1)
+        {
+            SelectPageItem(strMenuId, currentPage, page.items[0].id)
+        }
+
+        UpdateOverflowArrow();
+
+        if (!(bGoingBack)) // Not going back
+        {
+            // Add to history
+            menus[strMenuId].history.push(strPageId);
+        }
+        
+        navigationLock = false
+    }, 100);
+}
+
+
+function GoBack()
+{
+    if (currentMenuId!="")
     {
-        SelectPageItem(strMenuId, currentPage, page.items[0].id)
-    }
+        let menu = menus[currentMenuId];
+        
+        if (menu.history.length > 1) // We have history
+        {
+            let pageBefore = menu.history[menu.history.length-2];
 
-    UpdateOverflowArrow();
+            // Go
+            GoToPage(currentMenuId, pageBefore, true);
+
+            if (IsRedM())
+                fetch(`https://${GetParentResourceName()}/playNavBackSound`);
+        }
+        else // Close
+        {
+            if (IsRedM())
+                fetch(`https://${GetParentResourceName()}/closeAllMenus`);
+        }
+
+        // Remove from history
+        menus[currentMenuId].history.pop();
+    }
 }
 
 function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
@@ -283,7 +359,8 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
     let itemDiv = document.createElement("DIV");
     itemDiv.classList.add("menuItem");
 
-    let id = (strItemId != 0 && strItemId != "") ? strItemId : page.items.length;
+    let id = (strItemId != 0 && strItemId != "") ? strItemId : pageItemAutoId+"";
+    pageItemAutoId++;
 
     itemDiv.id = `menu_${strMenuId}_item_${id}`;
 
@@ -298,11 +375,17 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
         SelectPageItem(strMenuId, strPageId, id);
     });
 
+    itemDiv.addEventListener("click", (evt)=>{
+        if (IsRedM())
+            fetch(`https://${GetParentResourceName()}/playNavEnterSound`);
+
+        TriggerSelectedItem();
+    });
+
     page.items.push({
         id: id,
         element: itemDiv,
         extra: extraItemParams,
-        callback: null
     });
 
     page.element.appendChild(itemDiv);            
@@ -319,13 +402,13 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
         if (page.items[i].id == page.selectedItem)
         {
             page.items[i].element.classList.remove("selected");
-            itemIndex = i;
         }
 
         if (page.items[i].id == strItemId)
         {
             element = page.items[i].element;
             element.classList.add("selected");
+            itemIndex = i;
         }
     }
 
@@ -361,6 +444,9 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
         descElement.innerText = page.items[itemIndex].extra.description;
     else
         descElement.innerText = "";
+
+    let menuScrollerCount = document.querySelector(`#menu_${currentMenuId} .menuScrollerCount`);
+    menuScrollerCount.innerText = (itemIndex+1) + " of " + page.items.length;
 }
 
 function UpdateOverflowArrow()
@@ -427,9 +513,10 @@ function MoveSelection(bForward)
     let page = menu["pages"][currentPage];
 
     if (page == undefined)
-        return
+        return;
 
-    let items = page.items;
+    if (page.items.length == 0)
+        return;
 
     let itemToSelect = undefined;
 
@@ -466,6 +553,48 @@ function MoveSelection(bForward)
         else
             fetch(`https://${GetParentResourceName()}/playNavUpSound`);
     }*/
+}
+
+function TriggerSelectedItem()
+{ 
+    let menu = menus[currentMenuId]
+    if (menu == undefined)
+        return;
+
+    var currentPage = menu.currentPage;       
+    let page = menu["pages"][currentPage];
+
+    if (page == undefined)
+        return
+
+    if (page.selectedItem == undefined)
+        return;   
+
+    if (IsRedM()) 
+    {
+        fetch(`https://${GetParentResourceName()}/triggerSelectedItem`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+            },
+            body: JSON.stringify({
+                itemId: page.selectedItem
+            })
+        });
+    }
+    else // Chrome debugging
+    {
+        for (var i=0; i<page.items.length; i++)
+        {
+            if (page.items[i].id == page.selectedItem)
+            {
+                if (page.items[i].extra.action != undefined)
+                    page.items[i].extra.action()
+                break;
+            }
+        }
+        
+    }
 }
 
 function SetPageItemExtraParams(strMenuId, strPageId, strItemId, extraItemParams)
@@ -517,15 +646,22 @@ if (IsRedM())
 }
 else
 {
-    //window.GetParentResourceName = () => { return "wild-core"; }
-
     // Simulate RedM zoom for chrome
     document.body.style.zoom = window.screen.width / 1920;
 
-    CreateMenu("onlineMenu", "CRAFTING\n UPGRADES");
-    SetElementTextByClass("onlineMenu", "menuSubtitle", "Not in faction")
-    CreatePage("onlineMenu", "root", 0, 4);
+    CreateMenu("onlineMenu");
+    //SetElementTextByClass("onlineMenu", "menuSubtitle", "Not in faction")
+    CreatePage("onlineMenu", "root", "CRAFTING\n UPGRADES", "Not in faction", 0, 4);
+
     SetMenuRootPage("onlineMenu", "root");
+
+    CreatePageItem("onlineMenu", "root", "btnFoobar", {
+        text: "Foobar",
+        description: "Attempt to FUBAR the server.",
+        action: ()=>{
+            GoToPage("onlineMenu", "test_page");
+        }
+    });
     
     for (var i=0; i < 20; i++) {
         var params = {};
@@ -534,6 +670,16 @@ else
 
         CreatePageItem("onlineMenu", "root", 0, params);
     }
+
+    CreatePage("onlineMenu", "test_page", "Test Page", "Lorem ipsum", 0, 4);
+
+    CreatePageItem("onlineMenu", "test_page", "btnFoobar", {
+        text: "Nothing here",
+        description: "Select to go back",
+        action: ()=>{
+            GoToPage("onlineMenu", "root");
+        }
+    });
     
     OpenMenu("onlineMenu", true);
 
@@ -594,7 +740,17 @@ window.addEventListener('message', function(event) {
 
     if (event.data.cmd == "createPage")
     {
-        CreatePage(event.data.menuId, event.data.pageId, event.data.type, event.data.detailPanelSize);
+        CreatePage(event.data.menuId, event.data.pageId, event.data.pageTitle, event.data.pageSubtitle, event.data.type, event.data.detailPanelSize);
+    }
+
+    if (event.data.cmd == "goToPage")
+    {
+        GoToPage(event.data.menuId, event.data.pageId);
+    }
+
+    if (event.data.cmd == "goBack")
+    {
+        GoBack();
     }
 
     if (event.data.cmd == "setMenuRootPage")
@@ -612,9 +768,14 @@ window.addEventListener('message', function(event) {
         MoveSelection(event.data.forward);
     }
 
+    if (event.data.cmd == "triggerSelectedItem")
+    {
+        TriggerSelectedItem();
+    }
+
     if (event.data.cmd == "destroyMenuAndData")
     {
-        DestroyMenuAndData(event.data.menuId)
+        DestroyMenuAndData(event.data.menuId);
     }
 });
 
@@ -622,15 +783,35 @@ window.addEventListener('message', function(event) {
 document.onkeydown = function(evt) {
     switch (evt.key) {
     case 'Escape':
-        fetch(`https://${GetParentResourceName()}/closeAllMenus`);
+
+        if (currentMenuId!="")
+        {
+            let menu = menus[currentMenuId]
+            let history = menu.history;
+
+            if (history.length == 1)
+            {
+                //fetch(`https://${GetParentResourceName()}/closeAllMenus`);
+            }
+            else
+            {
+                //GoBack();
+
+
+            }
+        }
+        
         break;
 
     case 'ArrowDown':
-        //MoveSelection(true)
+        if (!IsRedM()) MoveSelection(true);
         break;
     case 'ArrowUp':
-        //MoveSelection(false)
-        break;    
+        if (!IsRedM()) MoveSelection(false);
+        break; 
+    case 'Enter':
+        //TriggerSelectedItem();
+        break; 
     }
 };
 
