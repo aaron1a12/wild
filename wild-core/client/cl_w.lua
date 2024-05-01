@@ -298,14 +298,24 @@ end
 AddEventHandler('onResourceStop', function(resourceName)
 	local resourcePrompts = W.Prompts[resourceName]
 
-	if resourcePrompts == nil then
-		return
+	if resourceName ~= GetCurrentResourceName() then
+		if resourcePrompts == nil then
+			return
+		end
+	
+		-- Prompt cleanup when stopping resource
+		for i = 1, #resourcePrompts do
+			PromptDelete(resourcePrompts[i])
+		end
+	
+		W.Prompts[resourceName] = {}		
+	else -- wild-core is stopping, clean everything
+
+		for _, resourcePrompts in pairs(W.Prompts) do
+			for i = 1, #resourcePrompts do
+				PromptDelete(resourcePrompts[i])
+			end
+		end
+		
 	end
-
-    -- Prompt cleanup when stopping resource
-    for i = 1, #resourcePrompts do
-        PromptDelete(resourcePrompts[i])
-    end
-
-	W.Prompts[resourceName] = {}
 end)
