@@ -206,24 +206,34 @@ local pageItemAutoId = 0
 
 function W.UI.CreatePageItem(strMenuId, strPageId, strItemId, oExtraItemParams)
 	if strItemId == 0 or strItemId == "" or strItemId == nil then
-		itemId = tostring(pageItemAutoId)
+		strItemId = tostring(pageItemAutoId)
 	end
 
 	pageItemAutoId = pageItemAutoId + 1
 
-	if oExtraItemParams.action ~= nil then
-		pageItemActions[itemId] = oExtraItemParams.action
-	else
-		pageItemActions[itemId] = function()
+	if oExtraItemParams.action == nil then
+		pageItemActions[strItemId] = function()
 			ShowText("No action assigned")
 		end
+	else
+		pageItemActions[strItemId] = oExtraItemParams.action
 	end
 
 	SendNUIMessage({cmd = "createPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId, extraItemParams = oExtraItemParams})
 end
 
+function W.UI.DestroyPageItem(strMenuId, strPageId, strItemId)
+	--pageItemActions[strItemId] = nil
+
+	SendNUIMessage({cmd = "destroyPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId})
+	Citizen.Wait(0)
+end
+
 W.UI.RegisterCallback("triggerSelectedItem", function(data, cb)
-	pageItemActions[data.itemId]()
+	if pageItemActions[data.itemId] ~= nil then
+		pageItemActions[data.itemId]()
+	end
+	
 	cb('ok')
 end)
 

@@ -392,7 +392,45 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
         extra: extraItemParams,
     });
 
-    page.element.appendChild(itemDiv);            
+    page.element.appendChild(itemDiv); 
+    
+    // If we're the first item in the page
+
+    if (page.selectedItem == undefined)
+    {
+        SelectPageItem(strMenuId, strPageId, id);
+    }
+}
+
+function DestroyPageItem(strMenuId, strPageId, strItemId)
+{
+    if (menus[strMenuId] == undefined)
+        return;
+
+    let page = menus[strMenuId]["pages"][strPageId];
+
+    if (page == undefined)
+        return;
+
+    for (var i=0; i<page.items.length; i++)
+    {
+        if (page.items[i].id == strItemId)
+        {
+            let item = page.items[i];
+
+            // Are we deleting a selected item?
+            if (i > 0 && page.selectedItem == strItemId)
+            {
+                // Select item behind it
+                SelectPageItem(strMenuId, strPageId, page.items[i-1].id);
+            }
+
+            item.element.remove();
+            
+            page.items.splice(i, 1);
+            break;
+        }
+    }
 }
 
 function SelectPageItem(strMenuId, strPageId, strItemId)
@@ -772,6 +810,11 @@ window.addEventListener('message', function(event) {
         CreatePageItem(event.data.menuId, event.data.pageId, event.data.itemId, event.data.extraItemParams);
     }
 
+    if (event.data.cmd == "destroyPageItem")
+    {
+        DestroyPageItem(event.data.menuId, event.data.pageId, event.data.itemId)
+    }
+
     if (event.data.cmd == "moveSelection")
     {
         MoveSelection(event.data.forward);
@@ -785,11 +828,6 @@ window.addEventListener('message', function(event) {
     if (event.data.cmd == "destroyMenuAndData")
     {
         DestroyMenuAndData(event.data.menuId);
-    }
-
-    if (event.data.cmd == "clearPage")
-    {
-        DestroyMenuAndData(event.data.menuId, event.data.pageId);
     }
 });
 
