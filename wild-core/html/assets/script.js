@@ -399,7 +399,7 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
 {
     let page = menus[strMenuId]["pages"][strPageId];
     let element = undefined;
-    let itemIndex = 0;
+    let itemIndex = -1;
 
     for (var i=0; i<page.items.length; i++)
     {
@@ -415,6 +415,9 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
             itemIndex = i;
         }
     }
+
+    if (itemIndex == -1)
+        return; // no item found
 
     page.selectedItem = strItemId;
 
@@ -782,6 +785,11 @@ window.addEventListener('message', function(event) {
     if (event.data.cmd == "destroyMenuAndData")
     {
         DestroyMenuAndData(event.data.menuId);
+    }
+
+    if (event.data.cmd == "clearPage")
+    {
+        DestroyMenuAndData(event.data.menuId, event.data.pageId);
     }
 });
 
