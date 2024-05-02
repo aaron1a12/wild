@@ -307,9 +307,13 @@ function GoToPage(strMenuId, strPageId, bGoingBack)
 
         // Select automatically any item
 
-        if (page.selectedItem == undefined && page.items.length > 1)
+        if (page.selectedItem == undefined && page.items.length > 0)
         {
-            SelectPageItem(strMenuId, currentPage, page.items[0].id)
+            SelectPageItem(strMenuId, currentPage, page.items[0].id);
+        }
+        else
+        {
+            console.log(page.items.length);
         }
 
         UpdateOverflowArrow();
@@ -446,7 +450,9 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
         descElement.innerText = "";
 
     let menuScrollerCount = document.querySelector(`#menu_${currentMenuId} .menuScrollerCount`);
-    menuScrollerCount.innerText = (itemIndex+1) + " of " + page.items.length;
+    
+    if (menuScrollerCount)
+        menuScrollerCount.innerText = (itemIndex+1) + " of " + page.items.length;
 }
 
 function UpdateOverflowArrow()
@@ -810,7 +816,7 @@ document.onkeydown = function(evt) {
         if (!IsRedM()) MoveSelection(false);
         break; 
     case 'Enter':
-        //TriggerSelectedItem();
+        if (!IsRedM()) TriggerSelectedItem();
         break; 
     }
 };
