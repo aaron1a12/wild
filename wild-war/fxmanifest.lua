@@ -8,6 +8,12 @@ client_script {
 }
 
 server_script {
+	'server/sv_war.lua'
+}
+
+files
+{
+	"factions.json"
 }
 
 dependencies {
