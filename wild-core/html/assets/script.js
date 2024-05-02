@@ -313,7 +313,7 @@ function GoToPage(strMenuId, strPageId, bGoingBack)
         }
         else
         {
-            console.log(page.items.length);
+            SelectPageItem(strMenuId, currentPage, page.selectedItem);
         }
 
         UpdateOverflowArrow();
