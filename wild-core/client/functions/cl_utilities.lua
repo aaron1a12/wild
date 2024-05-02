@@ -556,3 +556,11 @@ end
 function GetVectorDist(a, b)
 	return math.sqrt(GetVectorDistSqr(a, b));
 end
+
+
+function PlaySound(soundset_ref, soundset_name)
+	local soundset_ref = soundset_ref
+    local soundset_name =  soundset_name
+    Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
+    Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+end
