@@ -1,5 +1,31 @@
+--
+-- Server version of W
+--
+
+W = {}
+
+exports("Get", function()
+    return W
+end)
+
+
 local Players = {}
 local PlayerSources = {}
+
+function W.GetPlayerSourceCoords()
+    local coordMap = {}
+
+    for name, player in pairs(Players) do
+
+        if PlayerSources[name] ~= nil then
+            local coord = vector3(player.position[1], player.position[2], player.position[3])
+            local source = PlayerSources[name]
+            coordMap[source] = coord
+        end
+    end
+
+    return coordMap
+end
 
 
 -- Makes sure all player entries have appropriate properties read or created with default values
@@ -142,3 +168,13 @@ end)
         
 	--end
 --end)
+
+
+AddEventHandler('onResourceStop', function(resourceName)
+end)
+
+Citizen.CreateThread(function()
+	while true do
+        Citizen.Wait(1000)       
+	end
+end)

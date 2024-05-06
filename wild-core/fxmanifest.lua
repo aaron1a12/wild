@@ -8,6 +8,7 @@ client_script
 	"client/imaps/cl_imaps.lua",
 	"client/cl_w.lua",
 	"client/cl_events.lua",
+	"client/cl_npcManager.lua",
 	"client/cl_main.lua",
 	"client/cl_spawn.lua",	
 	"client/cl_horse.lua",
@@ -19,7 +20,8 @@ client_script
 server_script
 {
 	"server/sv_main.lua",
-	"server/sv_horse.lua"
+	"server/sv_horse.lua",
+	"server/sv_npcManager.lua",
 }
 
 files
@@ -28,7 +30,8 @@ files
 	"ipls.json",
 	"config.json",
 	"peds.json",
-	"players.json"
+	"players.json",
+	"npcs.json"
 }
 
 ui_page 'html/index.html'

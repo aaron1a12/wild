@@ -1,3 +1,5 @@
 update.bat
 wild-core/config.json
 wild-core/players.json
+wild-core/npcs.json
+wild-war/factions.json
