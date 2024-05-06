@@ -115,9 +115,9 @@ AddEventHandler("wild:npcManager:cl_onCreatedPed", function(name, netId)
     W.NpcManager.ClientPool[name].Ped = ped
     params.Ped = ped
 
-    if params.OnActivate ~= nil then
+    if params.onActivate ~= nil then
         local bOwned = NetworkHasControlOfEntity(ped)
-        params:OnActivate(ped, bOwned)
+        params:onActivate(ped, bOwned)
     end
 end)
 
@@ -128,8 +128,8 @@ AddEventHandler("wild:npcManager:cl_onDeletePed", function(name)
     W.NpcManager.ClientPool[name].Ped = 0
     params.Ped = 0
 
-    if params.OnDeactivate ~= nil then
-        params:OnDeactivate()
+    if params.onDeactivate ~= nil then
+        params:onDeactivate()
     end
 end)
 
