@@ -8,6 +8,10 @@ W.EventHandlerMap = {}
 -- Source: https://github.com/femga/rdr3_discoveries/tree/master/AI/EVENTS
 -- TODO: Add all events
 W.EventDataInfo = {
+    [`EVENT_CARRIABLE_UPDATE_CARRY_STATE`] = {
+        size = 5,
+        members = {"Int32", "Int32", "Int32", "Int32", "Int32"} --  CarriableEntityId | PerpitratorEntityId | CarrierEntityId | IsOnHorse | IsOnGround
+    },
     [`EVENT_LOOT_COMPLETE`] = {
         size = 3,
         members = {"Int32", "Int32", "Int32"} -- looter, ped, success
@@ -19,7 +23,7 @@ W.EventDataInfo = {
     [`EVENT_INVENTORY_ITEM_PICKED_UP`] = {
         size = 5,
         members = {"Int32", "Int32", "Int32", "Int32", "Int32"} -- inventory item hash | picked up entity model | isItemWasUsed | isItemWasBought | picked up entity id
-    },
+    }
 }
 
 function W.Events.AddHandler(evtHash, handler)
@@ -27,7 +31,17 @@ function W.Events.AddHandler(evtHash, handler)
         W.EventHandlerMap[evtHash] = {}
     end
 
-    table.insert(W.EventHandlerMap[evtHash], handler)
+    local resource = GetInvokingResource()
+
+    if resource == nil then
+        resource = GetCurrentResourceName()
+    end
+
+    if W.EventHandlerMap[evtHash][resource] == nil then
+        W.EventHandlerMap[evtHash][resource] = {}
+    end
+
+    table.insert(W.EventHandlerMap[evtHash][resource], handler)
 end
 
 Citizen.CreateThread(function()
@@ -65,16 +79,29 @@ Citizen.CreateThread(function()
                         for i = 0, dataSize - 1 do
                             -- Insert function named after member data type. E.g., "GetInt32", "GetFloat32", etc
                             local label = "Get" .. dataInfo.members[i + 1]
-                            table.insert(data, dataStruct[label](dataStruct, 8 * i))
+                            local dataMember = dataStruct[label](dataStruct, 8 * i)
+                            table.insert(data, dataMember)
                         end
 
                         -- Pass the data to the handlers
-                        for _, handler in pairs(W.EventHandlerMap[event]) do
-                            handler(data)
+                        for resourceName, resourceHandlers in pairs(W.EventHandlerMap[event]) do
+                            for _, handler in pairs(resourceHandlers) do
+                                handler(data)
+                            end
                         end
+
                     end
                 end
             end
         end
     end     
+end)
+
+-- The garbage collection
+AddEventHandler('onResourceStop', function(resourceName)
+    for evtHash, resources in pairs(W.EventHandlerMap) do
+        for resourceName, resourceHandlers in pairs(resources) do
+            W.EventHandlerMap[evtHash][resourceName] = {}
+        end
+    end
 end)
