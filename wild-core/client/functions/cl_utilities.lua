@@ -564,3 +564,14 @@ function PlaySound(soundset_ref, soundset_name)
     Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
     Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
 end
+
+function DrawTextAtCoord(v)
+	local s, sx, sy = GetScreenCoordFromWorldCoord(v.x, v.y, v.z)
+	if (sx > 0 and sx < 1) or (sy > 0 and sy < 1) then
+		local s, sx, sy = GetScreenCoordFromWorldCoord(v.x, v.y, v.z)
+		if (sx > 0 and sx < 1) or (sy > 0 and sy < 1) then
+			local s, sx, sy = GetHudScreenPositionFromWorldPosition(v.x, v.y, v.z)
+			PrintText(sx, sy, 0.3, true, tostring(hash), red, green, blue, 255)
+		end
+	end
+end
