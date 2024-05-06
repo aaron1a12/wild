@@ -566,12 +566,9 @@ function PlaySound(soundset_ref, soundset_name)
 end
 
 function DrawTextAtCoord(v)
-	local s, sx, sy = GetScreenCoordFromWorldCoord(v.x, v.y, v.z)
-	if (sx > 0 and sx < 1) or (sy > 0 and sy < 1) then
-		local s, sx, sy = GetScreenCoordFromWorldCoord(v.x, v.y, v.z)
-		if (sx > 0 and sx < 1) or (sy > 0 and sy < 1) then
-			local s, sx, sy = GetHudScreenPositionFromWorldPosition(v.x, v.y, v.z)
-			PrintText(sx, sy, 0.3, true, tostring(hash), red, green, blue, 255)
-		end
-	end
+    local s, sx, sy = GetScreenCoordFromWorldCoord(v.x, v.y, v.z)
+    if (sx > 0 and sx < 1) and (sy > 0 and sy < 1) then
+        local hudX, hudY = GetHudScreenPositionFromWorldPosition(v.x, v.y, v.z)
+        PrintText(hudX, hudY, 0.3, true, tostring(hash), red, green, blue, 255)
+    end
 end
