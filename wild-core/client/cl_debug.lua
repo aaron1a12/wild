@@ -380,11 +380,11 @@ AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
 
                 if bIsFlyMode then -- FLY MODE CONTROLS
                     if IsControlPressed(0, "INPUT_COVER") then
-                        AddFlyImpulse(vector3(0.0, 0.0, 1.0))
+                        AddFlyImpulse(vector3(0.0, 0.0, -1.0))
                     end
 
                     if IsControlPressed(0, "INPUT_ENTER") then
-                        AddFlyImpulse(vector3(0.0, 0.0, -1.0))
+                        AddFlyImpulse(vector3(0.0, 0.0, 1.0))
                     end
 
                     if IsControlPressed(0, "INPUT_MOVE_UP_ONLY") then
