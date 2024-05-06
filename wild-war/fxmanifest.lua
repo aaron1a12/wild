@@ -4,16 +4,16 @@ rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aw
 
 client_script {
 	"@wild-core/client/functions/cl_utilities.lua",
-	'client/cl_war.lua'
+	'client/cl_war.lua',
 }
 
 server_script {
-	'server/sv_war.lua'
+	'server/sv_war.lua',
 }
 
 files
 {
-	"factions.json"
+	"factions.json",
 }
 
 dependencies {

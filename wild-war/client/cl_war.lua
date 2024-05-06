@@ -1,3 +1,9 @@
+--[[
+    Models: 
+        Lemoyne Raiders - G_M_Y_UniExConfeds_01
+        O'Driscoll Boys - G_M_M_UniDuster_01
+]]
+
 -- Resources external to wild-core need to get the same instance of W this way
 W = exports["wild-core"]:Get()
 
@@ -46,6 +52,8 @@ function CreateRelationships()
         local _, group = AddRelationshipGroup(safeName)
 
         FactionRelationships[factionName] = group
+
+        
     end
 
     -- Set the relationships
@@ -57,6 +65,7 @@ function CreateRelationships()
 
             if factionAName == factionBName then
                 SetRelationshipBetweenGroups(0, factionAHash, factionBHash) -- Companion
+                SetRelationshipBetweenGroups(0, factionBHash, factionAHash) -- Companion
             else
                 SetRelationshipBetweenGroups(6, factionAHash, factionBHash) -- Kill on sight
             end
@@ -180,7 +189,7 @@ function SpawnFactionMember(factionName)
 
     local myCoords = GetEntityCoords(PlayerPedId())
     local ped = CreatePed(model, myCoords.x + 0.5, myCoords.y, myCoords.z + 1.0, 90.0, true)
-    SetPedOutfitPreset(ped, true, false)
+    --EquipMetaPedOutfitPreset(ped, 0, false)
     SetRandomOutfitVariation(ped, true)
 
     TaskWanderInArea(ped, myCoords.x, myCoords.y, myCoords.z,  5.0, 10, 10, 1)
@@ -188,7 +197,6 @@ function SpawnFactionMember(factionName)
     SetPedRelationshipGroupHash(ped, FactionRelationships[factionName])
     print(ped)
 end
-
 
 
 function OnStart()
@@ -203,6 +211,109 @@ function OnStart()
 
     ShowText(currentFaction)
 
+    for _, ped in ipairs(GetGamePool('CPed')) do
+        if not IsPedAPlayer(ped) then
+            DeletePed(ped)
+        end
+    end
+
+    
+    local dutchParams = {}
+    dutchParams.Model = "G_M_Y_UniExConfeds_01"
+    dutchParams.DefaultCoords = vector3(-128.393, -32.657, 96.175)
+    dutchParams.DefaultHeading = 267.4
+    dutchParams.CullMinDistance = 2.0
+    dutchParams.CullMaxDistance = 5.0
+    dutchParams.SaveCoordsAndHeading = false
+    dutchParams.Blip = 0
+    dutchParams.BlipName = "cs_dutchy"
+    
+    function dutchParams:OnActivate(ped, bOwned)
+        self.Blip = BlipAddForEntity(`BLIP_STYLE_FRIENDLY`, ped)
+
+        SetBlipSprite(self.Blip, `blip_ambient_posse_deputy`, true)
+        SetBlipScale(self.Blip, 0.2)
+        SetBlipName(self.Blip, self.BlipName)
+
+        DrawDebugSphereTimed(GetEntityCoords(ped), self.CullMinDistance, 255, 128, 64, 32, 6000)
+        DrawDebugSphereTimed(GetEntityCoords(ped), self.CullMaxDistance, 255, 64, 128, 32, 6000)
+    
+        if bOwned then
+            local coords = GetEntityCoords(ped)
+            EquipMetaPedOutfitPreset(ped, 1, false)    
+            --TaskWanderInArea(ped, coords.x, coords.y, coords.z,  5.0, 10, 10, 1)
+
+            SetPedRelationshipGroupHash(ped, FactionRelationships["Lemoyne Raiders"])
+            SetEntityCanBeDamagedByRelationshipGroup(ped, false, FactionRelationships["Lemoyne Raiders"])
+
+            -- Make the ped hate the player
+            --local _, ped_group = AddRelationshipGroup("insulted_ped")
+            --SetRelationshipBetweenGroups(6, ped_group, GetPedRelationshipGroupHash(PlayerPedId()))
+            --SetPedRelationshipGroupHash(ped, ped_group)	-- Make sure never to do this to a player ped		
+            --SetPedCombatMovement(targetPed, 0)
+
+
+            Citizen.InvokeNative(0x8ACC0506743A8A5C, ped, GetHashKey("SituationAllStop"), 1, -1.0)  -- apply combatstyle "SituationAllStop" for 240 seconds. Ped holds fire and prefer not move.
+            SetPedCanBeIncapacitated(ped, true)
+
+
+            Citizen.InvokeNative(0x1913FE4CBF41C463,ped, 40, false)
+            Citizen.InvokeNative(0x1913FE4CBF41C463,ped, 274, false)
+            Citizen.InvokeNative(0x1913FE4CBF41C463,ped, 569, false)
+        end
+
+        GiveWeaponCollectionToPed(self.Ped, GetDefaultPedWeaponCollection(self.Model))
+
+        -- Disable shooting at this ped
+        --SetPedConfigFlag(self.Ped, 253, true)
+
+        --PCF_TreatNonFriendlyAsHateWhenInCombat
+        --SetPedConfigFlag(self.Ped, 289, false)
+
+
+        
+        --SetPedConfigFlag(self.Ped, 254, true)
+        --SetPedConfigFlag(self.Ped, 255, true)
+
+        --SetPedConfigFlag(self.Ped, 156, true) --PCF_EnableCompanionAISupport (disables flee or agression)
+    
+
+        for i = 0, 700 do
+            if i ~= 580 and i ~= 253 then
+                --SetPedConfigFlag(self.Ped, i, true)
+            end
+        end
+
+        
+        Citizen.CreateThread(function()
+            while self.Ped ~= 0 do
+                Citizen.Wait(0)
+
+                SetPedMotivation(
+                        self.Ped, 
+                        10, 
+                        1, 
+                        self.Ped
+                    )
+
+
+
+                --SetPedResetFlag(self.Ped, 32, true)
+
+                for i = 0, 371 do
+                    --SetPedResetFlag(self.Ped, i, false)
+                end
+            end
+        end)
+    end
+
+    function dutchParams:OnDeactivate()
+        RemoveBlip(self.Blip)
+    end
+
+    W.NpcManager:EnsureNpcExists("dutch_at_camp", dutchParams)
+
+    
 
     --[[
     SpawnFactionMember("Lemoyne Raiders")
@@ -292,20 +403,64 @@ OnStart()
     print("EVT EXPLOSION HANDLED - PED : " .. tostring(data[1]))
 end)]]
 
+function DrawTextAtCoord(v, text, size, r, g, b, alpha)
+	local s, sx, sy = GetScreenCoordFromWorldCoord(v.x, v.y, v.z)
+
+	if (sx > 0 and sx < 1) or (sy > 0 and sy < 1) then
+		--local s, sx, sy = GetScreenCoordFromWorldCoord(v.x, v.y, v.z)
+		if (sx > 0 and sx < 1) or (sy > 0 and sy < 1) then
+			local s, sx, sy = GetHudScreenPositionFromWorldPosition(v.x, v.y, v.z)
+
+
+            
+			--PrintText(sx, sy, size, true, text, r, g, b, alpha)
+
+            
+            --(x, y, scale, center, text, r, g, b, a)
+            local str = CreateVarString(10, "LITERAL_STRING", text)
+            SetTextColor(r, g, b, alpha)
+            BgSetTextColor(r, g, b, alpha)
+            SetTextFontForCurrentCommand(0)
+            SetTextScale(size, size)
+            SetTextCentre(true)
+        
+            DisplayText(str, sx, sy)
+
+		end
+	end
+end
+
 
 Citizen.CreateThread(function()
-    if W.Config["debugMode"] == true then
+    --if W.Config["debugMode"] == true then
+        
+
         while true do    
-            Citizen.Wait(0)             
-            local playerPed = GetPlayerPed(player)
-            local playerCoords = GetEntityCoords(playerPed)
+            Citizen.Wait(0)        
+
+            local playerCoords = GetEntityCoords(GetPlayerPed(player))
+            
+
+            for _, ped in ipairs(GetGamePool('CPed')) do
+                DrawTextAtCoord(GetEntityCoords(PlayerPedId()))
+
+                local coords = GetEntityCoords(ped)
+                local dist = GetVectorDist(coords, playerCoords)
+    
+                if dist < 10.0 then
+                    DrawTextAtCoord(coords, "Ped ID: " .. ped .. "\nRelation: " .. GetPedRelationshipGroupHash(ped), 0.25, 255, 255, 255, 255)
+                end
+
+            end
+
+
             
              -- ALT + 3
             if IsControlJustPressed(0, "INPUT_EMOTE_TWIRL_GUN_VAR_D") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
                 TestGang()
             end
         end
-    end       
+    --end       
 end)
 
 AddEventHandler('onResourceStop', function(resourceName)

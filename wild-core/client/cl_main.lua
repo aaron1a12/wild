@@ -115,3 +115,35 @@ Citizen.CreateThread(function()
         end
 	end
 end)
+
+
+function test()
+    local a = 0.22
+    local b = 0.3
+    local c = 0.10
+    local d = 0.2
+    local e = 0.01
+    local f = 0.6
+
+    a = 0.022
+    b = 0.3
+    c = 0.10
+    d = 0.2
+    e = 0.01
+    f = 0.3
+
+    SetVisualSettingFloat("Tonemapping.dark.filmic.A", a)
+    SetVisualSettingFloat("Tonemapping.dark.filmic.B", b)
+    SetVisualSettingFloat("Tonemapping.dark.filmic.C", c)
+    SetVisualSettingFloat("Tonemapping.dark.filmic.D", d)
+    SetVisualSettingFloat("Tonemapping.dark.filmic.E", e)
+    SetVisualSettingFloat("Tonemapping.dark.filmic.F", f)
+    SetVisualSettingFloat("Tonemapping.bright.filmic.A", a)
+    SetVisualSettingFloat("Tonemapping.bright.filmic.B", b)
+    SetVisualSettingFloat("Tonemapping.bright.filmic.C", c)
+    SetVisualSettingFloat("Tonemapping.bright.filmic.D", d)
+    SetVisualSettingFloat("Tonemapping.bright.filmic.E", e)
+    SetVisualSettingFloat("Tonemapping.bright.filmic.F", f)
+    SetVisualSettingFloat("sky.MoonIntensity", 0.0) 
+end
+test()
