@@ -260,6 +260,8 @@ end
 local bIsFocusingOnPed = false
 local focusedPed = 0
 
+local bDisableEmoteWheel = true
+
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
@@ -298,7 +300,16 @@ Citizen.CreateThread(function()
 				if IsControlJustPressed(0, 'INPUT_INTERACT_LOCKON_POS') or IsControlJustPressed(0, 'INPUT_INTERACT_LOCKON_NEG') then
 					local bAntagonize = IsControlJustPressed(0, 'INPUT_INTERACT_LOCKON_NEG')
 		
-					
+					local playerModel = GetEntityModel(playerPed)
+
+					if playerModel == -1481695040 then -- mp_female
+						SetAmbientVoiceName(playerPed, "0863_A_F_M_CIV_POOR_WHITE_AVOID_01")
+					end
+
+					if playerModel == -171876066 then -- mp_male
+						SetAmbientVoiceName(playerPed, "0819_A_M_M_VHTTHUG_01_WHITE_03")
+					end
+
 					local playerPed_net = PedToNet(playerPed)
 					local targetPed_net = PedToNet(entity)
 
@@ -316,10 +327,29 @@ Citizen.CreateThread(function()
 
 			-- Hide 'Show Info' since it doesn't work on MP
 			ModifyPlayerUiPrompt(PlayerId(), 35, 0, 1)
+
+			-- When leading, if you disable prompt type 7, there will be no option to stop leading
+			-- We temporarily stop disabling from the moment the input is sent. We then wait until 
+			-- the task for leading (8) stops running.
+			if IsControlJustPressed(0, `INPUT_INTERACT_LEAD_ANIMAL`) and bDisableEmoteWheel then
+				bDisableEmoteWheel = false
+
+				Citizen.CreateThread(function()
+					Citizen.Wait(10000)
+					while not bDisableEmoteWheel do
+						Citizen.Wait(0)
+						if not GetIsTaskActive(playerPed, 8) then
+							bDisableEmoteWheel = true
+						end
+					end
+				end)
+			end
 		
 			-- Hide Emote wheel 
 			if not (IsEntityAPed(entity) and not IsPedHuman(entity)) then
-				PromptDisablePromptTypeThisFrame(7)
+				if bDisableEmoteWheel then
+					PromptDisablePromptTypeThisFrame(7)
+				end
 			end
 			
 		end
