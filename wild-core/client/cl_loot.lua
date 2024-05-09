@@ -14,6 +14,8 @@ W.Events.AddHandler(`EVENT_LOOT_COMPLETE`, function(data)
 	local success = data[3]
 
 	if looterPed == playerPed and success == 1 then
-		TriggerServerEvent("wild:sv_giveMoney", GetPlayerName(PlayerId()), CalculateLootForPed(ped))
+		if GetMetaPedType(ped) ~= 3 then -- animal = 3
+			TriggerServerEvent("wild:sv_giveMoney", GetPlayerName(PlayerId()), CalculateLootForPed(ped))
+		end
 	end
 end)
