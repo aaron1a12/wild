@@ -9,6 +9,84 @@
         "a_c_sheep_01" : [1.00, 3.00, 5.00],
         "a_c_prairiechicken_01" : [0.12, 0.25, 0.30],
         "a_c_chicken_01" : [0.12, 0.25, 0.30],
-        "mp_a_c_chicken_01" : [0.12, 0.25, 0.30]
+        "mp_a_c_chicken_01" : [0.12, 0.25, 0.30],
+        "A_C_Bear_01" : [10.00, 20.00, 30.00],
+        "A_C_BearBlack_01" : [5.00, 10.00, 15.00]
+    },
+
+    "pelts": {
+        "comment" : ["More pelts can be found at fm_mission_controller.c", 0.0],
+
+        "957520252":    ["Poor Bear Pelt",      10.0],
+        "143941906":    ["Good Bear Pelt",      20.0],
+        "1292673537":   ["Perfect Bear Pelt",   30.0],
+
+        "2116849039":   ["Unknown Pelt",        1.0],
+        "-1569450319":  ["Poor Beaver Pelt",    2.0],
+        "-2059726619":  ["Good Beaver Pelt",    3.0],
+        "854596618":    ["Perfect Beaver Pelt", 6.0],
+
+        "-1558096473":  ["Poor Coyote Pelt",    1.0],
+        "1150939141":   ["Good Coyote Pelt",    2.0],
+        "-794277189":   ["Perfect Coyote Pelt", 3.0],
+
+        "-662178186":   ["Poor Deer Pelt",      1.0],
+        "-1827027577":  ["Good Deer Pelt",      2.0],
+        "-1035515486":  ["Perfect Deer Pelt",   3.0],
+
+        "1248540072":   ["Poor Boar Pelt",      1.0],
+        "-1858513856":  ["Perfect Boar Pelt",   2.0],
+
+        "1914602340":   ["Poor Cougar Pelt",    3.0],
+        "459744337":    ["Good Cougar Pelt",    1.0],
+        "-1791452194":  ["Perfect Cougar Pelt", 2.0],
+
+        "699990316":    ["Poor Goat Hide",      1.0],
+        "1710714415":   ["Good Goat Hide",      2.0],
+        "-1648383828":  ["Perfect Goat Hide",   3.0],
+
+        "1806153689":   ["Poor Alligator Skin",     1.0],
+        "-802026654":   ["Good Alligator Skin",     2.0],
+        "-1625078531":  ["Perfect Alligator Skin",  3.0],
+
+        "-983605026":   ["Poor Pronghorn Hide",     1.0],
+        "554578289":    ["Good Pronghorn Hide",     2.0],
+        "-1544126829":  ["Perfect Pronghorn Hide",  3.0],
+
+        "1729948479":   ["Poor Sheep Hide",     1.0],
+        "-1317365569":  ["Good Sheep Hide",     2.0],
+        "1466150167":   ["Perfect Sheep Hide",  3.0],
+
+        "-395646254":   ["Good Panther Pelt",       1.0],
+        "1584468323":   ["Poor Panther Pelt",       2.0],
+        "1969175294":   ["Perfect Panther Pelt",    3.0],
+
+        "657906142":    ["Legendary Panther Pelt",   1.0],
+
+        "-99092070":    ["Poor Collared Peccary Pig Pelt",      1.0],
+        "-1379330323":  ["Good Collared Peccary Pig Pelt",      2.0],
+        "1963510418":   ["Perfect Collared Peccary Pig Pelt",   3.0],
+
+        "2047376405":   ["White Cougar Pelt",   1.0],
+
+        "1603936352":   ["Poor Buck Pelt",      2.0],
+        "-868657362":   ["Good Buck Pelt",      3.0],
+        "-702790226":   ["Perfect Buck Pelt",   1.0],
+
+        "85441452":     ["Poor Wolf Pelt",      3.0],
+        "1145777975":   ["Good Wolf Pelt",      2.0],
+        "653400939":    ["Perfect Wolf Pelt",   3.0],
+
+        "1647012424":   ["Poor Fox Pelt",       1.0],
+        "238733925":    ["Good Fox Pelt",       2.0],
+        "500722008":    ["Perfect Fox Pelt",    3.0],
+
+        "-476045512":   ["Good Ram Hide",       1.0],
+        "1796037447":   ["Poor Ram Hide",       2.0],
+        "1795984405":   ["Perfect Ram Hide",    3.0],
+
+        "-308965548":   ["Poor Pig Hide",       1.0],
+        "-57190831":    ["Good Pig Hide",       2.0],
+        "-1102272634":  ["Perfect Pig Hide",    3.0]
     }
 }

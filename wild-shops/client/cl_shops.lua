@@ -49,34 +49,6 @@ function SetupButchers()
 end
 SetupButchers()
 
-local function CalculatePrice(entity)
-	math.randomseed(GetGameTimer()/7)
-
-    local prices = shopConfig.butcherPrices[W.GetPedModelName(entity)]
-
-    if prices == nil then
-        prices = shopConfig.butcherPrices["default"]
-    end
-
-    local finalPrice = math.random(0, 100) / 100 -- Random cents starting rate
-
-    local rating = GetPedDamageCleanliness(entity)
-
-    if rating == 0 then
-        finalPrice = finalPrice + prices[1]
-    end
-
-    if rating == 1 then
-        finalPrice = finalPrice + prices[2]
-    end
-
-    if rating == 2 then
-        finalPrice = finalPrice + prices[3]
-    end
-
-	return finalPrice
-end
-
 local function GetBuyLine(speaker, entity)
     math.randomseed(GetGameTimer()/7)
 
@@ -84,6 +56,29 @@ local function GetBuyLine(speaker, entity)
     local line = ""
 
     local rating = GetPedDamageCleanliness(entity)
+
+    if GetIsCarriablePelt(entity) then -- large pelt items have no damage cleanliness
+        local peltId = GetCarriableFromEntity(entity)
+        local pelt = shopConfig.pelts[tostring(peltId)]
+        
+        local nameBegin = string.sub(pelt[1] ,1,4)
+
+        if nameBegin == "Poor" then
+            rating = 0
+        end
+
+        if nameBegin == "Good" then
+            rating = 1
+        end
+
+        if nameBegin == "Perf" then
+            rating = 2
+        end
+
+        if nameBegin == "Lege" then
+            rating = 2
+        end
+    end
 
     if rating == 0 then
         if CanPlayAmbientSpeech(speaker, "BUY_COMMON_ITEM") then
@@ -138,6 +133,85 @@ local function GetBuyLine(speaker, entity)
     return line
 end
 
+function PickMountForLoad(player)
+    local playerPed = GetPlayerPed(player)
+    local playerMount = GetMountOwnedByPlayer(player)
+    local playerLastMount = GetLastMount(playerPed)
+
+    local finalMount = 0
+    local finalDist = 0
+
+    if playerMount ~= 0 and playerLastMount ~= 0 then -- We have to choose between mounts
+        local playerCoords = GetEntityCoords(playerPed)
+
+        local playerMountDist = GetVectorDistSqr(playerCoords, GetEntityCoords(playerMount))
+        local playerLastMountDist = GetVectorDistSqr(playerCoords, GetEntityCoords(GetEntityCoords(playerLastMount)))
+
+        if playerLastMountDist < playerMountDist then
+            finalMount = playerLastMount
+            finalDist = playerLastMountDist
+        else
+            finalMount = playerMount
+            finalDist = playerMountDist
+        end
+    else
+        if playerLastMount ~= 0 then
+            finalMount = playerLastMount
+            finalDist = playerLastMountDist
+        end
+
+        if playerMount ~= 0 then
+            finalMount = playerMount
+            finalDist = playerMountDist
+        end
+    end
+
+    return finalMount, finalDist
+end
+
+local function CalculatePeltPrice(peltId)
+    local pelt = shopConfig.pelts[tostring(peltId)]
+
+    if pelt == nil then
+        return 0.50
+    end
+
+	return pelt[2]
+end
+
+local function CalculatePrice(entity)
+    local finalPrice = math.random(0, 100) / 100 -- Random cents starting rate
+
+    if GetIsCarriablePelt(entity) then -- large pelt item
+        local peltId = GetCarriableFromEntity(entity)
+        finalPrice = finalPrice + CalculatePeltPrice(peltId)
+    else
+        math.randomseed(GetGameTimer()/7)
+        local prices = shopConfig.butcherPrices[W.GetPedModelName(entity)]
+    
+        if prices == nil then
+            prices = shopConfig.butcherPrices["default"]
+        end
+    
+        local rating = GetPedDamageCleanliness(entity)
+    
+        if rating == 0 then
+            finalPrice = finalPrice + prices[1]
+        end
+    
+        if rating == 1 then
+            finalPrice = finalPrice + prices[2]
+        end
+    
+        if rating == 2 then
+            finalPrice = finalPrice + prices[3]
+        end
+    end
+
+	return finalPrice
+end
+
+
 local prompt = 0
 local helpLastTime = 0
 
@@ -145,7 +219,8 @@ Citizen.CreateThread(function()
     while true do
         Citizen.Wait(10)
     
-        local playerCoords = GetEntityCoords(PlayerPedId())
+        local playerPed = PlayerPedId()
+        local playerCoords = GetEntityCoords(playerPed)
         
         local bInValidAreas = false
         local currentLocation = nil
@@ -168,7 +243,7 @@ Citizen.CreateThread(function()
         local butcherPed = 0
 
         if bInValidAreas then
-            butcherPed = currentLocation[5].Ped
+            butcherPed = currentLocation[7].Ped           
             
             if DoesEntityExist(butcherPed) then
                 if not IsPedDeadOrDying(butcherPed) then
@@ -179,20 +254,31 @@ Citizen.CreateThread(function()
                         bButcherIsAvailable = true
                     end
                 end
-            end            
-        end
+            end 
+            
+            carriedEntity = GetFirstEntityPedIsCarrying(playerPed)
 
-        carriedEntity = GetFirstEntityPedIsCarrying(PlayerPedId())
-
-        if bInValidAreas and bButcherIsAvailable and carriedEntity == 0 then
-            if (GetGameTimer() - helpLastTime > 10000) then
-                helpLastTime = GetGameTimer()
-    
-                ShowHelpText("You can only sell to the butcher if you're carrying", 3000)
+            -- Pelts on horse
+            bHasPelts = false
+            local mount, mountDist = PickMountForLoad(PlayerId())
+        
+            if mount ~= 0 and mountDist < 30.0 then
+                if GetPeltFromHorse(mount, 0) ~= 0 then
+                    bHasPelts = true
+                end
             end
         end
 
-        if bInValidAreas and bButcherIsAvailable and carriedEntity ~=0 then
+        if bInValidAreas and bButcherIsAvailable and carriedEntity == 0 then
+            if (GetGameTimer() - helpLastTime > 20000) then
+                helpLastTime = GetGameTimer()
+    
+                ShowHelpText("To sell here, you must carry the large items and keep your pelts nearby", 10000)
+            end
+        end
+
+        if bInValidAreas and bButcherIsAvailable and (carriedEntity ~=0 or bHasPelts) then 
+
         
             if prompt == 0 then -- Create prompt
                 prompt = PromptRegisterBegin()
@@ -209,19 +295,45 @@ Citizen.CreateThread(function()
                 PromptDelete(prompt)
                 prompt = 0
 
+                local price = 0.0
+                
+                -- Carried large item
+                if carriedEntity ~= 0 then
+                    price = price + CalculatePrice(carriedEntity)
+                end
+
+                -- Pelts on horse
+                local mount = PickMountForLoad(PlayerId())
+
+                if mount ~= 0 then
+                    -- Search for pelts
+                    for i = 0, 99 do
+                        local peltId = GetPeltFromHorse(mount, i)
+                        
+                        if peltId ~= 0 then
+                            price = price + CalculatePeltPrice(peltId)
+                            ClearPeltFromHorse(mount, peltId)
+                        else
+                            break
+                        end
+                    end
+                end
+
                 -- Action
 
                 local playerCoords = GetEntityCoords(PlayerPedId())
                 TaskReact(butcherPed, PlayerPedId(), playerCoords.x, playerCoords.y, playerCoords.z, "Default_Curious", 1.0, 10.0, 4)
 
-                local price = CalculatePrice(carriedEntity)
-
                 TriggerServerEvent("wild:sv_giveMoney", GetPlayerName(PlayerId()), price)
-                TriggerServerEvent('wild:shops:sv_playAmbSpeech', PedToNet(butcherPed), GetBuyLine(butcherPed, carriedEntity))
-
-                DeleteEntity(carriedEntity)
-                carriedEntity = 0
-
+            
+                if carriedEntity ~= 0 then
+                    TriggerServerEvent('wild:shops:sv_playAmbSpeech', PedToNet(butcherPed), GetBuyLine(butcherPed, carriedEntity))
+                    DeleteEntity(carriedEntity)
+                    carriedEntity = 0
+                else
+                    W.PlayAmbientSpeech(butcherPed, "BUY_QUALITY_PELT")
+                end
+                
                 Citizen.Wait(1*1000) -- too soon?
             end
 
@@ -237,3 +349,45 @@ AddEventHandler("wild:shops:cl_onPlayAmbSpeech", function(pedNet, line)
 	local ped = NetToPed(pedNet)
 	PlayAmbientSpeechFromEntity(ped, "", line, "speech_params_force", 0)
 end)
+
+--[[RegisterCommand('animal', function() 
+	local x, y, z = table.unpack(GetEntityCoords(GetPlayerPed(PlayerId()), false))
+
+    local model = `A_C_Bear_01`
+
+    RequestModel(model)
+
+    while not HasModelLoaded(model) do
+        RequestModel(model)
+        Citizen.Wait(0)
+    end
+
+    local ped = CreatePed(model, x, y+1.0, z, 45.0, true, true, true)
+    SetEntityInvincible(ped, true)
+    SetPedKeepTask(ped)
+    SetPedAsNoLongerNeeded(ped)
+    SetRandomOutfitVariation(ped)
+
+    SetEntityHealth(ped, 0)
+end, false)
+
+RegisterCommand('deer', function() 
+	local x, y, z = table.unpack(GetEntityCoords(GetPlayerPed(PlayerId()), false))
+
+    local model = `A_C_Deer_01`
+
+    RequestModel(model)
+
+    while not HasModelLoaded(model) do
+        RequestModel(model)
+        Citizen.Wait(0)
+    end
+
+    local ped = CreatePed(model, x, y+1.0, z, 45.0, true, true, true)
+    SetEntityInvincible(ped, true)
+    SetPedKeepTask(ped)
+    SetPedAsNoLongerNeeded(ped)
+    SetRandomOutfitVariation(ped)
+
+    SetEntityHealth(ped, 0)
+end, false)]]
