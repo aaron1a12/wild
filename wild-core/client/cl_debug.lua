@@ -413,3 +413,23 @@ AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
 
     end
 end)
+
+
+--[[
+-- Debug Events    
+Citizen.CreateThread(function()
+	while true do
+		Citizen.Wait(0)
+		local size = GetNumberOfEvents(0)
+		if size > 0 then
+			for i = 0, size - 1 do
+				local evt = GetEventAtIndex(0, i)
+                if evt ~= 735942751 and evt ~= 1626561060 and evt ~= -1863021589 and evt ~= -1231347001 and evt ~= 1351025667 and evt ~= 1669410864 then
+                    print(evt)
+                end
+			end
+		end
+
+	end
+end)
+]]
