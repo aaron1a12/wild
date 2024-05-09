@@ -12,6 +12,9 @@ Factions = {}
 local _factions = nil
 local currentFaction = nil
 
+local bChangingFaction = false
+local bPlayerSpawned = false
+
 -- Map of faction names to relationship group hashes
 FactionRelationships = {}
 
@@ -30,20 +33,6 @@ RegisterNetEvent("wild:cl_onLoadFactionData")
 AddEventHandler("wild:cl_onLoadFactionData", function(factionData)
 	_factions = factionData
 end)
-
-
-RegisterNetEvent("wild:cl_onJoinFaction")
-AddEventHandler("wild:cl_onJoinFaction", function(factionName)
-    table.insert(Factions[factionName].players, playerName)
-
-    currentFaction = factionName
-
-    ShowText("Welcome to " .. currentFaction .. "!")
-    PlaySound("HUD_MP_FREE_MODE", "EVENT_AVAILABLE")
-
-    UpdateFactionMembershipStatus()
-end)
-
 
 -- TODO: Handle runtime creation (new faction creation)
 function CreateRelationships()
@@ -101,10 +90,53 @@ function UpdateFactionMembershipStatus()
 
     if currentFaction ~= nil then
         SetPedRelationshipGroupHash(PlayerPedId(), FactionRelationships[currentFaction])
+
+        W.UI.EditPage("warMenu", "my_faction", currentFaction, "Active Member")	
+        W.UI.SetMenuRootPage("warMenu", "my_faction");
+
+        if W.UI.IsMenuOpen("warMenu") then
+            W.UI.GoToPage("warMenu", "my_faction", true)
+            W.UI.ClearHistory()
+        end
     else
         SetPedRelationshipGroupHash(PlayerPedId(), `PLAYER`)
+
+        W.UI.SetMenuRootPage("warMenu", "root");
+
+        if W.UI.IsMenuOpen("warMenu") then
+            W.UI.GoToPage("warMenu", "root", true)
+            W.UI.ClearHistory()
+        end
     end
+
+    bChangingFaction = false
 end
+
+RegisterNetEvent("wild:cl_onJoinFaction", function(factionName)
+    table.insert(Factions[factionName].players, GetPlayerName(PlayerId()))
+
+    currentFaction = factionName
+
+    PlaySound("HUD_MP_FREE_MODE", "EVENT_AVAILABLE")
+    UpdateFactionMembershipStatus()
+end)
+
+
+RegisterNetEvent("wild:cl_onLeaveFaction", function()
+    local playerName = GetPlayerName(PlayerId())
+    
+    for i = 1, #Factions[currentFaction].players do 
+        if Factions[currentFaction].players[i] == playerName then
+            Factions[currentFaction].players[i] = nil
+            currentFaction = nil
+        end
+    end
+
+    PlaySound("HUD_MP_FREE_MODE", "HP_HORSE")
+    UpdateFactionMembershipStatus()
+end)
+
+
 
 -- cleanup
 AddEventHandler('onResourceStop', function(resourceName)
@@ -165,7 +197,12 @@ function PopulateFactionList()
         local params = {}
         params.text = factionName;
         params.action = function()
-            TriggerServerEvent("wild:sv_joinFaction", factionName)
+            if not bChangingFaction then
+                bChangingFaction = true
+                TriggerServerEvent("wild:sv_joinFaction", factionName)
+            else
+                ShowText("Cannot change faction at this time")
+            end
         end
 
         W.UI.DestroyPageItem("warMenu", "faction_list", GetHashKey(factionName))
@@ -198,26 +235,80 @@ function SpawnFactionMember(factionName)
     print(ped)
 end
 
+function onPlayerSpawn()
+    bPlayerSpawned = true
+
+    -- Assign your player ped to the appropriate group
+    UpdateFactionMembershipStatus()
+
+    ShowText(currentFaction)
+end
 
 function OnStart()
+    -- Destroy existing menu (useful for when restarting resource) -- TODO: MERGE WITH PROMPT GARBAGE COLLECTOR
+    W.UI.DestroyMenuAndData("warMenu")
+
     Citizen.Wait(1000)
+
+    W.UI.CreateMenu("warMenu")
+    
+
+    W.UI.CreatePage("warMenu", "root", "War", "Not in faction", 0, 4); -- Update subtitle:  W.UI.SetElementTextByClass("warMenu", "menuSubtitle", "Not in faction")
+    W.UI.SetMenuRootPage("warMenu", "root");
+
+    local params = {}
+    params.text = "Join a Faction";
+    params.description = "Allows you to join an existing War faction.";
+    params.action = function()
+        PopulateFactionList()
+        W.UI.GoToPage("warMenu", "faction_list")
+    end
+
+    W.UI.CreatePageItem("warMenu", "root", 0, params);
+
+    local btnNewFactionParams = {}
+    btnNewFactionParams.text = "Create New Faction";
+    btnNewFactionParams.description = "Allows you to create a new War faction which other players can join.";
+    btnNewFactionParams.action = function()
+        ShowText("Feature not implemented.")
+    end
+    
+    W.UI.CreatePageItem("warMenu", "root", 0, btnNewFactionParams);
+
+    -- Faction Join Page
+
+    W.UI.CreatePage("warMenu", "faction_list", "JOIN A FACTION", "Available factions", 0, 4);
+
+
+    -- My faction page
+    W.UI.CreatePage("warMenu", "my_faction", "HUNTERS", "Member", 0, 4);
+    
+
+    local btnLeave = {}
+    btnLeave.text = "Leave Faction";
+    btnLeave.description = "Will make you leave the current faction.";
+    btnLeave.action = function()
+        if currentFaction ~= nil and not bChangingFaction then
+            bChangingFaction = true
+            TriggerServerEvent("wild:sv_leaveFaction")
+        end
+    end
+    W.UI.CreatePageItem("warMenu", "my_faction", 0, btnLeave);
+
 
     -- Load the data
     RefreshFactionData()
     -- Create relationship groups
     CreateRelationships()
-    -- Assign your player ped to the appropriate group
-    UpdateFactionMembershipStatus()
 
-    ShowText(currentFaction)
 
+    --[[
     for _, ped in ipairs(GetGamePool('CPed')) do
         if not IsPedAPlayer(ped) then
             DeletePed(ped)
         end
     end
 
-    
     local dutchParams = {}
     dutchParams.Model = "G_M_Y_UniExConfeds_01"
     dutchParams.DefaultCoords = vector3(-128.393, -32.657, 96.175)
@@ -228,7 +319,7 @@ function OnStart()
     dutchParams.Blip = 0
     dutchParams.BlipName = "cs_dutchy"
     
-    function dutchParams:OnActivate(ped, bOwned)
+    function dutchParams:onActivate(ped, bOwned)
         self.Blip = BlipAddForEntity(`BLIP_STYLE_FRIENDLY`, ped)
 
         SetBlipSprite(self.Blip, `blip_ambient_posse_deputy`, true)
@@ -252,7 +343,6 @@ function OnStart()
             --SetPedRelationshipGroupHash(ped, ped_group)	-- Make sure never to do this to a player ped		
             --SetPedCombatMovement(targetPed, 0)
 
-
             Citizen.InvokeNative(0x8ACC0506743A8A5C, ped, GetHashKey("SituationAllStop"), 1, -1.0)  -- apply combatstyle "SituationAllStop" for 240 seconds. Ped holds fire and prefer not move.
             SetPedCanBeIncapacitated(ped, true)
 
@@ -266,38 +356,23 @@ function OnStart()
 
         -- Disable shooting at this ped
         --SetPedConfigFlag(self.Ped, 253, true)
-
         --PCF_TreatNonFriendlyAsHateWhenInCombat
         --SetPedConfigFlag(self.Ped, 289, false)
-
-
-        
         --SetPedConfigFlag(self.Ped, 254, true)
         --SetPedConfigFlag(self.Ped, 255, true)
-
         --SetPedConfigFlag(self.Ped, 156, true) --PCF_EnableCompanionAISupport (disables flee or agression)
     
-
         for i = 0, 700 do
             if i ~= 580 and i ~= 253 then
                 --SetPedConfigFlag(self.Ped, i, true)
             end
         end
-
         
         Citizen.CreateThread(function()
             while self.Ped ~= 0 do
                 Citizen.Wait(0)
 
-                SetPedMotivation(
-                        self.Ped, 
-                        10, 
-                        1, 
-                        self.Ped
-                    )
-
-
-
+                SetPedMotivation(self.Ped, 10, 1, self.Ped )
                 --SetPedResetFlag(self.Ped, 32, true)
 
                 for i = 0, 371 do
@@ -307,132 +382,32 @@ function OnStart()
         end)
     end
 
-    function dutchParams:OnDeactivate()
+    function dutchParams:onDeactivate()
         RemoveBlip(self.Blip)
     end
 
     W.NpcManager:EnsureNpcExists("dutch_at_camp", dutchParams)
-
-    
-
-    --[[
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-    SpawnFactionMember("Lemoyne Raiders")
-
-    Citizen.Wait(3000)
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-    SpawnFactionMember("Hunters")
-
     ]]
 
-
-
-    -- Destroy existing menu (useful for when restarting resource) -- TODO: MERGE WITH PROMPT GARBAGE COLLECTOR
-    W.UI.DestroyMenuAndData("warMenu")
-
-    Citizen.Wait(1000)
-
-    W.UI.CreateMenu("warMenu")
-   
-
-    W.UI.CreatePage("warMenu", "root", "War", "Not in faction", 0, 4); -- Update subtitle:  W.UI.SetElementTextByClass("warMenu", "menuSubtitle", "Not in faction")
-    W.UI.SetMenuRootPage("warMenu", "root");
-
-    local params = {}
-    params.text = "Join a Faction";
-    params.description = "Allows you to join an existing War faction.";
-    params.action = function()
-        W.UI.GoToPage("warMenu", "faction_list")
-        PopulateFactionList()
-    end
-
-    W.UI.CreatePageItem("warMenu", "root", 0, params);
-
-    local btnNewFactionParams = {}
-    btnNewFactionParams.text = "Create New Faction";
-    btnNewFactionParams.description = "Allows you to create a new War faction which other players can join.";
-    btnNewFactionParams.action = function()
-        ShowText("ACTION 2")
-    end
     
-    W.UI.CreatePageItem("warMenu", "root", 0, btnNewFactionParams);
+    if W.bPlayerSpawned and not bPlayerSpawned then
+        onPlayerSpawn()
+    end
 
-    -- Faction Join Page
-
-    W.UI.CreatePage("warMenu", "faction_list", "JOIN A FACTION", "Available factions", 0, 4);
 end
 OnStart()
 
---[[W.Events.AddHandler(`EVENT_ENTITY_EXPLOSION`, function(data)
-    -- Access data members like so:
-    -- data[1]
-    print("EVT EXPLOSION HANDLED - PED : " .. tostring(data[1]))
-end)]]
-
-function DrawTextAtCoord(v, text, size, r, g, b, alpha)
-	local s, sx, sy = GetScreenCoordFromWorldCoord(v.x, v.y, v.z)
-
-	if (sx > 0 and sx < 1) or (sy > 0 and sy < 1) then
-		--local s, sx, sy = GetScreenCoordFromWorldCoord(v.x, v.y, v.z)
-		if (sx > 0 and sx < 1) or (sy > 0 and sy < 1) then
-			local s, sx, sy = GetHudScreenPositionFromWorldPosition(v.x, v.y, v.z)
+AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
+    if not bPlayerSpawned then
+        onPlayerSpawn()
+    end
+end)
 
 
-            
-			--PrintText(sx, sy, size, true, text, r, g, b, alpha)
-
-            
-            --(x, y, scale, center, text, r, g, b, a)
-            local str = CreateVarString(10, "LITERAL_STRING", text)
-            SetTextColor(r, g, b, alpha)
-            BgSetTextColor(r, g, b, alpha)
-            SetTextFontForCurrentCommand(0)
-            SetTextScale(size, size)
-            SetTextCentre(true)
-        
-            DisplayText(str, sx, sy)
-
-		end
-	end
-end
 
 
 Citizen.CreateThread(function()
-    --if W.Config["debugMode"] == true then
+    if W.Config["debugMode"] == true then
         
 
         while true do    
@@ -442,8 +417,6 @@ Citizen.CreateThread(function()
             
 
             for _, ped in ipairs(GetGamePool('CPed')) do
-                DrawTextAtCoord(GetEntityCoords(PlayerPedId()))
-
                 local coords = GetEntityCoords(ped)
                 local dist = GetVectorDist(coords, playerCoords)
     
@@ -460,7 +433,7 @@ Citizen.CreateThread(function()
                 TestGang()
             end
         end
-    --end       
+    end       
 end)
 
 AddEventHandler('onResourceStop', function(resourceName)

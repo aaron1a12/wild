@@ -49,14 +49,11 @@ Citizen.CreateThread(function()
 	end
 end)
 
-RegisterNetEvent("wild:sv_onLoadFactionData")
-AddEventHandler("wild:sv_onLoadFactionData", function()
+RegisterNetEvent("wild:sv_onLoadFactionData", function()
     TriggerClientEvent("wild:cl_onLoadFactionData", source, Factions)
 end)
 
-
-RegisterNetEvent("wild:sv_joinFaction")
-AddEventHandler("wild:sv_joinFaction", function(factionName)
+RegisterNetEvent("wild:sv_joinFaction", function(factionName)
     local playerName = GetPlayerName(source)
 
     if factionName == nil then
@@ -80,4 +77,21 @@ AddEventHandler("wild:sv_joinFaction", function(factionName)
     SaveData()
 
     TriggerClientEvent("wild:cl_onJoinFaction", source, factionName)
+end)
+
+
+RegisterNetEvent("wild:sv_leaveFaction", function()
+    local playerName = GetPlayerName(source)
+
+    for factionName, faction in pairs(Factions) do
+        for i = 1, #faction.players do 
+            if faction.players[i] == playerName then
+                Factions[factionName].players[i] = nil
+            end
+        end
+    end
+
+    SaveData()
+
+    TriggerClientEvent("wild:cl_onLeaveFaction", source)
 end)
