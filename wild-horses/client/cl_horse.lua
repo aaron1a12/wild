@@ -495,6 +495,8 @@ end)
 
 -- Cleanup
 AddEventHandler('onResourceStop', function(resourceName)
-    RemoveBlip(mountBlip)
-    DeletePed(mount)
+    if resourceName == GetCurrentResourceName() then
+        RemoveBlip(mountBlip)
+        DeletePed(mount)
+    end
 end)
