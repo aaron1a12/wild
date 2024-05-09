@@ -8,8 +8,14 @@ client_script {
 }
 
 server_script {
+	'server/sv_shops.lua'
 }
 
 dependencies {
     'wild-core'
+}
+
+files
+{
+	"shops.json",
 }
