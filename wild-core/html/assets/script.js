@@ -53,7 +53,7 @@ function SetVisible(bVisible)
 var menus = [];
 var activeMenu = "";
 var currentMenuId = "";
-var bMenuLock = false
+let bMenuLock = false;
 
 var pageItemAutoId = 0
 
@@ -137,7 +137,7 @@ function CreateMenu(strMenuId)
                 // Scroller count
                 var menuScrollerCountDiv = document.createElement("DIV");
                 menuScrollerCountDiv.classList.add("menuScrollerCount");
-                menuScrollerCountDiv.innerText = "1 of 8";
+                menuScrollerCountDiv.innerText = "";
                 rightDiv.appendChild(menuScrollerCountDiv);
             }
 
@@ -157,7 +157,7 @@ function CreateMenu(strMenuId)
         {
             var menuItemDescriptionDiv = document.createElement("DIV");
             menuItemDescriptionDiv.classList.add("menuItemDescription");
-            menuItemDescriptionDiv.innerText = "Select to create a faction";//"Select to create a faction";
+            menuItemDescriptionDiv.innerText = "";
             menuBodyDiv.appendChild(menuItemDescriptionDiv);
         }
     }
@@ -181,7 +181,7 @@ function OpenMenu(strMenuId, bOpen)
 
             activeMenu = "";
             currentMenuId = "";
-        }, 1000);
+        }, 200);
     }
 
     if (!bOpen) return; 
@@ -190,6 +190,13 @@ function OpenMenu(strMenuId, bOpen)
 
     currentMenuId = strMenuId;
     activeMenu = document.getElementById("menu_" + strMenuId);
+
+    if (!activeMenu)
+    {
+        console.log("Attempted to open non-existent menu.");
+        return;
+    }
+
     activeMenu.style.display = "block";
 
 
@@ -209,18 +216,20 @@ function OpenMenu(strMenuId, bOpen)
 
     setTimeout(function(){
         activeMenu.classList.add("visible");
+        bMenuLock = false
     }, 1);       
 }
 
 function SetElementTextByClass(strMenuId, strClass, strText)
 {
+    console.log(`#menu_${strMenuId} .${strClass}`)
     let el = document.querySelector(`#menu_${strMenuId} .${strClass}`);
     el.innerText = strText;
 }
 
 function SetElementTextById(strMenuId, strId, strText)
 {
-    let el = document.getElementById(strMenuId + "_" + strId);
+    let el = document.querySelector(`#menu_${strMenuId}_item_${strId} div`);
     el.innerText = strText;                
 }
 
@@ -264,9 +273,39 @@ function CreatePage(strMenuId, strPageId, strPageTitle, strPageSubtitle, iType, 
     menus[strMenuId].mainAreaElement.appendChild(pageDiv);
 }
 
+function EditPage(strMenuId, strPageId, strPageTitle, strPageSubtitle)
+{
+    if (menus[strMenuId] == undefined)
+    {
+        console.log("Error: non-existent parent menu");
+        return; // non-existent parent menu
+    }
+
+    let page = menus[strMenuId]["pages"][strPageId];
+
+    if (page == undefined)
+        return;
+
+    page.title = strPageTitle;
+    page.subtitle = strPageSubtitle;
+
+    var currentPage = menus[strMenuId].currentPage;
+
+    if (currentPage == strPageId)
+    {
+        // Update titles
+
+        let titleElement = document.querySelector(`#menu_${strMenuId} h1`);
+        let menuSubtitleElement = document.querySelector(`#menu_${strMenuId} h2`);
+
+        titleElement.innerText = page.title;
+        menuSubtitleElement.innerText = page.subtitle;
+    }
+}
+
 let navigationLock = false;
 
-function GoToPage(strMenuId, strPageId, bGoingBack)
+function GoToPage(strMenuId, strPageId, bGoingBack, bNoHistory)
 {
     if (navigationLock) 
         return;
@@ -320,8 +359,11 @@ function GoToPage(strMenuId, strPageId, bGoingBack)
 
         if (!(bGoingBack)) // Not going back
         {
-            // Add to history
-            menus[strMenuId].history.push(strPageId);
+            if (!(bNoHistory))
+            {
+                // Add to history
+                menus[strMenuId].history.push(strPageId);
+            }
         }
         
         navigationLock = false
@@ -353,6 +395,19 @@ function GoBack()
 
         // Remove from history
         menus[currentMenuId].history.pop();
+    }
+}
+
+function ClearHistory()
+{
+    if (currentMenuId!="")
+    {
+        let menu = menus[currentMenuId];
+        
+        if (menu.history.length > 1) // We have history
+        {
+            menus[currentMenuId].history = [];
+        }       
     }
 }
 
@@ -554,7 +609,10 @@ function MoveSelection(bForward)
 { 
     let menu = menus[currentMenuId]
     if (menu == undefined)
+    {
+        console.log("Unable to move select since currentMenuId is undefined.");
         return;
+    }
 
     var currentPage = menu.currentPage;       
     let page = menu["pages"][currentPage];
@@ -602,17 +660,32 @@ function MoveSelection(bForward)
     }*/
 }
 
+let lastTriggerTime = 0
+
 function TriggerSelectedItem()
 { 
+    const elapsedMs = Date.now() - lastTriggerTime;
+
+    if (elapsedMs < 500)
+        return;
+
+    lastTriggerTime = Date.now();
+
     let menu = menus[currentMenuId]
     if (menu == undefined)
+    {
+        console.log("currentMenuId is undefined.");
         return;
+    }
 
     var currentPage = menu.currentPage;       
     let page = menu["pages"][currentPage];
 
     if (page == undefined)
+    {
+        console.log("currentPage is undefined.");
         return
+    }
 
     if (page.selectedItem == undefined)
         return;   
@@ -790,14 +863,24 @@ window.addEventListener('message', function(event) {
         CreatePage(event.data.menuId, event.data.pageId, event.data.pageTitle, event.data.pageSubtitle, event.data.type, event.data.detailPanelSize);
     }
 
+    if (event.data.cmd == "editPage")
+    {
+        EditPage(event.data.menuId, event.data.pageId, event.data.pageTitle, event.data.pageSubtitle);
+    }
+
     if (event.data.cmd == "goToPage")
     {
-        GoToPage(event.data.menuId, event.data.pageId);
+        GoToPage(event.data.menuId, event.data.pageId, event.data.noHistory);
     }
 
     if (event.data.cmd == "goBack")
     {
         GoBack();
+    }
+
+    if (event.data.cmd == "clearHistory")
+    {
+        ClearHistory();
     }
 
     if (event.data.cmd == "setMenuRootPage")

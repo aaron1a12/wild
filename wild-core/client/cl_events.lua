@@ -8,6 +8,10 @@ W.EventHandlerMap = {}
 -- Source: https://github.com/femga/rdr3_discoveries/tree/master/AI/EVENTS
 -- TODO: Add all events
 W.EventDataInfo = {
+    [`EVENT_CALM_PED`] = {
+        size = 4,
+        members = {"Int32", "Int32", "Int32", "Int32"} -- calmer ped id | mount ped id | CalmTypeId | isFullyCalmed
+    }, 
     [`EVENT_CARRIABLE_UPDATE_CARRY_STATE`] = {
         size = 5,
         members = {"Int32", "Int32", "Int32", "Int32", "Int32"} --  CarriableEntityId | PerpitratorEntityId | CarrierEntityId | IsOnHorse | IsOnGround
@@ -23,6 +27,14 @@ W.EventDataInfo = {
     [`EVENT_INVENTORY_ITEM_PICKED_UP`] = {
         size = 5,
         members = {"Int32", "Int32", "Int32", "Int32", "Int32"} -- inventory item hash | picked up entity model | isItemWasUsed | isItemWasBought | picked up entity id
+    },
+    [`EVENT_PED_ANIMAL_INTERACTION`] = {
+        size = 3,
+        members = {"Int32", "Int32", "Int32"} -- ped | animal ped | interaction type hash
+    },
+    [`EVENT_PLAYER_PROMPT_TRIGGERED`] = {
+        size = 10,
+        members = {"Int32", "Int32", "Int32", "Int32", "Float32", "Float32", "Float32", "Int32", "Int32", "Int32"} -- prompt type id | unknown | target entity id | unknown (??? discovered inventory item) | player coord x | player coord y | player  coord z | discoverable entity type id ( list ) | unknown | kit_emote_action hash ( list )
     }
 }
 
@@ -100,8 +112,7 @@ end)
 -- The garbage collection
 AddEventHandler('onResourceStop', function(resourceName)
     for evtHash, resources in pairs(W.EventHandlerMap) do
-        for resourceName, resourceHandlers in pairs(resources) do
-            W.EventHandlerMap[evtHash][resourceName] = {}
-        end
+        resources[resourceName] = {}
+        collectgarbage("collect")
     end
 end)

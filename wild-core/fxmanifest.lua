@@ -34,4 +34,6 @@ files
 	"npcs.json"
 }
 
+--data_file 'WEAPON_ANIMATIONS_FILE' 'cowboy.meta'
+
 ui_page 'html/index.html'

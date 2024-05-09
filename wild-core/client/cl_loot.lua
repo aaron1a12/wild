@@ -7,7 +7,7 @@ local function CalculateLootForPed(ped)
 end
 
 W.Events.AddHandler(`EVENT_LOOT_COMPLETE`, function(data)
-	local playerPed = GetPlayerPed(player)
+	local playerPed = PlayerPedId()
 
 	local looterPed = data[1]
 	local ped = data[2]

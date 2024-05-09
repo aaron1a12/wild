@@ -2,7 +2,7 @@
 --
 -- Player Data
 --
-
+W.bPlayerSpawned = false
 W.PlayerData = nil
 local _playerData = nil
 
@@ -82,6 +82,8 @@ end
 
 RegisterNetEvent("wild:cl_onPlayerFirstSpawn")
 AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
+    W.bPlayerSpawned = true
+
     -- Hide money
     Citizen.InvokeNative(0x4CC5F2FC1332577F, -66088566)
     -- Hide skill cards
@@ -90,7 +92,7 @@ AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
     Citizen.Wait(1000)
 
     -- Show the correct initial amount in NUI
-    W.UI.SetMoneyAmount(W.GetPlayerMoney()) 
+    W.UI.SetMoneyAmount(W.GetPlayerMoney())
 end)
 
 RegisterNetEvent("wild:cl_onUpdateMoney")
@@ -117,7 +119,7 @@ Citizen.CreateThread(function()
 end)
 
 
-function test()
+RegisterCommand('cinematic', function() 
     local a = 0.22
     local b = 0.3
     local c = 0.10
@@ -132,6 +134,13 @@ function test()
     e = 0.01
     f = 0.3
 
+    a = 0.121
+    b = 0.3
+    c = 0.10
+    d = 0.2
+    e = 0.01
+    f = 0.45
+
     SetVisualSettingFloat("Tonemapping.dark.filmic.A", a)
     SetVisualSettingFloat("Tonemapping.dark.filmic.B", b)
     SetVisualSettingFloat("Tonemapping.dark.filmic.C", c)
@@ -145,5 +154,4 @@ function test()
     SetVisualSettingFloat("Tonemapping.bright.filmic.E", e)
     SetVisualSettingFloat("Tonemapping.bright.filmic.F", f)
     SetVisualSettingFloat("sky.MoonIntensity", 0.0) 
-end
-test()
+end, false)

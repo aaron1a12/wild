@@ -173,8 +173,6 @@ end)
 AddEventHandler('onResourceStop', function(resourceName)
 end)
 
-Citizen.CreateThread(function()
-	while true do
-        Citizen.Wait(1000)       
-	end
+RegisterNetEvent('wild:sv_playAmbSpeech', function(pedNet, line)
+    TriggerClientEvent('wild:cl_onPlayAmbSpeech', -1, pedNet, line)
 end)

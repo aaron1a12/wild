@@ -55,6 +55,7 @@ local currentMenu = ""
 local tempCam = 0
 local bMenuLock = false
 local prevCtrlCtx = 0
+local menuOpenTime = GetGameTimer()
 
 function W.UI.SetVisible(bVisible)
     W.UI.Message({cmd = "setVisibility", visible = bVisible})
@@ -92,9 +93,10 @@ function W.UI.CreateMenu(strMenuId, strMenuTitle)
     SendNUIMessage({cmd = "createMenu", menuId = strMenuId, menuTitle = strMenuTitle})
 end
 
-function W.UI.OpenMenu(strMenuId, bOpen)
-	if bMenuLock then
-		return -- Opening too soon after closing, exit
+function W.UI.OpenMenu(strMenuId, bOpen, bNoCam)
+	local now = GetGameTimer()
+	if now-menuOpenTime < 500 then
+		return
 	end
 
 	if bOpen and currentMenu == strMenuId then
@@ -105,7 +107,7 @@ function W.UI.OpenMenu(strMenuId, bOpen)
 		return -- Closing menu that isn't open, ext
 	end
 
-	bMenuLock = true
+	menuOpenTime = now
 
 	if not bIsVisible then -- ui not visible
 		W.UI.SetVisible(true)
@@ -126,36 +128,43 @@ function W.UI.OpenMenu(strMenuId, bOpen)
 
 		--ClearPedTasksImmediately(PlayerPedId(), true, false)
 		
-		local camCoords = GetFinalRenderedCamCoord()
-		local camRot = GetFinalRenderedCamRot()
-		local camFov = GetFinalRenderedCamFov() - 5
-	
-		tempCam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", camCoords.x, camCoords.y, camCoords.z, camRot.x, camRot.y, camRot.z, camFov, false, 0)
+		if bNoCam == false or bNoCam == nil then
+			local camCoords = GetFinalRenderedCamCoord()
+			local camRot = GetFinalRenderedCamRot()
+			local camFov = GetFinalRenderedCamFov() - 5
+		
+			tempCam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", camCoords.x, camCoords.y, camCoords.z, camRot.x, camRot.y, camRot.z, camFov, false, 0)
 
-		SetCamActive(tempCam, true)
-		RenderScriptCams(true, true, 400, true, true, 0)
+			SetCamActive(tempCam, true)
+			RenderScriptCams(true, true, 400, true, true, 0)
+		else
+			tempCam = 0
+		end
 
 		Citizen.CreateThread(function()
 			Citizen.Wait(1)
 			SetNuiFocus(true)
-			bMenuLock = false
 		end)
 	else
+		TriggerEvent('wild:cl_onMenuClosing', currentMenu)
+
 		currentMenu = ""
 
 		SetNuiFocus(false)
 		
-
-		RenderScriptCams(false, true, 400, true, true, 0)
-		SetPlayerControl(PlayerId(), true, 0, true)
+		if tempCam ~= 0 then
+			RenderScriptCams(false, true, 400, true, true, 0)
+			SetPlayerControl(PlayerId(), true, 0, true)
+		end
 
 		-- Release menu lock after fully blended out
 		Citizen.CreateThread(function()
 			Citizen.Wait(400)
 			SetControlContext(0, prevCtrlCtx)
-			SetCamActive(tempCam, false)
-			DestroyCam(tempCam, true)
-			bMenuLock = false
+			if tempCam ~= 0 then
+				SetCamActive(tempCam, false)
+				DestroyCam(tempCam, true)
+			end	
 		end)
 	end
 
@@ -185,12 +194,20 @@ function W.UI.CreatePage(strMenuId, strPageId, strPageTitle, strPageSubtitle, iT
 	SendNUIMessage({cmd = "createPage", menuId = strMenuId, pageId = strPageId, pageTitle = strPageTitle, pageSubtitle = strPageSubtitle, type = iType, detailPanelSize = iDetailPanelSize})
 end
 
-function W.UI.GoToPage(strMenuId, strPageId)	
-	SendNUIMessage({cmd = "goToPage", menuId = strMenuId, pageId = strPageId})
+function W.UI.EditPage(strMenuId, strPageId, strPageTitle, strPageSubtitle)	
+	SendNUIMessage({cmd = "editPage", menuId = strMenuId, pageId = strPageId, pageTitle = strPageTitle, pageSubtitle = strPageSubtitle})
+end
+
+function W.UI.GoToPage(strMenuId, strPageId, bNoHistory)	
+	SendNUIMessage({cmd = "goToPage", menuId = strMenuId, pageId = strPageId, noHistory = bNoHistory})
 end
 
 function W.UI.GoBack()	
 	SendNUIMessage({cmd = "goBack"})
+end
+
+function W.UI.ClearHistory()	
+	SendNUIMessage({cmd = "clearHistory"})
 end
 
 function W.UI.DestroyMenuAndData(strMenuId)	
@@ -199,6 +216,14 @@ end
 
 function W.UI.SetMenuRootPage(strMenuId, strPageId)	
 	SendNUIMessage({cmd = "setMenuRootPage", menuId = strMenuId, pageId = strPageId})
+end
+
+function W.UI.IsMenuOpen(strMenuId)	
+	return (currentMenu == strMenuId)
+end
+
+function W.UI.GetCurrentMenu()	
+	return currentMenu
 end
 
 local pageItemActions = {}
@@ -388,3 +413,34 @@ AddEventHandler('onResourceStop', function(resourceName)
 		
 	end
 end)
+
+--
+-- Model lookup
+--
+
+local PedDB = json.decode(LoadResourceFile(GetCurrentResourceName(), "peds.json"))
+
+function W.GetPedModelName(ped)
+	local key = tostring(GetEntityModel(ped))
+
+	local model = PedDB[key]
+
+	if model ~= nil then
+		return model[1]
+	end
+
+	return ""
+end
+
+--
+-- Utility
+--
+
+RegisterNetEvent("wild:cl_onPlayAmbSpeech", function(pedNet, line)
+	local ped = NetToPed(pedNet)
+	PlayAmbientSpeechFromEntity(ped, "", line, "speech_params_force", 0)
+end)
+
+function W.PlayAmbientSpeech(ped, speech)
+	TriggerServerEvent('wild:sv_playAmbSpeech', PedToNet(ped), speech)
+end

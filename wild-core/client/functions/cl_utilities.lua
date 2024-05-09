@@ -194,10 +194,10 @@ function PlayAmbientSpeechFromEntity(entity_id, sound_ref_string, sound_name_str
 	struct:SetInt64(8, sound_ref_BigInt:GetInt64(0)) -- voiceName
 	struct:SetInt32(16, speech_line) -- variation
 	struct:SetInt64(24, speech_params_BigInt:GetInt64(0)) -- speechParamHash
-	struct:SetInt32(32, 0) -- listenerPed
+	struct:SetInt32(32, 1) -- listenerPed
 	struct:SetInt32(40, 1) -- syncOverNetwork
-	struct:SetInt32(48, 0) -- v7
-	struct:SetInt32(56, 0) -- v8
+	struct:SetInt32(48, 1) -- v7
+	struct:SetInt32(56, 1) -- v8
 	
 	return Citizen.InvokeNative(0x8E04FEDD28D42462, entity_id, struct:Buffer());
 end
@@ -236,6 +236,7 @@ function ShowText(text)
 end
 
 --See for more: https://gist.github.com/nonameset/b338aab76bbaa0c4f879630a61d97122
+--Example: ShowHelpText("Press ~INPUT_ENTER~ to browse shop", 1000)
 function ShowHelpText(strMessage, durationMs)
 	local str = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", strMessage, Citizen.ResultAsLong())
 	
@@ -565,10 +566,20 @@ function PlaySound(soundset_ref, soundset_name)
     Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
 end
 
-function DrawTextAtCoord(v)
-    local s, sx, sy = GetScreenCoordFromWorldCoord(v.x, v.y, v.z)
-    if (sx > 0 and sx < 1) and (sy > 0 and sy < 1) then
-        local hudX, hudY = GetHudScreenPositionFromWorldPosition(v.x, v.y, v.z)
-        PrintText(hudX, hudY, 0.3, true, tostring(hash), red, green, blue, 255)
-    end
+function DrawTextAtCoord(v, text, size, r, g, b, alpha)
+	local s, sx, sy = GetScreenCoordFromWorldCoord(v.x, v.y, v.z)
+
+	if (sx > 0 and sx < 1) or (sy > 0 and sy < 1) then
+		if (sx > 0 and sx < 1) or (sy > 0 and sy < 1) then
+			local s, sx, sy = GetHudScreenPositionFromWorldPosition(v.x, v.y, v.z)
+            local str = CreateVarString(10, "LITERAL_STRING", text)
+            SetTextColor(r, g, b, alpha)
+            BgSetTextColor(r, g, b, alpha)
+            SetTextFontForCurrentCommand(0)
+            SetTextScale(size, size)
+            SetTextCentre(true)
+        
+            DisplayText(str, sx, sy)
+		end
+	end
 end

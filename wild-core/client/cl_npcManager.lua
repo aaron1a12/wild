@@ -173,13 +173,13 @@ AddEventHandler("wild:npcManager:cl_receiveBucket", function(npcBucket)
         end
     end
 
-    print("Received bucket. The following npcs are now managed:")
+    --[[print("Received bucket. The following npcs are now managed:")
 
     for name, npc in pairs(W.NpcManager.ClientPool) do
         if npc.Managed then
             print(name)
         end
-    end
+    end]]
 
     bHaltManagement = false
     bAllocationEverOccurred = true
