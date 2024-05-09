@@ -490,18 +490,6 @@ Citizen.CreateThread(function()
         if IsControlJustPressed(0, `INPUT_HORSE_COMMAND_FLEE`) then
             OnFlee()
         end
-
-
-        if IsControlJustPressed(0, `INPUT_HORSE_SPECIAL`) then
-            ShowText("Horse special")
-        end
-        if IsControlJustPressed(0, `INPUT_HORSE_COLLECT`) then
-            ShowText("Horse collect")
-        end
-
-        
-
-        PrintText(0.12, 0.5, 0.3, false, "Foo: " ..tostring(foo), 128, 255, 128, 255)
 	end
 end)
 
@@ -509,11 +497,4 @@ end)
 AddEventHandler('onResourceStop', function(resourceName)
     RemoveBlip(mountBlip)
     DeletePed(mount)
-end)
-
-
-
-W.Events.AddHandler(`EVENT_ENTITY_EXPLOSION`, function(data)
-    foo = foo + 1 
-    ShowText("Explosion. Foo:" .. tostring(foo))
 end)
