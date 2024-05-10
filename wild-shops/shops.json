@@ -77,7 +77,7 @@
         "-702790226":   ["Perfect Buck Pelt",   3.0],
         "-888740979":   ["Legendary Buck Pelt",   32.0],
 
-        "85441452":     ["Poor Wolf Pelt",      3.0],
+        "85441452":     ["Poor Wolf Pelt",      1.0],
         "1145777975":   ["Good Wolf Pelt",      2.0],
         "653400939":    ["Perfect Wolf Pelt",   3.0],
         "552246565":    ["Legendary Wolf Pelt",        32.0],
@@ -154,9 +154,9 @@
         "-987731097":   ["Legendary Tatanka Bison Pelt",        3.0],
         "2022985736":   ["Legendary White Bison Pelt",        3.0],
 
-        "1083865179":   ["Poor Black Bear Pelt",        1.0],
-        "1490032862":   ["Good Black Bear Pelt",        2.0],
-        "663376218":    ["Perfect Black Bear Pelt",        3.0],
+        "1083865179":   ["Poor Black Bear Pelt",        6.0],
+        "1490032862":   ["Good Black Bear Pelt",        12.0],
+        "663376218":    ["Perfect Black Bear Pelt",        18.0],
         
         "959196213":    ["Poor Badger Pelt",        1.0],
         "-467109021":   ["Good Badger Pelt",        2.0],
@@ -167,12 +167,12 @@
         "-1625078531":  ["Perfect Alligator Skin",  3.0],
         "-444893329":   ["Legendary Alligator Skin",     2.0],
 
-        "-1726837022":  ["Poor Armadillo Skin",     2.0],
-        "27448453":     ["Good Armadillo Skin",     1.0],
+        "-1726837022":  ["Poor Armadillo Skin",     1.0],
+        "27448453":     ["Good Armadillo Skin",     2.0],
         "361430638":    ["Perfect Armadillo Skin",  3.0],
 
-        "1855671180":   ["Poor Frog Skin",     2.0],
-        "-732511557":   ["Good Frog Skin",     1.0],
+        "1855671180":   ["Poor Frog Skin",     1.0],
+        "-732511557":   ["Good Frog Skin",     2.0],
         "-564530632":   ["Perfect Frog Skin",  3.0],
 
         "95044528":     ["Good Gila Monster Skin",     1.0],
@@ -182,8 +182,8 @@
         "1204918860":   ["Good Iguana Skin",  3.0],
         "1677266727":   ["Perfect Iguana Skin",     2.0],
 
-        "1681193300":   ["Poor Snake Skin",  3.0],
-        "1126133763":   ["Good Snake Skin",  3.0],
-        "624262971":    ["Perfect Snake Skin", 1.0]
+        "1681193300":   ["Poor Snake Skin",  1.0],
+        "1126133763":   ["Good Snake Skin",  2.0],
+        "624262971":    ["Perfect Snake Skin", 3.0]
     }
 }
