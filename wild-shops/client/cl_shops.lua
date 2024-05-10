@@ -367,7 +367,7 @@ AddEventHandler("wild:shops:cl_onPlayAmbSpeech", function(pedNet, line)
 	PlayAmbientSpeechFromEntity(ped, "", line, "speech_params_force", 0)
 end)
 
-RegisterCommand('animal', function() 
+--[[RegisterCommand('animal', function() 
 	local x, y, z = table.unpack(GetEntityCoords(GetPlayerPed(PlayerId()), false))
 
     local model = `A_C_Cow`
@@ -407,4 +407,4 @@ RegisterCommand('deer', function()
     SetRandomOutfitVariation(ped)
 
     SetEntityHealth(ped, 0)
-end, false)
+end, false)]]
