@@ -26,7 +26,7 @@ function CreatePlayerHorse()
     SpawnpointsCancelSearch()
 
     -- Spawn radius (in meters)
-    local spawnRadius = 5.0
+    local spawnRadius = 100.0
 
     math.randomseed(123)
     local noiseX = math.random() * spawnRadius
@@ -57,6 +57,12 @@ function CreatePlayerHorse()
     --
     -- Create ped
     --
+
+    if x == nil or x == 0 then
+        x = pX + 1.0
+        x = pY
+        z = floor
+    end
 
     local model = mountInfo[1]
 
@@ -451,9 +457,9 @@ Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(1200)	
 
+        -- Hide native brush and feed
         ModifyPlayerUiPrompt(PlayerId(), 49, 0, 1)
         ModifyPlayerUiPrompt(PlayerId(), 50, 0, 1)
-
 
         ModifyPlayerUiPrompt(PlayerId(), 28, 0, 0) -- PP_HORSE_ITEMS
         ModifyPlayerUiPrompt(PlayerId(), 45, 0, 0) -- PP_HORSE_WEAPONS_HOLD
@@ -493,6 +499,15 @@ Citizen.CreateThread(function()
 	end
 end)
 
+
+AddEventHandler("wild:cl_onUpdateFaction", function(faction)
+    if mount ~= 0 then
+        if DoesEntityExist(mount) then
+            SetPedRelationshipGroupHash(mount, GetPedRelationshipGroupHash(PlayerPedId()))
+        end
+    end
+end)
+
 -- Cleanup
 AddEventHandler('onResourceStop', function(resourceName)
     if resourceName == GetCurrentResourceName() then
@@ -500,3 +515,4 @@ AddEventHandler('onResourceStop', function(resourceName)
         DeletePed(mount)
     end
 end)
+
