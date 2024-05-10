@@ -60,23 +60,25 @@ local function GetBuyLine(speaker, entity)
     if GetIsCarriablePelt(entity) then -- large pelt items have no damage cleanliness
         local peltId = GetCarriableFromEntity(entity)
         local pelt = shopConfig.pelts[tostring(peltId)]
-        
-        local nameBegin = string.sub(pelt[1] ,1,4)
 
-        if nameBegin == "Poor" then
-            rating = 0
-        end
+        if pelt ~= nil then
+            local nameBegin = string.sub(pelt[1] ,1,4)
 
-        if nameBegin == "Good" then
-            rating = 1
-        end
+            if nameBegin == "Poor" then
+                rating = 0
+            end
 
-        if nameBegin == "Perf" then
-            rating = 2
-        end
+            if nameBegin == "Good" then
+                rating = 1
+            end
 
-        if nameBegin == "Lege" then
-            rating = 2
+            if nameBegin == "Perf" then
+                rating = 2
+            end
+
+            if nameBegin == "Lege" then
+                rating = 2
+            end
         end
     end
 
@@ -141,8 +143,9 @@ function PickMountForLoad(player)
     local finalMount = 0
     local finalDist = 0
 
+    local playerCoords = GetEntityCoords(playerPed)
+
     if playerMount ~= 0 and playerLastMount ~= 0 then -- We have to choose between mounts
-        local playerCoords = GetEntityCoords(playerPed)
 
         local playerMountDist = GetVectorDistSqr(playerCoords, GetEntityCoords(playerMount))
         local playerLastMountDist = GetVectorDistSqr(playerCoords, GetEntityCoords(GetEntityCoords(playerLastMount)))
@@ -157,12 +160,12 @@ function PickMountForLoad(player)
     else
         if playerLastMount ~= 0 then
             finalMount = playerLastMount
-            finalDist = playerLastMountDist
+            finalDist = GetVectorDistSqr(playerCoords, GetEntityCoords(playerMount))
         end
 
         if playerMount ~= 0 then
             finalMount = playerMount
-            finalDist = playerMountDist
+            finalDist = GetVectorDistSqr(playerCoords, GetEntityCoords(playerMount))
         end
     end
 
@@ -179,10 +182,20 @@ local function CalculatePeltPrice(peltId)
 	return pelt[2]
 end
 
+local function IsPelt(entity)
+    if GetIsCarriablePelt(entity) then 
+        local peltId = GetCarriableFromEntity(entity)
+        if shopConfig.pelts[tostring(peltId)] ~= nil then
+            return true
+        end
+    end
+    return false
+end
+
 local function CalculatePrice(entity)
     local finalPrice = math.random(0, 100) / 100 -- Random cents starting rate
 
-    if GetIsCarriablePelt(entity) then -- large pelt item
+    if IsPelt(entity) then -- large pelt item
         local peltId = GetCarriableFromEntity(entity)
         finalPrice = finalPrice + CalculatePeltPrice(peltId)
     else
@@ -212,12 +225,14 @@ local function CalculatePrice(entity)
 end
 
 
+local promptGroup = GetRandomIntInRange(1, 0xFFFFFF)
 local prompt = 0
 local helpLastTime = 0
+local waitTime = 10
 
 Citizen.CreateThread(function()   
     while true do
-        Citizen.Wait(10)
+        Citizen.Wait(waitTime)
     
         local playerPed = PlayerPedId()
         local playerCoords = GetEntityCoords(playerPed)
@@ -277,19 +292,20 @@ Citizen.CreateThread(function()
             end
         end
 
-        if bInValidAreas and bButcherIsAvailable and (carriedEntity ~=0 or bHasPelts) then 
-
-        
+        if bInValidAreas and bButcherIsAvailable and (carriedEntity ~=0 or bHasPelts) then         
             if prompt == 0 then -- Create prompt
                 prompt = PromptRegisterBegin()
                 PromptSetControlAction(prompt, `INPUT_CONTEXT_X`) -- R key
-                PromptSetText(prompt, CreateVarString(10, "LITERAL_STRING", "Sell"))
+                PromptSetText(prompt, CreateVarString(10, "LITERAL_STRING", "Sell Items"))
                 UiPromptSetHoldMode(prompt, 1000)
+                PromptSetGroup(prompt, promptGroup, 0) 
                 PromptRegisterEnd(prompt)
             
                 -- Useful management. Automatically deleted when restarting resource
-                W.Prompts.AddToGarbageCollector(prompt)         
+                W.Prompts.AddToGarbageCollector(prompt)    
             end
+
+            PromptSetActiveGroupThisFrame(promptGroup, CreateVarString(10, "LITERAL_STRING", "Butcher"))
 
             if UiPromptGetProgress(prompt) == 1.0 then
                 PromptDelete(prompt)
@@ -340,6 +356,7 @@ Citizen.CreateThread(function()
         elseif prompt ~=0 then
             PromptDelete(prompt)
             prompt = 0
+            waitTime = 10
         end
     end
 end)
@@ -350,10 +367,10 @@ AddEventHandler("wild:shops:cl_onPlayAmbSpeech", function(pedNet, line)
 	PlayAmbientSpeechFromEntity(ped, "", line, "speech_params_force", 0)
 end)
 
---[[RegisterCommand('animal', function() 
+RegisterCommand('animal', function() 
 	local x, y, z = table.unpack(GetEntityCoords(GetPlayerPed(PlayerId()), false))
 
-    local model = `A_C_Bear_01`
+    local model = `A_C_Cow`
 
     RequestModel(model)
 
@@ -390,4 +407,4 @@ RegisterCommand('deer', function()
     SetRandomOutfitVariation(ped)
 
     SetEntityHealth(ped, 0)
-end, false)]]
+end, false)

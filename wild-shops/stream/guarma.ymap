@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<CMapData>
+	<flags value="2"/>
+	<contentFlags value="65"/>
+	<streamingExtentsMin x="934.364502" y="-7413.467285" z="-347.237385"/>
+	<streamingExtentsMax x="1735.050049" y="-6613.032715" z="453.590000"/>
+	<entitiesExtentsMin x="1334.364502" y="-7013.467285" z="52.762615"/>
+	<entitiesExtentsMax x="1335.050049" y="-7013.032715" z="53.590000"/>
+	<entities>
+		<Item type="CEntityDef">
+			<archetypeName>p_lampkerosene01x</archetypeName>
+			<flags value="1572897"/>
+			<position x="1335.050049" y="-7013.049805" z="53.590000"/>
+			<rotation w="0.996376" x="0.034794" y="0.002709" z="-0.077572"/>
+			<scaleXY value="1"/>
+			<scaleZ value="1"/>
+			<parentIndex value="-1"/>
+			<lodDist value="500"/>
+			<childLodDist value="500"/>
+			<lodLevel>LODTYPES_DEPTH_HD</lodLevel>
+			<numChildren value="0"/>
+			<ambientOcclusionMultiplier value="255"/>
+			<artificialAmbientOcclusion value="255"/>
+		</Item>
+		<Item type="CEntityDef">
+			<archetypeName>mp005_s_posse_butcher01x</archetypeName>
+			<flags value="1572897"/>
+			<position x="1334.364502" y="-7013.032715" z="52.764290"/>
+			<rotation w="0.625604" x="0.025878" y="-0.009572" z="-0.779653"/>
+			<scaleXY value="1"/>
+			<scaleZ value="1"/>
+			<parentIndex value="-1"/>
+			<lodDist value="500"/>
+			<childLodDist value="500"/>
+			<lodLevel>LODTYPES_DEPTH_HD</lodLevel>
+			<numChildren value="0"/>
+			<ambientOcclusionMultiplier value="255"/>
+			<artificialAmbientOcclusion value="255"/>
+		</Item>
+		<Item type="CEntityDef">
+			<archetypeName>p_tarp04x</archetypeName>
+			<flags value="1572897"/>
+			<position x="1334.478638" y="-7013.467285" z="52.762615"/>
+			<rotation w="0.190746" x="-0.000000" y="0.000000" z="0.981639"/>
+			<scaleXY value="1"/>
+			<scaleZ value="1"/>
+			<parentIndex value="-1"/>
+			<lodDist value="500"/>
+			<childLodDist value="500"/>
+			<lodLevel>LODTYPES_DEPTH_HD</lodLevel>
+			<numChildren value="0"/>
+			<ambientOcclusionMultiplier value="255"/>
+			<artificialAmbientOcclusion value="255"/>
+		</Item>
+	</entities>
+</CMapData>

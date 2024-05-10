@@ -19,3 +19,5 @@ files
 {
 	"shops.json",
 }
+
+this_is_a_map "yes"

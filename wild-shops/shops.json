@@ -1,7 +1,8 @@
 {
     "butcherLocations" : [
         [-338.943, 767.395, 116.568, 98.4, "U_M_M_VALBUTCHER_01", 0],
-        [-1752.908, -392.782, 156.246, 183.260,  "S_M_M_UNIBUTCHERS_01", 10]
+        [-1752.908, -392.782, 156.246, 183.260,  "S_M_M_UNIBUTCHERS_01", 10],
+        [1334.472, -7013.892, 53.801, 18.055,  "A_M_M_GUATOWNFOLK_01", 0]
     ],
 
     "butcherPrices" : {
@@ -10,8 +11,9 @@
         "a_c_prairiechicken_01" : [0.12, 0.25, 0.30],
         "a_c_chicken_01" : [0.12, 0.25, 0.30],
         "mp_a_c_chicken_01" : [0.12, 0.25, 0.30],
-        "A_C_Bear_01" : [10.00, 20.00, 30.00],
-        "A_C_BearBlack_01" : [5.00, 10.00, 15.00]
+        "a_c_bear_01" : [10.00, 20.00, 30.00],
+        "a_c_bearblack_01" : [5.00, 10.00, 15.00],
+        "a_c_deer_01" : [5.00, 10.00, 15.00]
     },
 
     "pelts": {
@@ -20,15 +22,18 @@
         "957520252":    ["Poor Bear Pelt",      10.0],
         "143941906":    ["Good Bear Pelt",      20.0],
         "1292673537":   ["Perfect Bear Pelt",   30.0],
+        "-514494287":   ["Legendary Bear Pelt", 32.0],
 
         "2116849039":   ["Unknown Pelt",        1.0],
         "-1569450319":  ["Poor Beaver Pelt",    2.0],
         "-2059726619":  ["Good Beaver Pelt",    3.0],
         "854596618":    ["Perfect Beaver Pelt", 6.0],
+        "-150200864":   ["Legendary Beaver Pelt",32.0],
 
         "-1558096473":  ["Poor Coyote Pelt",    1.0],
         "1150939141":   ["Good Coyote Pelt",    2.0],
         "-794277189":   ["Perfect Coyote Pelt", 3.0],
+        "-1517904196": ["Legendary Coyote Pelt",32.0],
 
         "-662178186":   ["Poor Deer Pelt",      1.0],
         "-1827027577":  ["Good Deer Pelt",      2.0],
@@ -37,21 +42,19 @@
         "1248540072":   ["Poor Boar Pelt",      1.0],
         "-1858513856":  ["Perfect Boar Pelt",   2.0],
 
-        "1914602340":   ["Poor Cougar Pelt",    3.0],
-        "459744337":    ["Good Cougar Pelt",    1.0],
-        "-1791452194":  ["Perfect Cougar Pelt", 2.0],
+        "1914602340":   ["Poor Cougar Pelt",    1.0],
+        "459744337":    ["Good Cougar Pelt",    2.0],
+        "-1791452194":  ["Perfect Cougar Pelt", 3.0],
+        "1528935719":   ["Legendary Cougar Pelt", 32.0],
 
         "699990316":    ["Poor Goat Hide",      1.0],
         "1710714415":   ["Good Goat Hide",      2.0],
         "-1648383828":  ["Perfect Goat Hide",   3.0],
 
-        "1806153689":   ["Poor Alligator Skin",     1.0],
-        "-802026654":   ["Good Alligator Skin",     2.0],
-        "-1625078531":  ["Perfect Alligator Skin",  3.0],
-
         "-983605026":   ["Poor Pronghorn Hide",     1.0],
         "554578289":    ["Good Pronghorn Hide",     2.0],
         "-1544126829":  ["Perfect Pronghorn Hide",  3.0],
+        "-103050851":   ["Legendary Pronghorn Hide",  32.0],
 
         "1729948479":   ["Poor Sheep Hide",     1.0],
         "-1317365569":  ["Good Sheep Hide",     2.0],
@@ -69,24 +72,118 @@
 
         "2047376405":   ["White Cougar Pelt",   1.0],
 
-        "1603936352":   ["Poor Buck Pelt",      2.0],
-        "-868657362":   ["Good Buck Pelt",      3.0],
-        "-702790226":   ["Perfect Buck Pelt",   1.0],
+        "1603936352":   ["Poor Buck Pelt",      1.0],
+        "-868657362":   ["Good Buck Pelt",      2.0],
+        "-702790226":   ["Perfect Buck Pelt",   3.0],
+        "-888740979":   ["Legendary Buck Pelt",   32.0],
 
         "85441452":     ["Poor Wolf Pelt",      3.0],
         "1145777975":   ["Good Wolf Pelt",      2.0],
         "653400939":    ["Perfect Wolf Pelt",   3.0],
+        "552246565":    ["Legendary Wolf Pelt",        32.0],
 
         "1647012424":   ["Poor Fox Pelt",       1.0],
         "238733925":    ["Good Fox Pelt",       2.0],
         "500722008":    ["Perfect Fox Pelt",    3.0],
+        "1642484975":   ["Legendary Fox Pelt",  32.0],
 
-        "-476045512":   ["Good Ram Hide",       1.0],
-        "1796037447":   ["Poor Ram Hide",       2.0],
+        "1796037447":   ["Poor Ram Hide",       1.0],
+        "-476045512":   ["Good Ram Hide",       2.0],
         "1795984405":   ["Perfect Ram Hide",    3.0],
+        "-734947450":   ["Legendary Ram Hide",        1.0],
 
         "-308965548":   ["Poor Pig Hide",       1.0],
         "-57190831":    ["Good Pig Hide",       2.0],
-        "-1102272634":  ["Perfect Pig Hide",    3.0]
+        "-1102272634":  ["Perfect Pig Hide",    3.0],
+
+        "1340414242":   ["Poor Rabbit Pelt", 1.0],
+        "149018327":    ["Good Rabbit Pelt", 2.0],
+        "-923552142":   ["Perfect Rabbit Pelt", 3.0],
+
+
+        "1992476687":   ["Poor Raccoon Pelt",        1.0],
+        "-1178296218":  ["Good Raccoon Pelt",        2.0],
+        "-305970307":   ["Perfect Raccoon Pelt",        3.0],
+
+        "-378416954":   ["Poor Rat Pelt",        1.0],
+        "-409451878":   ["Good Rat Pelt",        2.0],
+        "-269786196":   ["Perfect Rat Pelt",        3.0],
+
+        "-1731566944":  ["Poor Skunk Pelt",        1.0],
+        "1925227409":   ["Good Skunk Pelt",        2.0],
+        "119626970":    ["Perfect Skunk Pelt",        3.0],
+
+        "995830478":    ["Poor Squirrel Pelt",        1.0],
+        "-896290892":   ["Good Squirrel Pelt",        2.0],
+        "-1610025835":  ["Perfect Squirrel Pelt",        3.0],
+        
+        "9293261":      ["Poor Bull Hide",        1.0],
+        "-336086818":   ["Good Bull Hide",        2.0],
+        "-53270317":    ["Perfect Bull Hide",        3.0],
+
+
+        "462348928":    ["Poor Ox Hide",        1.0],
+        "1208128650":   ["Good Ox Hide",        2.0],
+        "659601266":    ["Perfect Ox Hide",        3.0],
+                
+        "1627318551":   ["Poor Opossum Pelt",        1.0],
+        "416535067":    ["Good Opossum Pelt",        2.0],
+        "-475820303":   ["Perfect Opossum Pelt",        1.0],
+
+        "-1912460485":  ["Poor Muskrat Pelt",        1.0],
+        "-771861010":   ["Good Muskrat Pelt",        2.0],
+        "2022921849":   ["Perfect Muskrat Pelt",        3.0],
+
+        "1868576868":   ["Poor Moose Pelt",        1.0],
+        "1636891382":   ["Good Moose Pelt",        2.0],
+        "-217731719":   ["Perfect Moose Pelt",     3.0],
+        "-687487191":   ["Legendary Moose Pelt",        32.0],
+
+        "2053771712":   ["Poor Elk Pelt",        1.0],
+        "1181652728":   ["Good Elk Pelt",        2.0],
+        "-1332163079":  ["Perfect Elk Pelt",        3.0],
+        "229379699":    ["Legendary Elk Pelt",        32.0],
+
+        "334093551":    ["Poor Cow Hide",        1.0],
+        "1150594075":   ["Good Cow Hide",        2.0],
+        "-845037222":   ["Perfect Cow Hide",        3.0],
+        
+        "-1730060063":  ["Poor Bison Pelt",        1.0],
+        "-591117838":   ["Good Bison Pelt",        2.0],
+        "-237756948":   ["Perfect Bison Pelt",        3.0],
+        "-987731097":   ["Legendary Tatanka Bison Pelt",        3.0],
+        "2022985736":   ["Legendary White Bison Pelt",        3.0],
+
+        "1083865179":   ["Poor Black Bear Pelt",        1.0],
+        "1490032862":   ["Good Black Bear Pelt",        2.0],
+        "663376218":    ["Perfect Black Bear Pelt",        3.0],
+        
+        "959196213":    ["Poor Badger Pelt",        1.0],
+        "-467109021":   ["Good Badger Pelt",        2.0],
+        "-463248330":   ["Perfect Badger Pelt",        3.0],
+
+        "1806153689":   ["Poor Alligator Skin",     1.0],
+        "-802026654":   ["Good Alligator Skin",     2.0],
+        "-1625078531":  ["Perfect Alligator Skin",  3.0],
+        "-444893329":   ["Legendary Alligator Skin",     2.0],
+
+        "-1726837022":  ["Poor Armadillo Skin",     2.0],
+        "27448453":     ["Good Armadillo Skin",     1.0],
+        "361430638":    ["Perfect Armadillo Skin",  3.0],
+
+        "1855671180":   ["Poor Frog Skin",     2.0],
+        "-732511557":   ["Good Frog Skin",     1.0],
+        "-564530632":   ["Perfect Frog Skin",  3.0],
+
+        "95044528":     ["Good Gila Monster Skin",     1.0],
+        "463481876":    ["Perfect Gila Monster Skin",     2.0],
+
+        "-2066910871":  ["Poor Iguana Skin",     1.0],
+        "1204918860":   ["Good Iguana Skin",  3.0],
+        "1677266727":   ["Perfect Iguana Skin",     2.0],
+
+        "1681193300":   ["Poor Snake Skin",  3.0],
+        "1126133763":   ["Good Snake Skin",  3.0],
+        "624262971":    ["Perfect Snake Skin", 1.0]
     }
 }
