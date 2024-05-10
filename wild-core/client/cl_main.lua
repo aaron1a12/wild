@@ -174,5 +174,3 @@ RegisterCommand('cleanup', function()
         end
     end
 end, false)
-
-NetworkClockTimeOverride(12, 0, 0)
