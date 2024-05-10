@@ -145,6 +145,14 @@ function PickMountForLoad(player)
 
     local playerCoords = GetEntityCoords(playerPed)
 
+    if not DoesEntityExist(playerMount) then
+        playerMount = 0
+    end
+
+    if not DoesEntityExist(playerLastMount) then
+        playerLastMount = 0
+    end
+
     if playerMount ~= 0 and playerLastMount ~= 0 then -- We have to choose between mounts
 
         local playerMountDist = GetVectorDistSqr(playerCoords, GetEntityCoords(playerMount))
