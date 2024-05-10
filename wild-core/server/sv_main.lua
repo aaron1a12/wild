@@ -176,3 +176,8 @@ end)
 RegisterNetEvent('wild:sv_playAmbSpeech', function(pedNet, line)
     TriggerClientEvent('wild:cl_onPlayAmbSpeech', -1, pedNet, line)
 end)
+
+
+RegisterNetEvent('wild:sv_reportCrime', function(crime, criminalPed, witnessPed, coords)
+    TriggerClientEvent('wild:cl_onCrimeReported', -1, crime, criminalPed, witnessPed, coords)
+end)

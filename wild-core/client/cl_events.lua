@@ -16,6 +16,22 @@ W.EventDataInfo = {
         size = 5,
         members = {"Int32", "Int32", "Int32", "Int32", "Int32"} --  CarriableEntityId | PerpitratorEntityId | CarrierEntityId | IsOnHorse | IsOnGround
     },
+    [`EVENT_CRIME_CONFIRMED`] = {
+        size = 3,
+        members = {"Int32", "Int32", "Int32"} -- crime type hash | criminal ped id | witness
+    },
+    [`EVENT_ENTITY_BROKEN`] = {
+        size = 9,
+        members = {"Int32", "Int32", "Int32", "Int32", "Int32", "Int32", "Float32", "Float32", "Float32"}
+    },
+    [`EVENT_ENTITY_DAMAGED`] = {
+        size = 9,
+        members = {"Int32", "Int32", "Int32", "Int32", "Int32", "Int32", "Float32", "Float32", "Float32"} --| entity | object (or ped id) that caused damage | weaponHash | ammo | damage amount | unknown | coord z | coord y | coord z
+    },
+    [`EVENT_ENTITY_DESTROYED`] = {
+        size = 9,
+        members = {"Int32", "Int32", "Int32", "Int32", "Int32", "Int32", "Float32", "Float32", "Float32"} --| entity | object (or ped id) that caused damage | weaponHash | ammo | damage amount | unknown | coord z | coord y | coord z
+    },
     [`EVENT_LOOT_COMPLETE`] = {
         size = 3,
         members = {"Int32", "Int32", "Int32"} -- looter, ped, success
