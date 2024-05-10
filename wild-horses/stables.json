@@ -5,6 +5,7 @@
     ],
 
     "horseCatalog" : [       
+        {"name": "Donkey", "model": "a_c_donkey_01", "price": 3.0},
         {"name": "Painted Mule", "model": "a_c_horsemulepainted_01", "price": 6.99},
         {"name": "Mule", "model": "a_c_horsemule_01", "price": 6.0},
         {"name": "a_c_horse_americanpaint_greyovero", "model": "a_c_horse_americanpaint_greyovero", "price": 12.0},
