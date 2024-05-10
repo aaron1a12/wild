@@ -59,6 +59,13 @@ function CreateRelationships()
                 SetRelationshipBetweenGroups(6, factionAHash, factionBHash) -- Kill on sight
             end
 
+            -- local ped population
+
+            if factionA.hated then
+                SetRelationshipBetweenGroups(6, -1976316465, factionAHash) -- Kill on sight
+            else
+                SetRelationshipBetweenGroups(0, -1976316465, factionAHash) -- companion
+            end
         end
     end
 end
@@ -109,6 +116,7 @@ function UpdateFactionMembershipStatus()
         end
     end
 
+    TriggerEvent('wild:cl_onUpdateFaction', currentFaction)
     bChangingFaction = false
 end
 
@@ -195,7 +203,7 @@ function PopulateFactionList()
 
     for factionName, factionData in pairs(Factions) do
         local params = {}
-        params.text = factionName;
+        params.text = factionName.."s";
         params.action = function()
             if not bChangingFaction then
                 bChangingFaction = true
@@ -437,4 +445,29 @@ Citizen.CreateThread(function()
 end)
 
 AddEventHandler('onResourceStop', function(resourceName)
+end)
+
+exports("GetPedFaction", function(ped)
+    if IsPedAPlayer(ped) then
+        local player = NetworkGetPlayerIndexFromPed(ped)
+        local name = GetPlayerName(player)
+
+        local foundFaction = nil
+
+        -- Search every faction
+        for factionName, faction in pairs(Factions) do
+            for i = 1, #faction.players do 
+                if faction.players[i] == name then
+                    foundFaction = factionName
+                    break
+                end
+            end
+        end
+
+        if foundFaction then
+            return foundFaction
+        end        
+    end
+
+    return nil
 end)

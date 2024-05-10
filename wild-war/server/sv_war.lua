@@ -1,7 +1,7 @@
 local Factions = {}
 
 -- Makes sure all entries have appropriate properties read or created with default values
-local function ValidateProps(factionEntry)
+local function ValidateProps(factionEntry, faction)
 
     if factionEntry["color"] == nil then
         factionEntry["color"] = 0
@@ -23,6 +23,10 @@ local function ValidateProps(factionEntry)
     if factionEntry["ped_members"] == nil then
         factionEntry["ped_members"] = {}
     end
+
+    if factionEntry["hated"] == nil then
+        factionEntry["hated"] = false
+    end
 end
 
 local function LoadData()
@@ -33,7 +37,7 @@ local function LoadData()
     end
 
     for faction, factionEntry in pairs(Factions) do
-        ValidateProps(factionEntry)
+        ValidateProps(factionEntry, faction)
     end
 end
 LoadData()
