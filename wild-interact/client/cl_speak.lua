@@ -5,6 +5,8 @@
 -- // TODO: Fix, 2nd antagonize is interrupted.
 -- ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+W = exports["wild-core"]:Get()
+
 --------------------
 -- Begin prompt code
 -- See https://gist.github.com/umaruru/1cdbfc302dda20d8c5601f0ce8f0e03c
@@ -282,9 +284,21 @@ Citizen.CreateThread(function()
 
 				focusedPed = entity
 								
-				-- SET PED AS "STRANGER" FOR INTERACTION
-				Citizen.InvokeNative(0x4A48B6E03BABB4AC, entity, "Stranger")
-				Citizen.InvokeNative(0x19B14E04B009E28B, entity, "Stranger")
+				-- SET PLAYER PED AS "STRANGER" FOR INTERACTION
+				if IsPedAPlayer(entity) then
+					local name = "Stranger"
+
+					if W.IsResourceRunning("wild-war") then
+						local faction = exports["wild-war"]:GetPedFaction(entity)
+						
+						if faction then
+							name = faction
+						end
+					end
+
+					Citizen.InvokeNative(0x4A48B6E03BABB4AC, entity, name)
+					Citizen.InvokeNative(0x19B14E04B009E28B, entity, name)
+				end
 
 				local playerPed = GetPlayerPed(PlayerId())
 

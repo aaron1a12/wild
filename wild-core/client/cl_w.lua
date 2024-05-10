@@ -414,6 +414,7 @@ AddEventHandler('onResourceStop', function(resourceName)
 	end
 end)
 
+
 --
 -- Model lookup
 --
@@ -443,4 +444,19 @@ end)
 
 function W.PlayAmbientSpeech(ped, speech)
 	TriggerServerEvent('wild:sv_playAmbSpeech', PedToNet(ped), speech)
+end
+
+
+local startedResources = {}
+
+AddEventHandler('onResourceStop', function(resourceName)
+	startedResources[resourceName] = nil
+end)
+
+AddEventHandler('onResourceStart', function(resourceName)
+	startedResources[resourceName] = true
+end)
+
+function W.IsResourceRunning(resourceName)
+	return (startedResources[resourceName]==true)
 end
