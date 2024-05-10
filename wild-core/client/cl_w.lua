@@ -414,7 +414,6 @@ AddEventHandler('onResourceStop', function(resourceName)
 	end
 end)
 
-
 --
 -- Model lookup
 --
