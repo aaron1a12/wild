@@ -156,7 +156,7 @@ function PickMountForLoad(player)
     if playerMount ~= 0 and playerLastMount ~= 0 then -- We have to choose between mounts
 
         local playerMountDist = GetVectorDistSqr(playerCoords, GetEntityCoords(playerMount))
-        local playerLastMountDist = GetVectorDistSqr(playerCoords, GetEntityCoords(GetEntityCoords(playerLastMount)))
+        local playerLastMountDist = GetVectorDistSqr(playerCoords, GetEntityCoords(playerLastMount))
 
         if playerLastMountDist < playerMountDist then
             finalMount = playerLastMount
