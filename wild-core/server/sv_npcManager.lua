@@ -50,7 +50,14 @@ RegisterNetEvent('wild:npcManager:sv_ensure', function(resource, name, defaultCo
 
         NpcManager:Reallocate()
     else
-        print("Warning: did not reallocate")
+        -- If the ped already exists in the world, subsequent joining players will never receive the 
+        -- onCreatedPed event that will provide them the ped id. Therefore, if we already have a netId,
+        -- send it via an artificial onCreatePed event. 
+        -- Be sure this event doesn't get triggered twice on already joined players!
+        if NpcManager.NetPool[name].NetId ~= nil then
+            TriggerClientEvent('wild:npcManager:cl_onCreatedPed', source, name, NpcManager.NetPool[name].NetId)
+        end
+
     end
 end) 
 

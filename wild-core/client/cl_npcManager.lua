@@ -65,7 +65,7 @@ function W.NpcManager:EnsureNpcExists(uniqueName, params)
     local resource = GetInvokingResource()
     W.NpcManager.ClientPool[uniqueName] = {
         ["Managed"] = false,
-        ["Ped"] = 0,
+        ["Ped"] = nil,
         ["Params"] = params,
         ["Resource"] = resource
     }
@@ -112,12 +112,21 @@ AddEventHandler("wild:npcManager:cl_onCreatedPed", function(name, netId)
     local params = W.NpcManager.ClientPool[name].Params
     local ped = NetToPed(netId)
     
+    -- onCreatedPed is artificially triggered late on later joining clients.
+    -- This is to avoid double triggering:
+    local bAlreadyActivated = false
+    if W.NpcManager.ClientPool[name].Ped == ped then
+        bAlreadyActivated = true
+    end
+
     W.NpcManager.ClientPool[name].Ped = ped
     params.Ped = ped
 
-    if params.onActivate ~= nil then
-        local bOwned = NetworkHasControlOfEntity(ped)
-        params:onActivate(ped, bOwned)
+    if not bAlreadyActivated then
+        if params.onActivate ~= nil then
+            local bOwned = NetworkHasControlOfEntity(ped)
+            params:onActivate(ped, bOwned)
+        end
     end
 end)
 
@@ -268,7 +277,7 @@ function W.NpcManager:ManageNow()
                 RequestCollisionAtCoord(pedCoords.x, pedCoords.y, pedCoords.z)
                 local ped = CreatePed(npc.Params.Model, pedCoords.x, pedCoords.y, pedCoords.z - 0.75, pedHeading, true)
                 --EquipMetaPedOutfitPreset(ped, 0, false)
-                SetEntityAsMissionEntity(npc.Ped, true, true)
+                SetEntityAsMissionEntity(ped, true, true)
             
                 local netId = PedToNet(ped)
                 SetNetworkIdExistsOnAllMachines(netId, true)
@@ -280,29 +289,30 @@ function W.NpcManager:ManageNow()
                 --SetEntityAsNoLongerNeeded(ped)
 
                 -- Makes ped not walk away when set as no longer needed
-                SetPedKeepTask(npc.Ped, true)
+                SetPedKeepTask(ped, true)
 
-                
-                NetworkRequestControlOfEntity(npc.Ped)
+                NetworkRequestControlOfEntity(ped)
 	
                 local timeOut = 5000
-                while timeOut > 0 and not NetworkHasControlOfEntity(npc.Ped) do
+                while timeOut > 0 and not NetworkHasControlOfEntity(ped) do
                     Wait(50)
                     timeOut = timeOut - 50
                 end
 
-                if not NetworkHasControlOfEntity(npc.Ped) then
+                if not NetworkHasControlOfEntity(ped) then
                     print("Failed to gain control of entity!")
                 end
             
 
             elseif nOutsideMaxCull == nPlayerCount then -- Outside of everybody's cull range
 
-                SetEntityAsNoLongerNeeded(npc.Ped)
-                DeletePed(npc.Ped)
+                if bExists then
+                    SetEntityAsNoLongerNeeded(npc.Ped)
+                    DeletePed(npc.Ped)
 
-                -- Remotely trigger all callbacks
-                TriggerServerEvent('wild:npcManager:sv_onDeletePed', name, pedCoords, pedHeading)
+                    -- Remotely trigger all callbacks
+                    TriggerServerEvent('wild:npcManager:sv_onDeletePed', name, pedCoords, pedHeading)
+                end
                 
             end
 
