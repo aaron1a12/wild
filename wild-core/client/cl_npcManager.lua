@@ -110,8 +110,16 @@ end
 RegisterNetEvent("wild:npcManager:cl_onCreatedPed")
 AddEventHandler("wild:npcManager:cl_onCreatedPed", function(name, netId)
     local params = W.NpcManager.ClientPool[name].Params
+
+    -- The provided net id might not be ready, so wait until it is:
+    local timeOut = 5000
+    while timeOut > 0 and not NetworkDoesNetworkIdExist(netId) do
+        Wait(50)
+        timeOut = timeOut - 50
+    end
+
     local ped = NetToPed(netId)
-    
+
     -- onCreatedPed is artificially triggered late on later joining clients.
     -- This is to avoid double triggering:
     local bAlreadyActivated = false
@@ -125,7 +133,7 @@ AddEventHandler("wild:npcManager:cl_onCreatedPed", function(name, netId)
     if not bAlreadyActivated then
         if params.onActivate ~= nil then
             local bOwned = NetworkHasControlOfEntity(ped)
-            params:onActivate(ped, bOwned)
+            params:onActivate(ped, bOwned, netId)
         end
     end
 end)

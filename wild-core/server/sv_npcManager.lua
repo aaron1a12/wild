@@ -54,7 +54,7 @@ RegisterNetEvent('wild:npcManager:sv_ensure', function(resource, name, defaultCo
         -- onCreatedPed event that will provide them the ped id. Therefore, if we already have a netId,
         -- send it via an artificial onCreatePed event. 
         -- Be sure this event doesn't get triggered twice on already joined players!
-        if NpcManager.NetPool[name].NetId ~= nil then
+        if NpcManager.NetPool[name].NetId ~= nil and NpcManager.NetPool[name].NetId ~= 0 then
             TriggerClientEvent('wild:npcManager:cl_onCreatedPed', source, name, NpcManager.NetPool[name].NetId)
         end
 
@@ -87,6 +87,7 @@ end)
 -- Called after a client created a ped
 RegisterNetEvent('wild:npcManager:sv_onCreatedPed', function(name, netId)
     NpcManager.NetPool[name].NetId = netId
+    print("Tigggering sv_onCreatedPed for everyone. Net Id: ".. tostring(netId))
     TriggerClientEvent('wild:npcManager:cl_onCreatedPed', -1, name, netId)
 end)
 
