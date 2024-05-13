@@ -270,7 +270,7 @@ h1, h2, h3 {font-family: 'rdr-lino';}
     font-size:16pt;
     display: flex;
     align-items: center;
-    justify-content: left;
+    justify-content: space-between;
     cursor:pointer;
 }
 
@@ -302,6 +302,27 @@ h1, h2, h3 {font-family: 'rdr-lino';}
     width:100%;
     height:100%;
     z-index: 1;
+}
+
+.menuItem .switch::before, .menuItem .switch::after {
+    content: ' ';
+    display: inline-block;    
+    background-image: url(selection_arrow_left.png);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    /*position: absolute;*/
+    width:20px;
+    height:20px;
+    /*filter: brightness(25%);
+    opacity: 0.5;*/
+    margin-bottom: -2px;
+    margin-right:10px;
+}
+
+.menuItem .switch::after {  
+    background-image: url(selection_arrow_right.png);
+    margin-right:0px;
+    margin-left:10px;
 }
 
 .menuDetail {

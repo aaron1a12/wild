@@ -56,6 +56,7 @@ var currentMenuId = "";
 let bMenuLock = false;
 
 var pageItemAutoId = 0
+let lastTriggerTime = 0;
 
 function CreateMenu(strMenuId)
 {
@@ -411,6 +412,83 @@ function ClearHistory()
     }
 }
 
+function FlipSwitch(strMenuId, strPageId, strItemId, bForward)
+{
+    if (menus[strMenuId] == undefined)
+        return;
+
+    let page = menus[strMenuId]["pages"][strPageId];
+
+    if (page == undefined)
+        return;
+
+    for (var i=0; i<page.items.length; i++)
+    {
+        if (page.items[i].id == strItemId)
+        {
+            let item = page.items[i];
+            let switchOptions = item.extra.switch;
+
+            if (switchOptions == undefined)
+                return
+
+            var index = (bForward) ? item.extra.switchActive+1 : item.extra.switchActive-1;
+
+            if (switchOptions[index] == undefined)
+                index = (bForward) ? 0 : switchOptions.length-1;
+
+            item.extra.switchActive = index;
+
+            let switchEl = item.element.querySelector(".switch");
+            switchEl.innerText = switchOptions[index][0];
+            break;
+        }
+    }
+}
+
+function FlipCurrentSwitch(bForward)
+{
+    const elapsedMs = Date.now() - lastTriggerTime;
+
+    if (elapsedMs < 500)
+    {
+        return;
+    }
+
+    if (currentMenuId=="")
+        return;
+
+    let menu = menus[currentMenuId];
+        
+    if (menu==undefined)
+        return;
+
+    var currentPage = menu.currentPage;       
+    let page = menu["pages"][currentPage];
+
+    if (page == undefined)
+        return
+
+    if (page.selectedItem == undefined)
+        return;           
+
+    for (var i=0; i<page.items.length; i++)
+    {
+        if (page.items[i].id == page.selectedItem)
+        {
+            let item = page.items[i];
+            if (item.extra.switch)
+            {
+                FlipSwitch(currentMenuId, currentPage, item.id, bForward);
+                TriggerSelectedItem();
+            }
+            break;
+        }
+        
+    }
+    
+}
+
 function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
 {
     let page = menus[strMenuId]["pages"][strPageId];
@@ -428,6 +506,15 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
         var itemContentDiv = document.createElement("DIV");
         itemContentDiv.innerText = extraItemParams.text;
         itemDiv.appendChild(itemContentDiv);
+
+        if (extraItemParams.switch)
+        {
+            extraItemParams.switchActive = -1;
+            var rightDiv = document.createElement("DIV");
+            rightDiv.className = "switch";
+            rightDiv.innerText = "";
+            itemDiv.appendChild(rightDiv);
+        }
     }
 
     itemDiv.addEventListener("mouseenter", (evt)=>{
@@ -438,7 +525,14 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
         if (IsRedM())
             fetch(`https://${GetParentResourceName()}/playNavEnterSound`);
 
-        TriggerSelectedItem();
+        if (!extraItemParams.switch)
+        {
+            TriggerSelectedItem();
+        }
+        else
+        {
+            FlipCurrentSwitch(true)
+        }
     });
 
     page.items.push({
@@ -454,6 +548,11 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
     if (page.selectedItem == undefined)
     {
         SelectPageItem(strMenuId, strPageId, id);
+    }
+
+    if (extraItemParams.switch != undefined)
+    {
+        FlipSwitch(strMenuId, strPageId, strItemId, true);
     }
 }
 
@@ -660,8 +759,6 @@ function MoveSelection(bForward)
     }*/
 }
 
-let lastTriggerTime = 0
-
 function TriggerSelectedItem()
 { 
     const elapsedMs = Date.now() - lastTriggerTime;
@@ -690,6 +787,21 @@ function TriggerSelectedItem()
     if (page.selectedItem == undefined)
         return;   
 
+    let switchOption = undefined;
+
+    for (var i=0; i<page.items.length; i++)
+    {
+        if (page.items[i].id == page.selectedItem)
+        {    
+            let item = page.items[i];
+            if (item.extra.switch)
+            {
+                switchOption = item.extra.switch[item.extra.switchActive][1]
+            }
+            break;
+        }
+    }
+
     if (IsRedM()) 
     {
         fetch(`https://${GetParentResourceName()}/triggerSelectedItem`, {
@@ -698,7 +810,8 @@ function TriggerSelectedItem()
                 'Content-Type': 'application/json; charset=UTF-8',
             },
             body: JSON.stringify({
-                itemId: page.selectedItem
+                itemId: page.selectedItem,
+                switchOption: switchOption
             })
         });
     }
@@ -709,7 +822,7 @@ function TriggerSelectedItem()
             if (page.items[i].id == page.selectedItem)
             {
                 if (page.items[i].extra.action != undefined)
-                    page.items[i].extra.action()
+                    page.items[i].extra.action(switchOption)
                 break;
             }
         }
@@ -780,10 +893,21 @@ else
         description: "Attempt to FUBAR the server.",
         action: ()=>{
             GoToPage("onlineMenu", "test_page");
-        }
+        },
+    });
+
+    CreatePageItem("onlineMenu", "root", "btnSwitchTest", {
+        text: "Hat options",
+        description: "Choose your hat options.",
+        action: (value)=>{
+            console.log(`Switch value: ${value}`);
+        },
+        switch: [
+            ["Hat", 1], ["No hat", 0], ["Optional", 3],
+        ]
     });
     
-    for (var i=0; i < 20; i++) {
+    for (var i=0; i < 3; i++) {
         var params = {};
         params.text = `Menu Item #${i}`;
         //params.description = `Some description #${i}`;
@@ -903,6 +1027,11 @@ window.addEventListener('message', function(event) {
         MoveSelection(event.data.forward);
     }
 
+    if (event.data.cmd == "flipCurrentSwitch")
+    {
+        FlipCurrentSwitch(event.data.forward);
+    }
+
     if (event.data.cmd == "triggerSelectedItem")
     {
         TriggerSelectedItem();
@@ -944,6 +1073,12 @@ document.onkeydown = function(evt) {
     case 'ArrowUp':
         if (!IsRedM()) MoveSelection(false);
         break; 
+    case 'ArrowRight':
+        if (!IsRedM()) FlipCurrentSwitch(true);
+        break; 
+    case 'ArrowLeft':
+        if (!IsRedM()) FlipCurrentSwitch(false);
+        break;     
     case 'Enter':
         if (!IsRedM()) TriggerSelectedItem();
         break; 

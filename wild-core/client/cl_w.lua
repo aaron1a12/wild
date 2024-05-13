@@ -351,6 +351,16 @@ Citizen.CreateThread(function()
 
 					SendNUIMessage({cmd = "triggerSelectedItem"})
 				end
+				
+				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_LEFT") then
+					PlaySound("RDRO_Spectate_Sounds", "left_bumper")
+					SendNUIMessage({cmd = "flipCurrentSwitch", forward = false})
+				end
+
+				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_RIGHT") then
+					PlaySound("RDRO_Spectate_Sounds", "right_bumper")
+					SendNUIMessage({cmd = "flipCurrentSwitch", forward = true})
+				end
 
 				if IsControlJustPressed(0, "INPUT_FRONTEND_CANCEL") then -- or IsControlJustPressed(0, "INPUT_QUIT")
 					W.UI.GoBack()
