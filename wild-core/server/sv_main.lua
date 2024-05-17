@@ -27,6 +27,17 @@ function W.GetPlayerSourceCoords()
     return coordMap
 end
 
+function NewDefaultOutfit()
+    local outfit = {}
+    outfit.model = "player_zero"
+    outfit.preset = 3
+    outfit.enabledDrawables = {}
+    outfit.disabledDrawables = {}
+    outfit.voice = nil
+    outfit.loco = 0
+
+    return outfit
+end
 
 -- Makes sure all player entries have appropriate properties read or created with default values
 local function ValidatePlayerProps(playerEntry)
@@ -40,6 +51,30 @@ local function ValidatePlayerProps(playerEntry)
 
     if playerEntry["world"] == nil then
         playerEntry["world"] = `world`
+    end
+
+    if playerEntry["outfits"] == nil then
+        playerEntry["outfits"] = {}
+    end
+
+    if playerEntry["outfits"][1] == nil then
+        playerEntry["outfits"][1] = NewDefaultOutfit()
+    end
+
+    if playerEntry["outfits"][2] == nil then
+        playerEntry["outfits"][2] = NewDefaultOutfit()
+    end
+
+    if playerEntry["outfits"][3] == nil then
+        playerEntry["outfits"][3] = NewDefaultOutfit()
+    end
+
+    if playerEntry["outfits"][4] == nil then
+        playerEntry["outfits"][4] = NewDefaultOutfit()
+    end
+
+    if playerEntry["currentOutfit"] == nil then
+        playerEntry["currentOutfit"] = 1
     end
 end
 
@@ -72,7 +107,6 @@ Citizen.CreateThread(function()
 	end
 end)
 
-
 AddEventHandler('playerJoining', function ()
     local playerName = GetPlayerName(source)
 
@@ -99,6 +133,17 @@ end)
 
 RegisterNetEvent("wild:sv_getPlayerData")
 AddEventHandler('wild:sv_getPlayerData', function(strPlayerName)
+    -- This is only possible if 'playerJoining' was skipped (restarting resource, debugging, etc)
+    if Players[strPlayerName] == nil then
+        Players[strPlayerName] = {}
+    
+        ValidatePlayerProps(Players[strPlayerName])
+    
+        -- Save the source so we can map names to sources later
+        PlayerSources[strPlayerName] = source
+        SaveData()
+    end
+
     TriggerClientEvent("wild:cl_onReceivePlayerData", source, Players[strPlayerName])
 end)
 
@@ -140,6 +185,13 @@ AddEventHandler("wild:sv_setPlayerKeyValue", function(strPlayerName, key, value)
     Players[strPlayerName][key] = value
     SaveData()
 end)
+
+
+RegisterNetEvent('wild:sv_modifyPlayerOutfit', function(strPlayerName, outfitIndex, outfit)
+    Players[strPlayerName]["outfits"][outfitIndex] = outfit
+    SaveData()
+end)
+
 --
 -- Auto-restart resources (glitchy)
 --
@@ -177,6 +229,9 @@ RegisterNetEvent('wild:sv_playAmbSpeech', function(pedNet, line)
     TriggerClientEvent('wild:cl_onPlayAmbSpeech', -1, pedNet, line)
 end)
 
+RegisterNetEvent('wild:sv_setPlayerVisible', function(player, bVisible)
+    TriggerClientEvent('wild:cl_onSetPlayerVisible', -1, player, bVisible)
+end)
 
 RegisterNetEvent('wild:sv_reportCrime', function(crime, criminalPed, witnessPed, coords)
     TriggerClientEvent('wild:cl_onCrimeReported', -1, crime, criminalPed, witnessPed, coords)

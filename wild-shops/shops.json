@@ -1,4 +1,36 @@
 {
+    "generalStores": [
+        {
+            "location": [-322.21, 803.275, 117.881],
+            "dressingRoom": {"player": [-327.567, 807.9, 117.894, -93.0], "cam": [-325.65, 807.13, 118.25, -10.0, 81.65]}
+        }
+    ],
+
+    "clothingCharacters": [
+        {"name": "Abigail Roberts", "model": "cs_abigailroberts"},
+        {"name": "Arthur", "model": "player_zero"},
+        {"name": "Dutch", "model": "cs_dutch"},
+        {"name": "Dutch (custom)", "model": "w_dutch"},
+        {"name": "John", "model": "player_three"},
+        {"name": "MP Male", "model": "mp_male"},
+        {"name": "MP Female", "model": "mp_female"},
+        {"name": "Sadie Adler", "model": "cs_mrsadler"},
+        {"name": "Sadie Adler (custom)", "model": "mp_mrsadler"}
+    ],
+
+    
+    "characterVoices": [
+        "ARTHUR",
+        "JOHN_PLAYER",
+        "DUTCH",
+        "ABIGAIL",
+        "ABIGAIL_ES",
+        "SADIE_ADLER",
+        "SADIE_ADLER_ES",
+        "0863_A_F_M_CIV_POOR_WHITE_AVOID_01",
+        "0819_A_M_M_VHTTHUG_01_WHITE_03"
+    ],
+
     "butcherLocations" : [
         [-338.943, 767.395, 116.568, 98.4, "U_M_M_VALBUTCHER_01", 0],
         [-1752.908, -392.782, 156.246, 183.260,  "S_M_M_UNIBUTCHERS_01", 10],
@@ -17,8 +49,6 @@
     },
 
     "pelts": {
-        "comment" : ["More pelts can be found at fm_mission_controller.c", 0.0],
-
         "957520252":    ["Poor Bear Pelt",      10.0],
         "143941906":    ["Good Bear Pelt",      20.0],
         "1292673537":   ["Perfect Bear Pelt",   30.0],

@@ -214,8 +214,16 @@ function W.UI.DestroyMenuAndData(strMenuId)
 	SendNUIMessage({cmd = "destroyMenuAndData", menuId = strMenuId})
 end
 
+function W.UI.DestroyPage(strMenuId, strPageId)	
+	SendNUIMessage({cmd = "destroyPage", menuId = strMenuId, pageId = strPageId})
+end
+
 function W.UI.SetMenuRootPage(strMenuId, strPageId)	
 	SendNUIMessage({cmd = "setMenuRootPage", menuId = strMenuId, pageId = strPageId})
+end
+
+function W.UI.SetSwitchIndex(strMenuId, strPageId, strItemId, iIndex)
+	SendNUIMessage({cmd = "setSwitchIndex", menuId = strMenuId, pageId = strPageId, itemId = strItemId, index = iIndex})
 end
 
 function W.UI.IsMenuOpen(strMenuId)	
@@ -247,6 +255,11 @@ function W.UI.CreatePageItem(strMenuId, strPageId, strItemId, oExtraItemParams)
 	SendNUIMessage({cmd = "createPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId, extraItemParams = oExtraItemParams})
 end
 
+
+function W.UI.SetPageItemEndHtml(strMenuId, strPageId, strItemId, strHtml)
+	SendNUIMessage({cmd = "setPageItemEndHtml", menuId = strMenuId, pageId = strPageId, itemId = strItemId, html = strHtml})
+end
+
 function W.UI.DestroyPageItem(strMenuId, strPageId, strItemId)
 	--pageItemActions[strItemId] = nil
 
@@ -256,7 +269,11 @@ end
 
 W.UI.RegisterCallback("triggerSelectedItem", function(data, cb)
 	if pageItemActions[data.itemId] ~= nil then
-		pageItemActions[data.itemId]()
+		if data.switchOption == nil then
+			pageItemActions[data.itemId]()
+		else
+			pageItemActions[data.itemId](data.switchOption)
+		end
 	end
 	
 	cb('ok')
@@ -390,6 +407,10 @@ W.Prompts.Pool = {}
 
 function W.Prompts.AddToGarbageCollector(promptId)
 	local resourceName = GetInvokingResource()
+
+	if resourceName == nil then
+		resourceName = GetCurrentResourceName()
+	end
 	
 	if W.Prompts.Pool[resourceName] == nil then
 		W.Prompts.Pool[resourceName] = {}
@@ -424,6 +445,16 @@ AddEventHandler('onResourceStop', function(resourceName)
 	end
 end)
 
+local activeGroup = 0
+
+function W.Prompts.GetActiveGroup()
+	return activeGroup
+end
+
+function W.Prompts.SetActiveGroup(group)
+	activeGroup = group
+end
+
 --
 -- Model lookup
 --
@@ -453,6 +484,39 @@ end)
 
 function W.PlayAmbientSpeech(ped, speech)
 	TriggerServerEvent('wild:sv_playAmbSpeech', PedToNet(ped), speech)
+end
+
+
+local invisiblePlayers = {}
+RegisterNetEvent("wild:cl_onSetPlayerVisible", function(player, bVisible)
+
+	NetworkConcealPlayer(player, not bVisible)
+	SetPlayerInvisibleLocally(player, not bVisible)
+
+	if invisiblePlayers[player] ~= nil and not bVisible then
+		return
+	end
+
+	if not bVisible then
+		Citizen.CreateThread(function()
+			invisiblePlayers[player] = 1
+
+			while invisiblePlayers[player] ~= nil do
+				Citizen.Wait(0)
+				SetPlayerInvisibleLocally(player, true)
+			end
+
+			NetworkConcealPlayer(player, false)
+			SetPlayerInvisibleLocally(player, false)
+		end)
+	else
+		invisiblePlayers[player] = nil
+	end
+	
+end)
+
+function W.SetPlayerVisible(player, bVisible)
+	TriggerServerEvent('wild:sv_setPlayerVisible', player, bVisible)
 end
 
 

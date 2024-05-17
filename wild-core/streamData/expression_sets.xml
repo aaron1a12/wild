@@ -1,0 +1,158 @@
+<fwExpressionSetManager>
+    <ExpressionSets>
+        <Item key="expr_set_MP_BCustom_Female" type="fwExpressionSet">
+            <DictionaryIds>
+                <Item>MP_Female</Item>
+                <Item>META_Base_Female</Item>
+                <Item>MP_Shared</Item>
+                <Item>ped_shared</Item>
+                <Item>Component_Velocity</Item>
+                <Item>Component_HighCollar_female</Item>
+                <Item>default</Item>
+
+                <!-- Mrs Adler fix -->
+                <Item>Component_Collar</Item>
+                <Item>Component_LongJacket</Item>
+                <Item>CS_MrsAdlerHair003SPR</Item>
+                <Item>Component_Dress</Item>
+                <Item>CS_MrsAdler</Item>
+                <Item>Component_AnmBloodFlow</Item>
+            </DictionaryIds>
+            <Groups>
+                <Item type="fwExpressionSetItemGroup">
+                <DictId>MP_Female</DictId>
+                <Items>
+                    <Item key="MP_Female_Coat" type="fwExpressionItem" />
+                    <Item key="MP_Female_Coat_lod1" type="fwExpressionItem" />
+                    <Item key="MP_Female_Coat_lod2" type="fwExpressionItem" />
+                    <Item key="MP_Female_Vest" type="fwExpressionItem" />
+                    <Item key="MP_Female_Hem" type="fwExpressionItem" />
+                    <Item key="MP_Female_Boots" type="fwExpressionItem" />
+                    <Item key="MP_Female_Shirt" type="fwExpressionItem" />
+                    <Item key="MP_Female_HolsterRight" type="fwExpressionItem" />
+                    <Item key="MP_Female_Overalls" type="fwExpressionItem" />
+                    <Item key="MP_Female_MoneyBag" type="fwExpressionItem" />
+                    <Item key="MP_Female_Neckwear" type="fwExpressionItem" />
+                    <Item key="MP_Female_HolsterLeft" type="fwExpressionItem" />
+                </Items>
+                </Item> 
+                <Item type="fwExpressionSetItemGroup">
+                <DictId>META_Base_Female</DictId>
+                <Items>
+                    <Item key="MP_META_Rifle" type="fwExpressionItem" />
+                    <Item key="BCustom" type="fwExpressionItem" />
+                    <Item key="BCustom_lod1" type="fwExpressionItem" />
+                    <Item key="MP_META_Cust" type="fwExpressionItem" />
+                    <Item key="MP_Muscles" type="fwExpressionItem" />
+                    <Item key="female_ragdoll" type="fwExpressionItem" />
+                </Items>
+                </Item>
+                <Item type="fwExpressionSetItemGroup">
+                <DictId>MP_Shared</DictId>
+                <Items>
+                    <Item key="MP_HairProjection" type="fwExpressionItem" />
+                    <Item key="MP_HairProjection_lod1" type="fwExpressionItem" />
+                    <Item key="MP_CP_Back_Position" type="fwExpressionItem" />
+                </Items>
+                </Item>
+                <Item type="fwExpressionSetItemGroup">
+                <DictId>ped_shared</DictId>
+                <Items>
+                    <Item key="XHToMover" type="fwExpressionItem" />
+                    <Item key="Breasts" type="fwExpressionItem" />
+                    <Item key="Heels" type="fwExpressionItem" />
+                    <Item key="Hands_Base" type="fwExpressionItem" />
+                    <Item key="Rollbones" type="fwExpressionItem" />
+                    <Item key="Rollbones_lod1" type="fwExpressionItem" />
+                    <Item key="Teeth" type="fwExpressionItem" />
+                    <Item key="Eyes" type="fwExpressionItem" />
+                    <Item key="cigarette" type="fwExpressionItem" />
+                    <Item key="CompressionJoints" type="fwExpressionItem" />
+                    <Item key="CompressionJoints_lod1" type="fwExpressionItem" />
+                    <Item key="Hat_GenderAdjustment_Female" type="fwExpressionItem" />
+                    <Item key="CarriedAnimal_FirstPerson" type="fwExpressionItem" />
+                    <Item key="AnimatedHat" type="fwExpressionItem" />
+                    <Item key="PosIKRollbones" type="fwExpressionItem" />           
+                </Items>
+                </Item>
+                <Item type="fwExpressionSetItemGroup">
+                <DictId>Component_Velocity</DictId>
+                <Items>
+                    <Item key="Component_Velocity" type="fwExpressionItem" />
+                    <Item key="Component_Velocity_lod2" type="fwExpressionItem" />
+                </Items>
+                </Item>
+                <Item type="fwExpressionSetItemGroup">
+                <DictId>Component_HighCollar_female</DictId>
+                <Items>
+                    <Item key="Component_HighCollar_female" type="fwExpressionItem" />
+                </Items>
+                </Item>
+                <Item type="fwExpressionSetItemGroup">
+                <DictId>default</DictId>
+                <Items>
+                    <Item key="CP_MP_PlayerFemale" type="fwExpressionItem" />
+                    <Item key="ObjectSpacePH" type="fwExpressionItem" />
+                    <Item key="CoatHipOffset" type="fwExpressionItem" />
+                    <Item key="HeadTracking" type="fwExpressionItem" />
+                    <Item key="HeadTracking_lod1" type="fwExpressionItem" />
+                </Items>
+                </Item>
+
+                <!-- Mrs Adler fix -->
+                <Item type="fwExpressionSetItemGroup">
+                    <DictId>Component_Collar</DictId>
+                    <Items>
+                        <Item key="Component_Collar_Female" type="fwExpressionItem" />
+                    </Items>
+                </Item>
+                <Item type="fwExpressionSetItemGroup">
+                    <DictId>Component_LongJacket</DictId>
+                    <Items>
+                        <Item key="Component_LongJacket" type="fwExpressionItem" />
+                        <Item key="Component_LongJacket_lod2" type="fwExpressionItem" />
+                    </Items>
+                </Item>
+                <Item type="fwExpressionSetItemGroup">
+                    <DictId>CS_MrsAdlerHair003SPR</DictId>
+                    <Items>
+                        <Item key="CS_MrsAdlerHair003SPR" type="fwExpressionItem" />
+                    </Items>
+                </Item>
+                <Item type="fwExpressionSetItemGroup">
+                    <DictId>Component_Dress</DictId>
+                    <Items>
+                        <Item key="Component_Dress" type="fwExpressionItem" />
+                        <Item key="Component_Dress_lod1" type="fwExpressionItem" />
+                    </Items>
+                </Item>
+                <Item type="fwExpressionSetItemGroup">
+                    <DictId>CS_MrsAdler</DictId>
+                    <Items>
+                        <Item key="CS_MrsAdler_Ponytail" type="fwExpressionItem" />
+                        <Item key="CS_MrsAdlerHairSPR" type="fwExpressionItem" />
+                        <Item key="CS_MrsAdlerScarfSPR" type="fwExpressionItem" />
+                        <Item key="CS_MrsAdler_HatFeather" type="fwExpressionItem" />
+                        <Item key="CS_MrsAdler_BackBraid" type="fwExpressionItem" />
+                        <Item key="CS_MrsAdler_Knife" type="fwExpressionItem" />
+                        <Item key="CS_MrsAdler_Sleeves" type="fwExpressionItem" />
+                        <Item key="CS_MrsAdler_Nightgown" type="fwExpressionItem" />
+                        <Item key="CS_MrsAdler_Misc" type="fwExpressionItem" />
+                        <Item key="RigFATXML_MrsAdler_Male_SHARE" type="fwExpressionItem" />
+                        <Item key="RigFATXML_MrsAdler_SHARE" type="fwExpressionItem" />
+                        <Item key="RigFATXML_MrsAdler" type="fwExpressionItem" />
+                        <Item key="RigFATXML_MrsAdler_lod1" type="fwExpressionItem" />
+                    </Items>
+                </Item>
+                <Item type="fwExpressionSetItemGroup">
+                    <DictId>Component_AnmBloodFlow</DictId>
+                    <Items>
+                        <Item key="Component_ANM_Face_Medium" type="fwExpressionItem" />
+                        <Item key="Component_BloodFlow_Face" type="fwExpressionItem" />
+                        <Item key="Component_ANM_Body" type="fwExpressionItem" />
+                    </Items>
+                </Item>
+            </Groups>
+        </Item>
+    </ExpressionSets>
+</fwExpressionSetManager>

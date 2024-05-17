@@ -10,6 +10,7 @@ client_script
 	"client/cl_events.lua",
 	"client/cl_npcManager.lua",
 	"client/cl_main.lua",
+	"client/cl_outfits.lua",
 	"client/cl_spawn.lua",	
 	"client/cl_horse.lua",
 	"client/cl_loot.lua",
@@ -32,9 +33,12 @@ files
 	"config.json",
 	"peds.json",
 	"players.json",
-	"npcs.json"
+	"npcs.json",
+	"streamData/**.ymt",
+	"streamData/**.xml",
 }
 
---data_file 'WEAPON_ANIMATIONS_FILE' 'cowboy.meta'
+data_file 'EXPRESSION_SETS_FILE' 'streamData/expression_sets.xml'
+data_file 'PED_METADATA_FILE' 'streamData/metapeds.ymt'
 
 ui_page 'html/index.html'

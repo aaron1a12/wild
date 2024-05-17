@@ -1,0 +1,1 @@
+IsMetaPedUsingComponent(previewPed, `HATS`)

@@ -108,13 +108,13 @@ Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(1000)
 		Citizen.InvokeNative(0x4B8F743A4A6D2FF8, true) -- Reveal full map
-		NetworkSetFriendlyFireOption(true)
-		SetRelationshipBetweenGroups(0, `PLAYER`, `PLAYER`) -- Companion
+		--NetworkSetFriendlyFireOption(false)
+		--SetRelationshipBetweenGroups(0, `PLAYER`, `PLAYER`) -- Companion
 
-        for i,player in ipairs(GetActivePlayers()) do
+        --[[for i,player in ipairs(GetActivePlayers()) do
             local ped = GetPlayerPed(player)
-            SetEntityCanBeDamagedByRelationshipGroup(ped, true, `PLAYER`)
-        end
+            SetEntityCanBeDamagedByRelationshipGroup(ped, false, `PLAYER`)
+        end]]
 	end
 end)
 
@@ -173,4 +173,26 @@ RegisterCommand('cleanup', function()
             end
         end
     end
+end, false)
+
+
+RegisterCommand('test', function() 
+    ForceSpawnPerschar("VAL_BUTCHER", true)
+    ForceSpawnPerschar(`VAL_BUTCHER`, true)
+	--[[local x, y, z = table.unpack(GetEntityCoords(GetPlayerPed(PlayerId()), false))
+
+    local model = `wild_dutch`
+
+    RequestModel(model)
+
+    while not HasModelLoaded(model) do
+        RequestModel(model)
+        Citizen.Wait(0)
+    end
+
+    local ped = CreatePed(model, x, y+1.0, z, 45.0, true, true, true)
+    SetEntityInvincible(ped, true)
+    SetPedKeepTask(ped)
+    SetPedAsNoLongerNeeded(ped)
+    SetRandomOutfitVariation(ped)]]
 end, false)

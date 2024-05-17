@@ -344,3 +344,25 @@ h1, h2, h3 {font-family: 'rdr-lino';}
     justify-content: center;
     color: #e3e3e3;
 }
+
+.menuItem tick {
+    display: inline-block;    
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    /*position: absolute;*/
+    width:20px;
+    height:20px;
+    /*filter: brightness(25%);
+    opacity: 0.5;*/
+    margin-bottom: -2px;
+    margin-right:10px;
+    border: 2px solid;
+}
+
+.menuItem tick[on] {  
+    background-image: url(tick.png);
+}
+
+.menuItem tick[off] {  
+    background-image: url(cross.png);
+}

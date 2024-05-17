@@ -60,6 +60,7 @@ let lastTriggerTime = 0;
 
 function CreateMenu(strMenuId)
 {
+    console.log(`Creating menu ${strMenuId}...`)
     if (typeof menus[strMenuId] != "undefined")
     {
         return; // Existing menu
@@ -194,7 +195,7 @@ function OpenMenu(strMenuId, bOpen)
 
     if (!activeMenu)
     {
-        console.log("Attempted to open non-existent menu.");
+        console.log("Attempted to open non-existent menu. Menu in question: " + strMenuId);
         return;
     }
 
@@ -203,7 +204,8 @@ function OpenMenu(strMenuId, bOpen)
 
     if (menus[strMenuId].root != "")
     {
-        GoToPage(strMenuId, menus[strMenuId].root)
+        menus[strMenuId].history = []; // wipe history
+        GoToPage(strMenuId, menus[strMenuId].root);
     }
     else
     {
@@ -311,6 +313,9 @@ function GoToPage(strMenuId, strPageId, bGoingBack, bNoHistory)
     if (navigationLock) 
         return;
 
+    if (!menus[strMenuId]["pages"][strPageId])
+        return;    
+
     navigationLock = true;
 
     var currentPage = menus[strMenuId].currentPage;
@@ -373,7 +378,7 @@ function GoToPage(strMenuId, strPageId, bGoingBack, bNoHistory)
 
 
 function GoBack()
-{
+{    
     if (currentMenuId!="")
     {
         let menu = menus[currentMenuId];
@@ -450,7 +455,7 @@ function FlipCurrentSwitch(bForward)
 {
     const elapsedMs = Date.now() - lastTriggerTime;
 
-    if (elapsedMs < 500)
+    if (elapsedMs < 50)
     {
         return;
     }
@@ -480,13 +485,42 @@ function FlipCurrentSwitch(bForward)
             if (item.extra.switch)
             {
                 FlipSwitch(currentMenuId, currentPage, item.id, bForward);
-                TriggerSelectedItem();
+                TriggerSelectedItem(true);
             }
             break;
         }
         
     }
     
+}
+
+function SetSwitchIndex(strMenuId, strPageId, strItemId, index)
+{
+    if (menus[strMenuId] == undefined)
+        return;
+
+    let page = menus[strMenuId]["pages"][strPageId];
+
+    if (page == undefined)
+        return;
+
+    for (var i=0; i<page.items.length; i++)
+    {
+        if (page.items[i].id == strItemId)
+        {
+            let item = page.items[i];
+            let switchOptions = item.extra.switch;
+
+            if (switchOptions == undefined)
+                return
+
+            item.extra.switchActive = index;
+
+            let switchEl = item.element.querySelector(".switch");
+            switchEl.innerText = switchOptions[index][0];
+            break;
+        }
+    }
 }
 
 function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
@@ -507,13 +541,16 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
         itemContentDiv.innerText = extraItemParams.text;
         itemDiv.appendChild(itemContentDiv);
 
-        if (extraItemParams.switch)
+        // End 
         {
-            extraItemParams.switchActive = -1;
             var rightDiv = document.createElement("DIV");
-            rightDiv.className = "switch";
+            rightDiv.classList.add("end");
+
+            if (extraItemParams.switch)
+                rightDiv.classList.add("switch");
+            
             rightDiv.innerText = "";
-            itemDiv.appendChild(rightDiv);
+            itemDiv.appendChild(rightDiv);     
         }
     }
 
@@ -554,6 +591,27 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
     {
         FlipSwitch(strMenuId, strPageId, strItemId, true);
     }
+}
+
+function SetPageItemEndHtml(strMenuId, strPageId, strItemId, html)
+{
+    let page = menus[strMenuId]["pages"][strPageId];
+
+    if (!page)
+        return;
+
+    for (var i=0; i<page.items.length; i++)
+    {
+        if (page.items[i].id == strItemId)
+        {
+            let item = page.items[i];
+
+            let endEl = item.element.querySelector(".end");
+            endEl.innerHTML = html;
+            break;
+        }
+        
+    }        
 }
 
 function DestroyPageItem(strMenuId, strPageId, strItemId)
@@ -759,12 +817,15 @@ function MoveSelection(bForward)
     }*/
 }
 
-function TriggerSelectedItem()
+function TriggerSelectedItem(bForce)
 { 
-    const elapsedMs = Date.now() - lastTriggerTime;
+    if (!bForce)
+    {
+        const elapsedMs = Date.now() - lastTriggerTime;
 
-    if (elapsedMs < 500)
-        return;
+        if (elapsedMs < 500)
+            return;
+    }
 
     lastTriggerTime = Date.now();
 
@@ -853,6 +914,29 @@ function DestroyMenuAndData(strMenuId)
     menus[strMenuId] = undefined;
 }
 
+function DestroyPage(strMenuId, strPageId)
+{
+    if (!menus[strMenuId])
+        return;
+
+    let menu = menus[strMenuId];
+    let page = menu.pages[strPageId];
+
+    if (!page)
+        return
+
+    if (menu.currentPage == strPageId)
+    {
+        if (menu.root == strPageId)
+            fetch(`https://${GetParentResourceName()}/closeAllMenus`);
+        else
+            GoBack();
+    }
+
+    page.element.remove();
+    delete menu.pages[strPageId];
+}
+
 window.addEventListener("load", (event) => {
     if (!IsRedM())
     {
@@ -906,6 +990,8 @@ else
             ["Hat", 1], ["No hat", 0], ["Optional", 3],
         ]
     });
+
+    SetSwitchIndex("onlineMenu", "root", "btnSwitchTest", 1);
     
     for (var i=0; i < 3; i++) {
         var params = {};
@@ -924,6 +1010,13 @@ else
             GoToPage("onlineMenu", "root");
         }
     });
+
+    CreatePageItem("onlineMenu", "root", "btnSkin", {
+        text: "Skin",
+        description: "...",
+    });
+
+    SetPageItemEndHtml("onlineMenu", "root", "btnSkin", "<tick>")
     
     OpenMenu("onlineMenu", true);
 
@@ -1017,6 +1110,11 @@ window.addEventListener('message', function(event) {
         CreatePageItem(event.data.menuId, event.data.pageId, event.data.itemId, event.data.extraItemParams);
     }
 
+    if (event.data.cmd == "setPageItemEndHtml")
+    {
+        SetPageItemEndHtml(event.data.menuId, event.data.pageId, event.data.itemId, event.data.html)
+    }
+
     if (event.data.cmd == "destroyPageItem")
     {
         DestroyPageItem(event.data.menuId, event.data.pageId, event.data.itemId)
@@ -1032,6 +1130,11 @@ window.addEventListener('message', function(event) {
         FlipCurrentSwitch(event.data.forward);
     }
 
+    if (event.data.cmd == "setSwitchIndex")
+    {
+        SetSwitchIndex(event.data.menuId, event.data.pageId, event.data.itemId, event.data.index)
+    }
+
     if (event.data.cmd == "triggerSelectedItem")
     {
         TriggerSelectedItem();
@@ -1040,6 +1143,11 @@ window.addEventListener('message', function(event) {
     if (event.data.cmd == "destroyMenuAndData")
     {
         DestroyMenuAndData(event.data.menuId);
+    }
+
+    if (event.data.cmd == "destroyPage")
+    {
+        DestroyPage(event.data.menuId, event.data.pageId);
     }
 });
 
@@ -1087,4 +1195,8 @@ document.onkeydown = function(evt) {
 
 document.addEventListener("wheel", (evt) => {
     MoveSelection((evt.deltaY/100)+1)
+});
+
+document.body.addEventListener("contextmenu", (evt) => {
+    GoBack()
 });

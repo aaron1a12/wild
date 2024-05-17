@@ -531,6 +531,18 @@ function RotateVectorPitch(vec, degrees)
     return vector3(x, y, z)
 end
 
+function GetLookAtRotation(startCoords, endCoords)
+    local aim = norm(startCoords-endCoords)
+    local yaw = math.atan2(aim.y, aim.x)
+    local pitch = math.atan2(-aim.z, math.sqrt(aim.x * aim.x + aim.y * aim.y))
+    
+    local degreesPerRadian = 180 / math.pi
+    yaw = (yaw * degreesPerRadian)+90
+    pitch = pitch * degreesPerRadian
+    
+    return {pitch, 0.0, yaw}
+end
+
 function GetCamForward(dist)
     local camCoords = GetFinalRenderedCamCoord()
     local camRot = GetFinalRenderedCamRot(0)

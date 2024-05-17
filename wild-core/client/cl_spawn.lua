@@ -124,8 +124,10 @@ function SpawnPlayer()
     -- MODEL
     --
 
+    local playerOutfit = W.GetPlayerCurrentOutfit()
+
     if not bPlayerAlreadySpawnedOnce then
-        local model = `player_zero`
+        local model = GetHashKey(playerOutfit.model)
         RequestModel(model)
 
         -- load the model for this spawn
@@ -142,7 +144,7 @@ function SpawnPlayer()
         SetModelAsNoLongerNeeded(model)
         
         -- Only for player?
-        SetRandomOutfitVariation(PlayerPedId(), true)
+        --SetRandomOutfitVariation(PlayerPedId(), true)
 
         -- Were you in Guarma?
         W.SetPlayerWorld(W.GetPlayerWorld())
@@ -160,7 +162,8 @@ function SpawnPlayer()
 
     -- Ped preset
     if not bPlayerAlreadySpawnedOnce then
-        EquipMetaPedOutfitPreset(PlayerPedId(), 3, 0)
+        ---EquipMetaPedOutfitPreset(PlayerPedId(), 3, 0)
+        W.SetPedOutfit(playerPed, playerOutfit)
     end
 
     --SetEntityCoordsNoOffset(ped, spawnCoords.x, spawnCoords.y, spawnCoords.z, false, false, false, true)

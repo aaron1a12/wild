@@ -316,13 +316,13 @@ Citizen.CreateThread(function()
 		
 					local playerModel = GetEntityModel(playerPed)
 
-					if playerModel == -1481695040 then -- mp_female
+					--[[if playerModel == -1481695040 then -- mp_female
 						SetAmbientVoiceName(playerPed, "0863_A_F_M_CIV_POOR_WHITE_AVOID_01")
 					end
 
 					if playerModel == -171876066 then -- mp_male
 						SetAmbientVoiceName(playerPed, "0819_A_M_M_VHTTHUG_01_WHITE_03")
-					end
+					end]]
 
 					local playerPed_net = PedToNet(playerPed)
 					local targetPed_net = PedToNet(entity)

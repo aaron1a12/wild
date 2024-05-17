@@ -114,6 +114,21 @@ function UpdateFactionMembershipStatus()
             W.UI.GoToPage("warMenu", "root", true)
             W.UI.ClearHistory()
         end
+
+        SetPlayerTeam(PlayerId(), -1)
+    end
+
+
+    if currentFaction == "Lemoyne Raider" then
+        SetPlayerTeam(PlayerId(), 1)
+    end
+
+    if currentFaction == "Hunter" then
+        SetPlayerTeam(PlayerId(), 2)
+    end
+
+    if currentFaction == "Chelonian" then
+        SetPlayerTeam(PlayerId(), 3)
     end
 
     TriggerEvent('wild:cl_onUpdateFaction', currentFaction)
@@ -420,7 +435,6 @@ Citizen.CreateThread(function()
 
         while true do    
             Citizen.Wait(0)        
-
             local playerCoords = GetEntityCoords(GetPlayerPed(player))
             
 
@@ -429,7 +443,7 @@ Citizen.CreateThread(function()
                 local dist = GetVectorDist(coords, playerCoords)
     
                 if dist < 10.0 then
-                    DrawTextAtCoord(coords, "Ped ID: " .. ped .. "\nRelation: " .. GetPedRelationshipGroupHash(ped), 0.25, 255, 255, 255, 255)
+                    DrawTextAtCoord(coords, "Ped ID: " .. ped .. "\nNet: "..PedToNet(ped).."\nRelation: " .. GetPedRelationshipGroupHash(ped) .. "\nSpeed: "..tostring(GetEntitySpeed(PlayerPedId()))   , 0.25, 255, 255, 255, 255)
                 end
 
             end
