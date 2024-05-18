@@ -2,8 +2,6 @@
     "random": [
         {"name":"player_zero_hair_s01_l05_p0","drawable":383137820,"albedo":1653184168,"normal":-765171760,"material":1364420450,"palette":-541985204,"tint0":24,"tint1":66,"tint2":77},
         {"name":"player_zero_hair_s01_l09_p1","drawable":463337740,"albedo":1653184168,"normal":-765171760,"material":1364420450,"palette":-541985204,"tint0":24,"tint1":66,"tint2":77},
-        {"name":"hair_s01_l05_p0 black","drawable":383137820,"albedo":1653184168,"normal":-765171760,"material":1364420450,"palette":-541985204,"tint0":9,"tint1":9,"tint2":9},
-        {"name":"hair_s01_l09_p1 black","drawable":463337740,"albedo":1653184168,"normal":-765171760,"material":1364420450,"palette":-541985204,"tint0":9,"tint1":9,"tint2":9},
         {"name": "Arthur 'Stache #1", "drawable":904753841,"albedo":1653184168,"normal":-765171760,"material":1364420450,"palette":-541985204,"tint0":9,"tint1":9,"tint2":9},
         {"name": "player_zero_beard_shv_chin_000_03", "drawable":-894355274,"albedo":1653184168,"normal":-765171760,"material":1364420450,"palette":-541985204,"tint0":24,"tint1":66,"tint2":77},
         {"name": "player_zero_beard_shv_chin_000_05", "drawable":213400783,"albedo":1653184168,"normal":-765171760,"material":1364420450,"palette":-541985204,"tint0":24,"tint1":66,"tint2":77},

@@ -306,7 +306,7 @@ function SetupStores()
                 btnToggle.action = function()
                     ToggleDrawable(drawable)
                 end
-                W.UI.CreatePageItem("clothingMenu", "drawable_list", 0, btnToggle);
+                W.UI.CreatePageItem("clothingMenu", "drawable_list", drawable.drawable, btnToggle);
 
                 if IsMetaPedUsingDrawable(previewPed, drawable.drawable) then
                     W.UI.SetPageItemEndHtml("clothingMenu", "drawable_list", drawable.drawable, "<tick on>")
