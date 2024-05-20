@@ -1,7 +1,7 @@
 <CPedModelInfo__InitDataList>
     <InitDatas itemType="CPedModelInfo__InitData">
         <Item>
-            <Name>w_dutch</Name>
+            <Name>mp_dutch</Name>
             <LocoArchetypes>
                 <Item>dutch</Item>
             </LocoArchetypes>
@@ -105,7 +105,6 @@
             <SpawnRange>SR_Default</SpawnRange>
             <TrackPed value="True" />
             <TrackerPathWidth value="1" />
-            <lodDistances>0 0 0</lodDistances>
             <zutiasba_0xf45d226f value="0" />
             <AttributeSet />
             <chskwqha_0xc6d90bc4 />
@@ -222,7 +221,6 @@
             <SpawnRange>SR_Default</SpawnRange>
             <TrackPed value="True" />
             <TrackerPathWidth value="1" />
-            <lodDistances>0 0 0</lodDistances>
             <zutiasba_0xf45d226f value="0" />
             <AttributeSet />
             <chskwqha_0xc6d90bc4 />

@@ -9,13 +9,11 @@
     "clothingCharacters": [
         {"name": "Abigail Roberts", "model": "cs_abigailroberts"},
         {"name": "Arthur", "model": "player_zero"},
-        {"name": "Dutch", "model": "cs_dutch"},
-        {"name": "Dutch (custom)", "model": "w_dutch"},
+        {"name": "Dutch (MP)", "model": "mp_dutch"},
         {"name": "John", "model": "player_three"},
         {"name": "MP Male", "model": "mp_male"},
         {"name": "MP Female", "model": "mp_female"},
-        {"name": "Sadie Adler", "model": "cs_mrsadler"},
-        {"name": "Sadie Adler (custom)", "model": "mp_mrsadler"}
+        {"name": "Sadie Adler (MP)", "model": "mp_mrsadler"}
     ],
 
     

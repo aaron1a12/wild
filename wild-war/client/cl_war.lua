@@ -443,7 +443,7 @@ Citizen.CreateThread(function()
                 local dist = GetVectorDist(coords, playerCoords)
     
                 if dist < 10.0 then
-                    DrawTextAtCoord(coords, "Ped ID: " .. ped .. "\nNet: "..PedToNet(ped).."\nRelation: " .. GetPedRelationshipGroupHash(ped) .. "\nSpeed: "..tostring(GetEntitySpeed(PlayerPedId()))   , 0.25, 255, 255, 255, 255)
+                    DrawTextAtCoord(coords, "Ped ID: " .. ped .. "\nNet: "..PedToNet(ped).."\nRelation: " .. GetPedRelationshipGroupHash(ped) .. "\nSpeed: "..tostring(GetEntitySpeed(ped))   , 0.25, 255, 255, 255, 255)
                 end
 
             end

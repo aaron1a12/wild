@@ -377,10 +377,6 @@ function OnWhistle()
             end            
         end
 
-        
-
-
-
         TaskGoToEntity(mount, playerPed, -1, 2.5, 1.5, 0, 0)
         --TaskFollowAndConverseWithPed(mount, playerPed, 0, 0, 2.25, 2.75, 8, 0.0, 0.0, 1069547520, 1073741824)
         --TaskGoToWhistle(mount, playerPed, 3)

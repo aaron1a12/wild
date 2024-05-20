@@ -8,21 +8,22 @@ local loadout = {}
 loadout.model = "player_zero"
 loadout.preset = 0
 loadout.enabledDrawables = {}
-loadout.disabledDrawables = {}
 loadout.voice = nil
 loadout.loco = 0
 
-local bDisablingDrawables = false
+local bViewingDrawables = false
+local bModifyingDrawable = false
+local lastSelectedDrawable = 0
+local promptModifyDrawable = 0
 
 local pedDrawables = json.decode(LoadResourceFile(GetCurrentResourceName(), "pedDrawables.json"))
 
 local bShouldReloadPlayer = false
 
 
-function IsDrawableInList(t, item)
+function IsDrawableInList(t, hash)
     for _, tItem in pairs(t) do
-        --print("Comparing item #" .. tostring(_)..", "..tostring(tItem[1]))
-        if tItem[1] == item[1] then
+        if tItem[1] == hash then
             return true
         end
     end
@@ -30,9 +31,9 @@ function IsDrawableInList(t, item)
     return false
 end
 
-function RemoveDrawableFromList(t, item)
+function RemoveDrawableFromList(t, hash)
     for i = 1, #t do
-        if t[i][1] == item[1] then
+        if t[i][1] == hash then
             table.remove(t, i)
             return
         end
@@ -51,6 +52,18 @@ function IsMetaPedUsingDrawable(ped, hash)
     return false
 end
 
+function UpdateModifyPrompt(drawableHash)
+    if promptModifyDrawable == 0 then
+        return
+    end
+
+    if IsMetaPedUsingDrawable(previewPed, drawableHash) then
+        UiPromptSetEnabled(promptModifyDrawable, true)
+    else
+        UiPromptSetEnabled(promptModifyDrawable, false)
+    end
+end
+
 function ToggleDrawable(drawable)
 
     local drawableDat = {
@@ -65,38 +78,51 @@ function ToggleDrawable(drawable)
     -- Enabling drawable
 
     if bEnable then
-        if not IsDrawableInList(loadout.enabledDrawables, drawableDat) then
+        if not IsDrawableInList(loadout.enabledDrawables, drawableDat[1]) then
             table.insert(loadout.enabledDrawables, drawableDat)
-        end
-
-        if IsDrawableInList(loadout.disabledDrawables, drawableDat) then
-            RemoveDrawableFromList(loadout.disabledDrawables, drawableDat)
         end
     end
 
     -- Disabling drawable
 
     if not bEnable then
-        if not IsDrawableInList(loadout.disabledDrawables, drawableDat) then
-            table.insert(loadout.disabledDrawables, drawableDat)
-        end
-
-        if IsDrawableInList(loadout.enabledDrawables, drawableDat) then
-            RemoveDrawableFromList(loadout.enabledDrawables, drawableDat)
-        end
+        RemoveDrawableFromList(loadout.enabledDrawables, drawableDat[1])
     end
 
     UpdatePreviewPed()
     
-    while not bEnable == IsMetaPedUsingDrawable(previewPed, drawableDat[1]) do
-        Citizen.Wait(100)
+    local timeOut = 500
+    while not bEnable == IsMetaPedUsingDrawable(previewPed, drawableDat[1]) and timeOut > 0 do
+        Wait(50)
+        timeOut = timeOut - 50
     end
+
+    while bEnable == not IsMetaPedUsingDrawable(previewPed, drawableDat[1]) and timeOut > 0 do
+        Wait(50)
+        timeOut = timeOut - 50
+    end
+    
+    Citizen.Wait(1)
+
+    UpdateModifyPrompt(drawableDat[1])
 
     if IsMetaPedUsingDrawable(previewPed, drawableDat[1]) then
         W.UI.SetPageItemEndHtml("clothingMenu", "drawable_list", drawableDat[1], "<tick on>")
     else
         W.UI.SetPageItemEndHtml("clothingMenu", "drawable_list", drawableDat[1], "<tick>")
+
+        if bEnable then -- FAIL TO ENABLE DRAWABLE
+            RemoveDrawableFromList(loadout.enabledDrawables, drawableDat[1])
+        end
     end
+end
+
+function CreateModifyPrompt()
+    promptModifyDrawable = PromptRegisterBegin()
+    PromptSetControlAction(promptModifyDrawable, `INPUT_GAME_MENU_OPTION`) -- space key
+    PromptSetText(promptModifyDrawable, CreateVarString(10, "LITERAL_STRING", "Modify"))
+    UiPromptSetEnabled(promptModifyDrawable, false)
+    PromptRegisterEnd(promptModifyDrawable)
 end
 
 function TestVoice(ped, voice)
@@ -173,6 +199,31 @@ function SaveOutfit()
     end
 end
 
+function OpenDrawableForEditing(drawable)
+    if not IsDrawableInList(loadout.enabledDrawables, drawable.drawable) then
+        ToggleDrawable(drawable)
+    end
+
+    local drawableDat = {}
+
+    for _, tItem in pairs(loadout.enabledDrawables) do
+        if tItem[1] == drawable.drawable then
+            drawableDat = tItem
+        end
+    end
+
+    if drawableDat[1] == nil then
+        ShowText("Error opening drawable")
+        Citizen.Wait(501)
+        W.UI.GoBack()
+        return
+    end
+
+    W.UI.SetSwitchIndex("clothingMenu", "modify_drawable", "btnTint0", drawableDat[6])
+    W.UI.SetSwitchIndex("clothingMenu", "modify_drawable", "btnTint1", drawableDat[7])
+    W.UI.SetSwitchIndex("clothingMenu", "modify_drawable", "btnTint2", drawableDat[8])
+end
+
 AddEventHandler("wild:cl_onMenuClosing", function(menu)
     SaveOutfit()
 end)
@@ -222,14 +273,13 @@ function SetupStores()
         btnEditOutfit.description = "Select to edit outfit #"..tostring(i);
         btnEditOutfit.action = function()
 
-            if editingOutfit ~= nil then
+            if editingOutfit ~= i then
                 SaveOutfit()
             end
 
-            OpenOutfitForEditing(i)
             W.UI.GoToPage("clothingMenu", "outfit_edit")
         end
-        W.UI.CreatePageItem("clothingMenu", "outfits", 0, btnEditOutfit);
+        W.UI.CreatePageItem("clothingMenu", "outfits", "outfit"..tostring(i), btnEditOutfit);
     end
 
     --
@@ -280,7 +330,6 @@ function SetupStores()
     btnDrawable.text = "Drawable Components";
     btnDrawable.description = "Experimental";
     btnDrawable.action = function()
-        bDisablingDrawables = false
         W.UI.GoToPage("clothingMenu", "drawable_models")
     end
     W.UI.CreatePageItem("clothingMenu", "outfit_edit", 0, btnDrawable);
@@ -306,6 +355,18 @@ function SetupStores()
                 btnToggle.action = function()
                     ToggleDrawable(drawable)
                 end
+                btnToggle.altAction = function()
+                    bModifyingDrawable = true
+                    bViewingDrawables = false
+                    PromptDelete(promptModifyDrawable)
+                    promptModifyDrawable = 0
+
+                    W.UI.EditPage("clothingMenu", "modify_drawable", "MODIFY\nDRAWABLE", drawable.name)
+                    W.UI.GoToPage("clothingMenu", "modify_drawable")
+                    PlaySound("HUD_SHOP_SOUNDSET", "SELECT")
+
+                    OpenDrawableForEditing(drawable)
+                end
                 W.UI.CreatePageItem("clothingMenu", "drawable_list", drawable.drawable, btnToggle);
 
                 if IsMetaPedUsingDrawable(previewPed, drawable.drawable) then
@@ -316,18 +377,96 @@ function SetupStores()
             end
 
             W.UI.GoToPage("clothingMenu", "drawable_list")
+
+            --
+            -- Begin Modify drawable prompt 
+            -- 
+
+            bViewingDrawables = true
+            CreateModifyPrompt()
+
+            -- End Modify drawable prompt 
         end
 
         W.UI.CreatePageItem("clothingMenu", "drawable_models", 0, params);
     end
 
+    --
+    -- Modify drawable sub page
+    --
+
+    W.UI.CreatePage("clothingMenu", "modify_drawable", "", "", 0, 4);
+
+
+    local btnTint0 = {}
+    btnTint0.text = "Tint 0";
+    btnTint0.action = function(value)        
+        for _, tItem in pairs(loadout.enabledDrawables) do
+            if tItem[1] == lastSelectedDrawable then
+                tItem[6] = value
+            end
+        end
+
+        UpdatePreviewPed()
+    end
+
+    btnTint0.switch = {}
+
+    for i = 0, 255 do
+        table.insert(btnTint0.switch, {tostring(i), i})
+    end
+
+    W.UI.CreatePageItem("clothingMenu", "modify_drawable", "btnTint0", btnTint0);
+
+    local btnTint1 = {}
+    btnTint1.text = "Tint 1";
+    btnTint1.action = function(value)        
+        for _, tItem in pairs(loadout.enabledDrawables) do
+            if tItem[1] == lastSelectedDrawable then
+                tItem[7] = value
+            end
+        end
+
+        UpdatePreviewPed()
+    end
+
+    btnTint1.switch = {}
+
+    for i = 0, 255 do
+        table.insert(btnTint1.switch, {tostring(i), i})
+    end
+
+    W.UI.CreatePageItem("clothingMenu", "modify_drawable", "btnTint1", btnTint1);
+
+    local btnTint2 = {}
+    btnTint2.text = "Tint 0";
+    btnTint2.action = function(value)        
+        for _, tItem in pairs(loadout.enabledDrawables) do
+            if tItem[1] == lastSelectedDrawable then
+                tItem[8] = value
+            end
+        end
+
+        UpdatePreviewPed()
+    end
+
+    btnTint2.switch = {}
+
+    for i = 0, 255 do
+        table.insert(btnTint2.switch, {tostring(i), i})
+    end
+
+    W.UI.CreatePageItem("clothingMenu", "modify_drawable", "btnTint2", btnTint2);
+
+    --
+    -- The rest of the edit outfit page
+    --
 
     local btnClearDrawable = {}
     btnClearDrawable.text = "Clear Drawables";
     btnClearDrawable.description = "";
     btnClearDrawable.action = function()
         loadout.enabledDrawables = {}
-        loadout.disabledDrawables = {}
         UpdatePreviewPed()
     end
     W.UI.CreatePageItem("clothingMenu", "outfit_edit", 0, btnClearDrawable);
@@ -367,7 +506,7 @@ function SetupStores()
     --
 
     local btnLoco = {}
-    btnLoco.text = "Walk Style";
+    btnLoco.text = "MP Walk Style";
     btnLoco.description = "Sets the ped's locomotion animations.";
     btnLoco.action = function(value)
         loadout.loco = value
@@ -375,31 +514,18 @@ function SetupStores()
     end
 
     btnLoco.switch = {
-        {"No override", 0},
-        {"algie", 1},
-        {"angry_female", 2},
-        {"arthur_healthy", 3},
-        {"cowboy", 4},
-        {"cowboy_f", 5},
-        {"default", 6},
-        {"default_female", 7},
-        {"free_slave_01", 8},
-        {"free_slave_02", 9},
-        {"gold_panner", 10},
-        {"guard_lantern", 11},
-        {"injured_general", 12},
-        {"john_marston", 13},
-        {"lilly_millet", 14},
-        {"lone_prisoner", 15},
-        {"lost_man", 16},
-        {"mp_ova_hunter", 17},
-        {"mp_ova_hunter_female", 18},
-        {"murfree", 19},
-        {"old_female", 20},
-        {"primate", 21},
-        {"rally", 22},
-        {"waiter", 23},
-        {"war_veteran", 24}
+        {"Default", 0},
+        {"Casual", 1},
+        {"Crazy", 2},
+        {"Drunk", 3},
+        {"Easy Rider", 4},
+        {"Flamboyant", 5},
+        {"Greenhorn", 6},
+        {"Gunslinger", 7},
+        {"Inquisitive", 8},
+        {"Refined", 9},
+        {"Silent Type", 10},
+        {"Veteran", 11},
     }
 
     W.UI.CreatePageItem("clothingMenu", "outfit_edit", "btnLoco", btnLoco);
@@ -448,7 +574,7 @@ function UpdatePreviewPed()
         end
         
         local position = currentStore.dressingRoom.player
-        previewPed = CreatePed(modelHash, position[1], position[2], position[3]-1.0, position[4], true, true, true)
+        previewPed = CreatePed(modelHash, position[1], position[2], position[3]-1.0, position[4], false, true, true)
         SetRemovePedNetworked(previewPed, 1)
         --[[]]
         SetEntityInvincible(previewPed, true)
@@ -472,14 +598,14 @@ function DeletePreviewPed()
 end
 
 function GoToDressingRoom()
+    Citizen.Wait(401)
     W.UI.OpenMenu("storeMenu", false)
-    Citizen.Wait(0)
-
+    Citizen.Wait(401) -- Wait until menu fully closed
+    
     DoScreenFadeOut(200)
     Citizen.Wait(200)
 
-    W.SetPlayerVisible(PlayerId(), false)
-
+    --W.SetPlayerVisible(PlayerId(), false)
 
     local camInfo = currentStore.dressingRoom.cam
     dressingCam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", camInfo[1], camInfo[2], camInfo[3], camInfo[4], 0.0, camInfo[5], 60.0, false, 0)
@@ -487,8 +613,13 @@ function GoToDressingRoom()
     RenderScriptCams(true, false, 0, true, true, 0)
 
     DoScreenFadeIn(200)
-    Citizen.Wait(301) -- elapsed time since opening/closing menu must be greater 500ms
+    --Citizen.Wait(301) -- elapsed time since opening/closing menu must be greater 500ms
     W.UI.OpenMenu("clothingMenu", true, true)
+
+    -- pick off where we left
+    if editingOutfit ~= nil then
+        OpenOutfitForEditing(editingOutfit)
+    end
 end
 
 
@@ -496,7 +627,7 @@ function ExitDressingRoom()
     DoScreenFadeOut(200)
     Citizen.Wait(200)
 
-    W.SetPlayerVisible(PlayerId(), true)
+    --W.SetPlayerVisible(PlayerId(), true)
     RenderScriptCams(false, false, 0, true, true, 0)
     SetCamActive(dressingCam, false)
     DestroyCam(dressingCam, true)
@@ -513,14 +644,59 @@ end
 AddEventHandler("wild:cl_onMenuClosing", function(menu)
     if menu == "clothingMenu" then
         ExitDressingRoom()
+
+        if promptModifyDrawable ~= 0 then
+            PromptDelete(promptModifyDrawable)
+            promptModifyDrawable = 0            
+        end
     end
 end)
 
+AddEventHandler("wild:cl_onMenuBack", function(menu)
+    if menu == "clothingMenu" then
+        if bViewingDrawables then
+            bViewingDrawables = false
+
+            PromptDelete(promptModifyDrawable)
+            promptModifyDrawable = 0
+        end
+
+        if bModifyingDrawable then
+            bModifyingDrawable = false
+
+            bViewingDrawables = true
+            CreateModifyPrompt()
+        end
+
+        if editingOutfit ~= 0 then
+            SaveOutfit()
+        end
+    end
+end)
+
+AddEventHandler("wild:cl_onSelectPageItem", function(menu, item)
+    if menu == "clothingMenu" then
+        if bViewingDrawables then
+            lastSelectedDrawable = tonumber(item)
+
+            UpdateModifyPrompt(lastSelectedDrawable)
+        end
+
+        if string.sub(item, 1, 6) == "outfit" and dressingCam ~= 0 then
+            local outfit = tonumber(string.sub(item, 7, 7))
+
+            if editingOutfit ~= outfit then
+                OpenOutfitForEditing(outfit)
+            end
+        end
+        
+    end
+end)
 
 local promptGroup = GetRandomIntInRange(1, 0xFFFFFF)
 local prompt = 0
 local waitTime = 10
-
+            
 
 Citizen.CreateThread(function()   
     while true do
@@ -558,7 +734,7 @@ Citizen.CreateThread(function()
                 PromptRegisterEnd(prompt)
             
                 -- Useful management. Automatically deleted when restarting resource
-                W.Prompts.AddToGarbageCollector(prompt)    
+                W.Prompts.AddToGarbageCollector(prompt)
             end
 
             if W.Prompts.GetActiveGroup() == 0 then
@@ -566,6 +742,7 @@ Citizen.CreateThread(function()
             end
 
             if UiPromptGetProgress(prompt) == 1.0 then
+                W.Prompts.RemoveFromGarbageCollector(prompt)
                 PromptDelete(prompt)
                 prompt = 0
 
@@ -576,6 +753,7 @@ Citizen.CreateThread(function()
             end
 
         elseif prompt ~=0 then
+            W.Prompts.RemoveFromGarbageCollector(prompt)
             PromptDelete(prompt)
             prompt = 0
             waitTime = 10

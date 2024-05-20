@@ -169,6 +169,7 @@ function CreateMenu(strMenuId)
 
 function OpenMenu(strMenuId, bOpen)
 {
+    // lastTriggerTime = Date.now() - 100
     // Close active menu
     if (activeMenu!="" && activeMenu.classList.contains("visible"))
     {
@@ -671,6 +672,20 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
 
     page.selectedItem = strItemId;
 
+    if (IsRedM()) 
+    {
+        fetch(`https://${GetParentResourceName()}/onSelectPageItem`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+            },
+            body: JSON.stringify({
+                menuId: strMenuId,
+                itemId: strItemId
+            })
+        });
+    }
+
     // Scroll if not visible (list menus only)
 
     var mainAreaCont = element.parentElement.parentElement;
@@ -817,7 +832,7 @@ function MoveSelection(bForward)
     }*/
 }
 
-function TriggerSelectedItem(bForce)
+function TriggerSelectedItem(bForce, bAlt)
 { 
     if (!bForce)
     {
@@ -872,7 +887,8 @@ function TriggerSelectedItem(bForce)
             },
             body: JSON.stringify({
                 itemId: page.selectedItem,
-                switchOption: switchOption
+                switchOption: switchOption,
+                bAlt: bAlt
             })
         });
     }
@@ -1138,6 +1154,11 @@ window.addEventListener('message', function(event) {
     if (event.data.cmd == "triggerSelectedItem")
     {
         TriggerSelectedItem();
+    }
+
+    if (event.data.cmd == "triggerSelectedItemAlt")
+    {
+        TriggerSelectedItem(undefined, true);
     }
 
     if (event.data.cmd == "destroyMenuAndData")

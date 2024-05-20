@@ -93,6 +93,9 @@ function W.UI.CreateMenu(strMenuId, strMenuTitle)
     SendNUIMessage({cmd = "createMenu", menuId = strMenuId, menuTitle = strMenuTitle})
 end
 
+local promptMenuSelect = 0
+local promptMenuBack = 0
+
 function W.UI.OpenMenu(strMenuId, bOpen, bNoCam)
 	local now = GetGameTimer()
 	if now-menuOpenTime < 500 then
@@ -123,7 +126,7 @@ function W.UI.OpenMenu(strMenuId, bOpen, bNoCam)
 		-- With SetNuiFocusKeepInput(), we'll use input from the game and only use SetNuiFocus() when entering text.
 
 		prevCtrlCtx = GetCurrentControlContext(0)
-		SetControlContext(0, `FrontendMenu`)
+		SetControlContext(0, `GameMenu`)
 		SetNuiFocusKeepInput(true)
 
 		--ClearPedTasksImmediately(PlayerPedId(), true, false)
@@ -145,6 +148,17 @@ function W.UI.OpenMenu(strMenuId, bOpen, bNoCam)
 			Citizen.Wait(1)
 			SetNuiFocus(true)
 		end)
+
+		promptMenuSelect = PromptRegisterBegin()
+        PromptSetControlAction(promptMenuSelect, `INPUT_GAME_MENU_ACCEPT`)
+        PromptSetText(promptMenuSelect, CreateVarString(10, "LITERAL_STRING", "Select"))
+        PromptRegisterEnd(promptMenuSelect)
+
+		promptMenuBack = PromptRegisterBegin()
+        PromptSetControlAction(promptMenuBack, `INPUT_GAME_MENU_CANCEL`)
+        PromptSetText(promptMenuBack, CreateVarString(10, "LITERAL_STRING", "Back"))
+        PromptRegisterEnd(promptMenuBack)
+
 	else
 		TriggerEvent('wild:cl_onMenuClosing', currentMenu)
 
@@ -166,6 +180,11 @@ function W.UI.OpenMenu(strMenuId, bOpen, bNoCam)
 				DestroyCam(tempCam, true)
 			end	
 		end)
+
+		PromptDelete(promptMenuSelect)
+		PromptDelete(promptMenuBack)
+		promptMenuSelect = 0
+		promptMenuBack = 0
 	end
 
 	local soundset_ref = "Study_Sounds"
@@ -204,6 +223,7 @@ end
 
 function W.UI.GoBack()	
 	SendNUIMessage({cmd = "goBack"})
+	TriggerEvent('wild:cl_onMenuBack', currentMenu)
 end
 
 function W.UI.ClearHistory()	
@@ -235,6 +255,7 @@ function W.UI.GetCurrentMenu()
 end
 
 local pageItemActions = {}
+local pageItemAltActions = {}
 local pageItemAutoId = 0
 
 function W.UI.CreatePageItem(strMenuId, strPageId, strItemId, oExtraItemParams)
@@ -252,6 +273,10 @@ function W.UI.CreatePageItem(strMenuId, strPageId, strItemId, oExtraItemParams)
 		pageItemActions[strItemId] = oExtraItemParams.action
 	end
 
+	if oExtraItemParams.altAction ~= nil then
+		pageItemAltActions[strItemId] = oExtraItemParams.altAction
+	end
+
 	SendNUIMessage({cmd = "createPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId, extraItemParams = oExtraItemParams})
 end
 
@@ -261,16 +286,27 @@ function W.UI.SetPageItemEndHtml(strMenuId, strPageId, strItemId, strHtml)
 end
 
 function W.UI.DestroyPageItem(strMenuId, strPageId, strItemId)
-	--pageItemActions[strItemId] = nil
+	pageItemActions[strItemId] = nil
+	pageItemAltActions[strItemId] = nil
 
 	SendNUIMessage({cmd = "destroyPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId})
 	Citizen.Wait(0)
 end
 
+
+W.UI.RegisterCallback("onSelectPageItem", function(data, cb)
+	TriggerEvent('wild:cl_onSelectPageItem', data.menuId, data.itemId)	
+	cb('ok')
+end)
+
 W.UI.RegisterCallback("triggerSelectedItem", function(data, cb)
 	if pageItemActions[data.itemId] ~= nil then
 		if data.switchOption == nil then
-			pageItemActions[data.itemId]()
+			if not data.bAlt then
+				pageItemActions[data.itemId]()
+			elseif pageItemAltActions[data.itemId] ~= nil then
+				pageItemAltActions[data.itemId]()
+			end
 		else
 			pageItemActions[data.itemId](data.switchOption)
 		end
@@ -342,7 +378,7 @@ Citizen.CreateThread(function()
 				DisableFrontendThisFrame()
 				SetMouseCursorActiveThisFrame(true)
 
-				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_DOWN") then
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_DOWN") then
 					local soundset_ref = "HUD_DOMINOS_SOUNDSET"
 					local soundset_name =  "NAV_DOWN"
 					Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
@@ -351,7 +387,7 @@ Citizen.CreateThread(function()
 					SendNUIMessage({cmd = "moveSelection", forward = true})
 				end
 
-				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_UP") then
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_UP") then
 					local soundset_ref = "HUD_DOMINOS_SOUNDSET"
 					local soundset_name =  "NAV_UP"
 					Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
@@ -360,7 +396,7 @@ Citizen.CreateThread(function()
 					SendNUIMessage({cmd = "moveSelection", forward = false})
 				end
 
-				if IsControlJustPressed(0, "INPUT_FRONTEND_ACCEPT") then
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_ACCEPT") then
 					local soundset_ref = "HUD_SHOP_SOUNDSET"
 					local soundset_name =  "SELECT"
 					Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
@@ -368,18 +404,22 @@ Citizen.CreateThread(function()
 
 					SendNUIMessage({cmd = "triggerSelectedItem"})
 				end
+
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_OPTION") then
+					SendNUIMessage({cmd = "triggerSelectedItemAlt"})
+				end
 				
-				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_LEFT") then
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_LEFT") then
 					PlaySound("RDRO_Spectate_Sounds", "left_bumper")
 					SendNUIMessage({cmd = "flipCurrentSwitch", forward = false})
 				end
 
-				if IsControlJustPressed(0, "INPUT_FRONTEND_NAV_RIGHT") then
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_RIGHT") then
 					PlaySound("RDRO_Spectate_Sounds", "right_bumper")
 					SendNUIMessage({cmd = "flipCurrentSwitch", forward = true})
 				end
 
-				if IsControlJustPressed(0, "INPUT_FRONTEND_CANCEL") then -- or IsControlJustPressed(0, "INPUT_QUIT")
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_CANCEL") then -- or IsControlJustPressed(0, "INPUT_QUIT")
 					W.UI.GoBack()
 					--W.UI.OpenMenu(currentMenu, false)
 				end
@@ -396,6 +436,12 @@ Citizen.CreateThread(function()
 	end
 end)
 
+AddEventHandler("wild:cl_onPlayerDeath", function()
+	if currentMenu ~= "" then
+		W.UI.GoBack()
+		W.UI.OpenMenu(currentMenu, false)
+	end
+end)
 
 --
 -- Prompt Management (garbage collection)
@@ -418,6 +464,23 @@ function W.Prompts.AddToGarbageCollector(promptId)
 
 	table.insert(W.Prompts.Pool[resourceName], promptId)
 end
+
+function W.Prompts.RemoveFromGarbageCollector(promptId)
+	local resourceName = GetInvokingResource()
+
+	if resourceName == nil then
+		resourceName = GetCurrentResourceName()
+	end
+	
+	local resourcePrompts = W.Prompts.Pool[resourceName]
+	for i = 1, #resourcePrompts do
+		if resourcePrompts[i] == promptId then
+			table.remove(W.Prompts.Pool[resourceName], i)
+			return
+		end
+	end
+end
+
 
 -- The garbage collection
 AddEventHandler('onResourceStop', function(resourceName)

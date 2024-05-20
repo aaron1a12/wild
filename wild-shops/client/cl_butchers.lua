@@ -309,6 +309,7 @@ Citizen.CreateThread(function()
             PromptSetActiveGroupThisFrame(promptGroup, CreateVarString(10, "LITERAL_STRING", "Butcher"))
 
             if UiPromptGetProgress(prompt) == 1.0 then
+                W.Prompts.RemoveFromGarbageCollector(prompt)
                 PromptDelete(prompt)
                 prompt = 0
 
@@ -355,6 +356,7 @@ Citizen.CreateThread(function()
             end
 
         elseif prompt ~=0 then
+            W.Prompts.RemoveFromGarbageCollector(prompt)
             PromptDelete(prompt)
             prompt = 0
             waitTime = 10

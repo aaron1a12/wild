@@ -216,6 +216,7 @@ Citizen.CreateThread(function()
         end
 
         if IsEntityDead(PlayerPedId()) then -- Respawning
+            TriggerEvent('wild:cl_onPlayerDeath')
             if not bRespawning then
                 bRespawning = true
 

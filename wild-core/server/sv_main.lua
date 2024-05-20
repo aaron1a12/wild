@@ -32,7 +32,6 @@ function NewDefaultOutfit()
     outfit.model = "player_zero"
     outfit.preset = 3
     outfit.enabledDrawables = {}
-    outfit.disabledDrawables = {}
     outfit.voice = nil
     outfit.loco = 0
 
@@ -76,6 +75,12 @@ local function ValidatePlayerProps(playerEntry)
     if playerEntry["currentOutfit"] == nil then
         playerEntry["currentOutfit"] = 1
     end
+
+    -- Legacy fix. Todo: remove soon
+    if playerEntry.outfits[1].disabledDrawables ~= nil then playerEntry.outfits[1].disabledDrawables = nil end
+    if playerEntry.outfits[2].disabledDrawables ~= nil then playerEntry.outfits[2].disabledDrawables = nil end
+    if playerEntry.outfits[3].disabledDrawables ~= nil then playerEntry.outfits[3].disabledDrawables = nil end
+    if playerEntry.outfits[4].disabledDrawables ~= nil then playerEntry.outfits[4].disabledDrawables = nil end
 end
 
 local function LoadData()

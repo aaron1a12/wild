@@ -176,12 +176,10 @@ RegisterCommand('cleanup', function()
 end, false)
 
 
-RegisterCommand('test', function() 
-    ForceSpawnPerschar("VAL_BUTCHER", true)
-    ForceSpawnPerschar(`VAL_BUTCHER`, true)
-	--[[local x, y, z = table.unpack(GetEntityCoords(GetPlayerPed(PlayerId()), false))
+--[[RegisterCommand('test', function() 
+	local x, y, z = table.unpack(GetEntityCoords(GetPlayerPed(PlayerId()), false))
 
-    local model = `wild_dutch`
+    local model = `w_dutch`
 
     RequestModel(model)
 
@@ -194,5 +192,5 @@ RegisterCommand('test', function()
     SetEntityInvincible(ped, true)
     SetPedKeepTask(ped)
     SetPedAsNoLongerNeeded(ped)
-    SetRandomOutfitVariation(ped)]]
-end, false)
+    SetRandomOutfitVariation(ped)
+end, false)]]

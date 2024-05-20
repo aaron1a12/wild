@@ -2,6 +2,24 @@
 -- Global outfit functionality
 --
 
+function GetLocoFromInt(loco)
+    local locoStr = ""
+
+    if loco == 1 then locoStr = "MP_Style_Casual" end
+    if loco == 2 then locoStr = "MP_Style_Crazy" end
+    if loco == 3 then locoStr = "mp_style_drunk" end
+    if loco == 4 then locoStr = "MP_Style_EasyRider" end
+    if loco == 5 then locoStr = "MP_Style_Flamboyant" end
+    if loco == 6 then locoStr = "MP_Style_Greenhorn" end
+    if loco == 7 then locoStr = "MP_Style_Gunslinger" end
+    if loco == 8 then locoStr = "mp_style_inquisitive" end
+    if loco == 9 then locoStr = "MP_Style_Refined" end
+    if loco == 10 then locoStr = "MP_Style_SilentType" end
+    if loco == 11 then locoStr = "MP_Style_Veteran" end
+
+    return locoStr
+end
+
 function W.GetPlayerCurrentOutfit()
     RefreshPlayerData()
     return W.PlayerData["outfits"][W.PlayerData["currentOutfit"]]
@@ -26,14 +44,9 @@ function W.ModifyPlayerOutfit(index, outfit)
 
     -- Copy the drawables
     localOutfit.enabledDrawables = {}
-    localOutfit.disabledDrawables = {}
 
     for i, drawable in pairs(outfit.enabledDrawables) do
         localOutfit.enabledDrawables[i] = {drawable[1], drawable[2],  drawable[3],  drawable[4], drawable[5], drawable[6], drawable[7], drawable[8]}
-    end
-    
-    for i, drawable in pairs(outfit.disabledDrawables) do
-        localOutfit.disabledDrawables[i] = {drawable[1], drawable[2],  drawable[3],  drawable[4], drawable[5], drawable[6], drawable[7], drawable[8]}
     end
 
     W.PlayerData["outfits"][index] = localOutfit
@@ -47,10 +60,6 @@ function W.SetPedOutfit(ped, outfit)
 
     for _, enabledDrawable in pairs(outfit.enabledDrawables) do
         SetMetaPedTag(ped, enabledDrawable[1], enabledDrawable[2],  enabledDrawable[3],  enabledDrawable[4], enabledDrawable[5], enabledDrawable[6], enabledDrawable[7], enabledDrawable[8])
-    end
-    
-    for _, disabledDrawable in pairs(outfit.disabledDrawables) do
-        RemoveTagFromMetaPed(ped, disabledDrawable[1], 1)
     end
 
     while not IsPedReadyToRender(ped) do
@@ -70,35 +79,22 @@ function W.SetPedOutfit(ped, outfit)
         N_0xd47d47efbf103fb8(ped, 3)
     end
 
+    SetPedBlackboardBool(ped, "MP_Style_Casual", false, -1)
+    SetPedBlackboardBool(ped, "MP_Style_Crazy", false, -1)
+    SetPedBlackboardBool(ped, "mp_style_drunk", false, -1)
+    SetPedBlackboardBool(ped, "MP_Style_EasyRider", false, -1)
+    SetPedBlackboardBool(ped, "MP_Style_Flamboyant", false, -1)
+    SetPedBlackboardBool(ped, "MP_Style_Greenhorn", false, -1)
+    SetPedBlackboardBool(ped, "MP_Style_Gunslinger", false, -1)
+    SetPedBlackboardBool(ped, "mp_style_inquisitive", false, -1)
+    SetPedBlackboardBool(ped, "MP_Style_Refined", false, -1)
+    SetPedBlackboardBool(ped, "MP_Style_SilentType", false, -1)
+    SetPedBlackboardBool(ped, "MP_Style_Veteran", false, -1)
+
     if outfit.loco ~= 0 then
-        local locoStr = ""
-
-        if outfit.loco == 1 then locoStr = "algie" end
-        if outfit.loco == 2 then locoStr = "angry_female" end
-        if outfit.loco == 3 then locoStr = "arthur_healthy" end
-        if outfit.loco == 4 then locoStr = "cowboy" end
-        if outfit.loco == 5 then locoStr = "cowboy_f" end
-        if outfit.loco == 6 then locoStr = "default" end
-        if outfit.loco == 7 then locoStr = "default_female" end
-        if outfit.loco == 8 then locoStr = "free_slave_01" end
-        if outfit.loco == 9 then locoStr = "free_slave_02" end
-        if outfit.loco == 10 then locoStr = "gold_panner" end
-        if outfit.loco == 11 then locoStr = "guard_lantern" end
-        if outfit.loco == 12 then locoStr = "injured_general" end
-        if outfit.loco == 13 then locoStr = "john_marston" end
-        if outfit.loco == 14 then locoStr = "lilly_millet" end
-        if outfit.loco == 15 then locoStr = "lone_prisoner" end
-        if outfit.loco == 16 then locoStr = "lost_man" end
-        if outfit.loco == 17 then locoStr = "mp_ova_hunter" end
-        if outfit.loco == 18 then locoStr = "mp_ova_hunter_female" end
-        if outfit.loco == 19 then locoStr = "murfree" end
-        if outfit.loco == 20 then locoStr = "old_female" end
-        if outfit.loco == 21 then locoStr = "primate" end
-        if outfit.loco == 22 then locoStr = "rally" end
-        if outfit.loco == 23 then locoStr = "waiter" end
-        if outfit.loco == 24 then locoStr = "war_veteran" end
-
-        SetPedDesiredLocoForModel(ped, locoStr)
+        SetPedBlackboardBool(ped, GetLocoFromInt(outfit.loco), true, -1)
+    else
+        SetPedDesiredLocoForModel(ped, "default", true, -1) -- Does not network sync but at least allows slow walk on MP peds
     end
 end
 
