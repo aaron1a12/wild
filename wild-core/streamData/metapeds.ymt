@@ -231,5 +231,121 @@
             <xsmxfeaa_0xcffe931e value="False" />
             <wdzndzba_0xa5229965 value="False" />
         </Item>
+
+        <Item>
+            <Name>mp_hoseamatthews</Name>
+            <LocoArchetypes>
+                <Item>ajgazoha_0x716842a0</Item>
+            </LocoArchetypes>
+            <FragName>META_Base_HoseaMatthews</FragName>
+            <ClipDictionaryName>null</ClipDictionaryName>
+            <BlendShapeFileName>null</BlendShapeFileName>
+            <ExpressionSetName>rxpoumac_0x8c6848a3</ExpressionSetName>
+            <Pedtype>civmale</Pedtype>
+            <MovementClipSet />
+            <fdhdosga_0xd282b498>qbnqcuua_0xf7ff54cb</fdhdosga_0xd282b498>
+            <FullBodyDamageClipSet>dam_ko</FullBodyDamageClipSet>
+            <AdditiveDamageClipSet>dam_ad</AdditiveDamageClipSet>
+            <ajulutca_0xf656e7cc>clip_set_id_invalid</ajulutca_0xf656e7cc>
+            <mosasnka_0x33ee71a3>clip_set_id_invalid</mosasnka_0x33ee71a3>
+            <puyzvqga_0x7b02f627>clip_set_id_invalid</puyzvqga_0x7b02f627>
+            <GestureSettingsName>gen_male</GestureSettingsName>
+            <FacialClipsetGroupName>nlavayza_0x0ab6885d</FacialClipsetGroupName>
+            <DefaultVisemeClipSet>anim_group_visemes_m_lo</DefaultVisemeClipSet>
+            <SidestepClipSet>clip_set_id_invalid</SidestepClipSet>
+            <PoseMatcherName>Male</PoseMatcherName>
+            <GetupSetHash>nmbs_slow_getups</GetupSetHash>
+            <ScenarioCapabilities>Smoker</ScenarioCapabilities>
+            <CreatureMetadataName>ukwdywfa_0xd089fe7c</CreatureMetadataName>
+            <qcrlzvka_0x3207fdf6>null</qcrlzvka_0x3207fdf6>
+            <DecisionMakerName>ubuaoapb_0x72249735</DecisionMakerName>
+            <kwpxjyqa_0xc4e3a8e3>human</kwpxjyqa_0xc4e3a8e3>
+            <MotionTaskDataSetName>standard_ped</MotionTaskDataSetName>
+            <DefaultTaskDataSetName>standard_ped</DefaultTaskDataSetName>
+            <PedCapsuleName>standard_male</PedCapsuleName>
+            <PedLayoutName />
+            <PedComponentSetName />
+            <PedIKSettingsName />
+            <TaskDataName />
+            <ClimbParamsName>standard_ped</ClimbParamsName>
+            <nuubccla_0x0ce51a59>standard_ped</nuubccla_0x0ce51a59>
+            <AmbulanceShouldRespondTo value="True" />
+            <CanRideBikeWithNoHelmet value="False" />
+            <CanSpawnInCar value="True" />
+            <bOnlyBulkyItemVariations value="False" />
+            <RelationshipGroup>svmetnfa_0x3d714f12</RelationshipGroup>
+            <NavCapabilitiesName>standard_ped</NavCapabilitiesName>
+            <SpeedDataName>default</SpeedDataName>
+            <PerceptionInfo>default_perception</PerceptionInfo>
+            <DefaultBrawlingStyle>qatdmcga_0x69c76c14</DefaultBrawlingStyle>
+            <DefaultUnarmedWeapon>weapon_unarmed</DefaultUnarmedWeapon>
+            <DefaultMeleeProgram>xvkhspsa_0x4fc75164</DefaultMeleeProgram>
+            <DefaultCombatDirector>lfjindga_0x7507fc63</DefaultCombatDirector>
+            <StatName />
+            <SpeciesName>zhdzzcka_0xf6a70676</SpeciesName>
+            <DiscoverableName />
+            <UndiscoveredName />
+            <vhzqgnba_0x9e63e6ed>ruhuymea_0x4a59c18f</vhzqgnba_0x9e63e6ed>
+            <ScavengerLayout>human</ScavengerLayout>
+            <Personality>takkcpia_0x9b8b72e0</Personality>
+            <AmbientResponseProfile>standard_ped</AmbientResponseProfile>
+            <DefaultWeaponLoadout>lo_hosea</DefaultWeaponLoadout>
+            <koorpvda_0x936a1503 />
+            <WeaponAnimationsGroup>player</WeaponAnimationsGroup>
+            <HealthConfigHash>gcdqnoma_0x5ebc87de</HealthConfigHash>
+            <elhtqona_0x895861da>rczkbkca_0xe20f9b90</elhtqona_0x895861da>
+            <xhvibkra_0xb2fe2edf />
+            <CombatInfo>kavsuvta_0x7778a019</CombatInfo>
+            <qpnkkvea_0x3cf2af47>default</qpnkkvea_0x3cf2af47>
+            <VfxInfoName>sacrxbkb_0x8a806dff</VfxInfoName>
+            <AmbientClipsForFlee>flee</AmbientClipsForFlee>
+            <GenericSkinningSize>Small</GenericSkinningSize>
+            <usjpufaa_0x43d57fd3 value="False" />
+            <Drivers />
+            <QualityProbability />
+            <Radio1>RADIO_GENRE_OFF</Radio1>
+            <Radio2>RADIO_GENRE_OFF</Radio2>
+            <MinActivationImpulse value="20" />
+            <Stubble value="0" />
+            <kcdwdkxa_0x0ab020bb value="0" />
+            <FurEffect value="0" />
+            <HDDist value="0" />
+            <dnqiqydc_0xc5691df9 value="-1" />
+            <gkuzagra_0xc6af94a8 value="0" />
+            <ntqafoba_0x5b0be8dc value="False" />
+            <PedSize>PS_MEDIUM</PedSize>
+            <Scale value="1" />
+            <CutsceneScale value="0.9836" />
+            <ScaleRandomOffset value="0" />
+            <KilledPerceptionRangeModifer value="-1" />
+            <Sexiness />
+            <tiqffsfa_0x7f0093da />
+            <AgeGroup>AGE_ADULT</AgeGroup>
+            <mmgrbpma_0x6899d915>ibcedirb_0x22d02028</mmgrbpma_0x6899d915>
+            <MaxPassengersInCar value="0" />
+            <ExternallyDrivenDOFs>EMPTY, HIGH_HEELS, COLLAR, BREATHING, ROOT_HEIGHT, PISTOL_HOLSTER</ExternallyDrivenDOFs>
+            <PedVoiceGroup>koybhtfa_0x3ff72712</PedVoiceGroup>
+            <AnimalAudioObject />
+            <ninvcmlb_0x8c9ccceb />
+            <ncuqpzia_0x7c337da0>zcizpmqa_0xa54bbb71</ncuqpzia_0x7c337da0>
+            <BreathingSettingsName>human</BreathingSettingsName>
+            <AbilityType>SAT_NONE</AbilityType>
+            <SecondaryAbilityType>SAT_NONE</SecondaryAbilityType>
+            <SuperlodType>slod_human</SuperlodType>
+            <ScenarioPopStreamingSlot>SCENARIO_POP_STREAMING_NORMAL</ScenarioPopStreamingSlot>
+            <DefaultSpawningPreference>DSP_NORMAL</DefaultSpawningPreference>
+            <SpawnRange>SR_Default</SpawnRange>
+            <TrackPed value="True" />
+            <TrackerPathWidth value="1" />
+            <zutiasba_0xf45d226f value="0" />
+            <AttributeSet />
+            <chskwqha_0xc6d90bc4 />
+            <zrxuobaa_0x120c7ac8 value="0" />
+            <scorgaqa_0x187e18e5 value="50" />
+            <pbwlkcaa_0x15fd61aa value="80" />
+            <vslhbdca_0x2fc486f7 value="1" />
+            <xsmxfeaa_0xcffe931e value="False" />
+            <wdzndzba_0xa5229965 value="False" />
+            </Item>
     </InitDatas>
 </CPedModelInfo__InitDataList>
