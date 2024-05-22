@@ -411,16 +411,12 @@ function OnFeed()
 
     SetTimeout(5000, function()
         bRunningTask = false
-        ClearPedBloodDamage(mount)
-        ClearPedDamageDecalByZone(mount, 10, "ALL")
-        ClearPedEnvDirt(mount)
-
         SetAttributePoints(mount, ePedAttribute.PA_HEALTH, GetMaxAttributePoints(mount, ePedAttribute.PA_HEALTH))
         SetAttributePoints(mount, ePedAttribute.PA_STAMINA, GetMaxAttributePoints(mount, ePedAttribute.PA_STAMINA))
 
-        SetAttributeCoreValue(mount, 0, 100)
-        SetAttributeCoreValue(mount, 1, 100)
-        SetEntityHealth(mount, 100, 0)
+        SetAttributeCoreValue(mount, 0, 200)
+        SetAttributeCoreValue(mount, 1, 200)
+        SetEntityHealth(mount, GetMaxAttributePoints(mount, ePedAttribute.PA_HEALTH), 0)
         RestorePedStamina(mount, 100.0)
     end)
 end
