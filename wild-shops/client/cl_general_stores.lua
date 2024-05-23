@@ -694,9 +694,9 @@ AddEventHandler("wild:cl_onSelectPageItem", function(menu, item)
 end)
 
 local promptGroup = GetRandomIntInRange(1, 0xFFFFFF)
+local promptGroupStr = CreateVarString(10, "LITERAL_STRING", "General Store")
 local prompt = 0
 local waitTime = 10
-            
 
 Citizen.CreateThread(function()   
     while true do
@@ -737,8 +737,10 @@ Citizen.CreateThread(function()
                 W.Prompts.AddToGarbageCollector(prompt)
             end
 
-            if W.Prompts.GetActiveGroup() == 0 then
-                PromptSetActiveGroupThisFrame(promptGroup, CreateVarString(10, "LITERAL_STRING", "General Store"))
+            local activeGroup = DatabindingReadDataIntFromParent(wildData, "active_group")
+
+            if activeGroup == 0 then
+                PromptSetActiveGroupThisFrame(promptGroup, promptGroupStr)
             end
 
             if UiPromptGetProgress(prompt) == 1.0 then
@@ -770,3 +772,14 @@ AddEventHandler('onResourceStop', function(resourceName)
         end  
     end
 end)
+
+--[[]
+function foo()
+    local cont = DatabindingAddDataContainerFromPath("", "wild")
+    DatabindingAddDataBool(cont, "foo", true)
+
+
+    local cont2 = DatabindingAddDataContainerFromPath("", "wild")
+    print(DatabindingReadDataBoolFromParent(cont2, "foo"))
+end
+foo()]]

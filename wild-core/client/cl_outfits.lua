@@ -205,7 +205,8 @@ function OpenOutfitMenu()
     CreateOutfitPrompt(`INPUT_EMOTE_TAUNT`, "Outfit 4")
     UpdatePrompts()
     
-    W.Prompts.SetActiveGroup(outfitPromptGroup)
+    -- Write to the wild data container about this active group (fixes conflicting prompt groups)
+    DatabindingAddDataInt(wildData, "active_group", outfitPromptGroup)
     
     Citizen.CreateThread(function() 
         while outfitPromptTimeOut > 0 do
@@ -263,7 +264,8 @@ function OpenOutfitMenu()
 end
 
 function CloseOutfitMenu()
-    W.Prompts.SetActiveGroup(0)
+    DatabindingAddDataInt(wildData, "active_group", 0)
+
     DeleteAllOutfitPrompts()
     bShowOutfitPrompt = false
     outfitPromptTimeOut = 0

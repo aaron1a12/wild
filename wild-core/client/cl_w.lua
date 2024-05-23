@@ -26,12 +26,6 @@ exports("Get", function()
     return W
 end)
 
-W.Foo = 123
-
-function W.GetFoo()
-	return W.Foo
-end
-
 --
 -- Configuration loading
 --
@@ -42,6 +36,19 @@ local function LoadConfig()
     W.Config = json.decode(LoadResourceFile(GetCurrentResourceName(), "config.json"))	
 end
 LoadConfig()
+
+--
+--
+-- Experimental Shared Databinding
+-- ===============================
+-- Currently, accessing non-local variables every tick is very performance draining on Lua.
+-- RAGE engine supports a data binding framework for synchronizing information between the 
+-- game scripts and its UI. Luckily for us, we are able to exploit this system for fast 
+-- variable sharing between resources. Note that the information we store here, will persist
+-- throughout the lifetime of the game instance. 
+--
+
+wildData = DatabindingAddDataContainerFromPath("", "wild")
 
 --
 -- Shared NUI Functionality
