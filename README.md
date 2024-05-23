@@ -13,5 +13,7 @@ start wild-shops
 start wild-war
 start wild-guarma
 start wild-horses
+start wild-emote
+start wild-blips
 ```
 3. Go to `wild-core` and rename `_config.json` and `_players.json` to `config.json` and `players.json`
