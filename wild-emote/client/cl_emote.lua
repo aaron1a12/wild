@@ -111,6 +111,8 @@ Citizen.CreateThread(function()
 
 			N_0x066167c63111d8cf(1.0, 1, 0.0, 1, 0.9)
 			
+			-- Disable standard RDR2 prompts. Don't want to use UiPromptDisablePromptsThisFrame()
+			-- in case we want to show a prompt while the emote wheel is open.
 			for i=0, 12 do
 				PromptDisablePromptTypeThisFrame(i)
 			end
