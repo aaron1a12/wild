@@ -1,0 +1,17 @@
+-- Detect eating peaches
+
+Citizen.CreateThread(function()
+	while true do
+		Citizen.Wait(0)
+
+        	if N_0x9c409bbc492cb5b1() == `CONSUMABLE_PEACHES_CAN` and IsControlJustReleased(0, `INPUT_OPEN_WHEEL_MENU`) then
+            		ShowText("Just ate a bunch of peaces.")
+            		local playerPed = PlayerPedId()
+            		RequestAnimDict("mech_inventory@eating@canned_food@cylinder@d8-2_h10-5")
+            		while not HasAnimDictLoaded("mech_inventory@eating@canned_food@cylinder@d8-2_h10-5") do
+                		Wait(100)
+            		end
+            		TaskPlayAnim(playerPed, "mech_inventory@eating@canned_food@cylinder@d8-2_h10-5", "left_hand", 8.0, -8.0, -1, 1 << 4 | 1 << 3 | 1 << 16, 0.0, false, 0, false, "UpperBodyFixup_filter", false)
+        	end
+	end
+end)
