@@ -311,6 +311,7 @@ Citizen.CreateThread(function()
                 PromptSetControlAction(prompt, `INPUT_CONTEXT_X`) -- R key
                 PromptSetText(prompt, CreateVarString(10, "LITERAL_STRING", "Access Stable"))
                 UiPromptSetHoldMode(prompt, 500)
+                UiPromptSetType(prompt, 1) -- By setting a prompt type, we can then hide these types during special cases (conflicting prompts)
                 PromptRegisterEnd(prompt)
             
                 -- Useful management. Automatically deleted when restarting resource
