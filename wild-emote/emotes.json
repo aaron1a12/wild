@@ -1,0 +1,10 @@
+[
+	["Hat Flick", "KIT_EMOTE_GREET_HAT_FLICK_1", "emote_greet_hat_flick.png"],
+	["Jovial Laugh", "kit_emote_reaction_jovial_laugh_1", "emote_reaction_jovial_laugh.png"],
+    ["Check Time", "KIT_emote_action_check_pocket_watch_1", "emote_action_check_pocket_watch_1.png"],
+    ["Smoke Cigar", "KIT_emote_action_smoke_cigar_1", "emote_action_smoke_cigar.png"],
+    ["Throat Slit", "KIT_emote_taunt_throat_slit_1", "emote_taunt_throat_slit.png"],
+    ["Throw Hissy Fit", "KIT_emote_action_hissyfit_1", "emote_action_hissyfit.png"],
+    ["Dance Awkwardly", "KIT_EMOTE_dance_awkward_a_1", "emote_dance_awkward_a.png"],
+    ["Blow Kiss", "KIT_emote_action_blow_kiss_1", "emote_action_blow_kiss.png"]
+]

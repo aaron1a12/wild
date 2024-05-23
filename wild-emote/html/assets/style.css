@@ -1,0 +1,147 @@
+@font-face {
+    font-family: 'rdr-lino';
+    src: url(rdr-lino.woff2);
+}
+
+@font-face {
+    font-family: 'hapna-slab-serif';
+    font-weight: 100;
+    src: url(hapna-slab-serif-light.woff2);
+}
+@font-face {
+    font-family: 'hapna-slab-serif';
+    font-weight: 400;
+    src: url(hapna-slab-serif-regular.woff2);
+}
+@font-face {
+    font-family: 'hapna-slab-serif';
+    font-weight: 500;
+    src: url(hapna-slab-serif-medium.woff2);
+}
+@font-face {
+    font-family: 'hapna-slab-serif';
+    font-weight: 600;
+    src: url(hapna-slab-serif-demibold.woff2);
+}
+@font-face {
+    font-family: 'hapna-slab-serif';
+    font-weight: 700;
+    src: url(hapna-slab-serif-bold.woff2);
+}
+@font-face {
+    font-family: 'hapna-slab-serif';
+    font-weight: 900;
+    src: url(hapna-slab-serif-extrabold.woff2);
+}
+
+body {font-family: 'rdr-lino'; color:#fff; user-select: none;}
+
+body,html {margin:0;padding:0;height:100%;}
+
+body {
+    max-width: 1920px;
+    max-height: 1080px;
+    visibility: hidden;
+    overflow: hidden;
+}
+
+body.visible {
+    visibility: visible;
+}
+
+body.not-redm {
+    background-image: url("test.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+.wheel {
+    width:688px;
+    height:688px;
+    margin-left:auto;
+    margin-right:auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.wheel::before {
+    content: ' ';
+    display: block;
+    background-image: url("wheel_bg_1b.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width:688px;
+    height:688px;
+    position: absolute;
+    left: -3px;
+    top: -2px;
+}
+
+.wheel .slot {
+    position: absolute;
+    width: 100%;
+    transform: rotate(103deg);
+    height: 100%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+}
+
+.wheel .slot.selected::before {
+    content: ' ';
+    display: block;
+    background-image: url(wheel_select_big.png);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    position: absolute;
+    width: 44px;
+    height: 244px;
+    filter: brightness(6%) sepia(100%) saturate(100) hue-rotate(4deg);
+    opacity: 1.0;
+    z-index: 1;
+    right: 0px;
+}
+
+
+.wheel .slot > div {
+    width: 150px;
+    text-align: center;
+    margin-left:auto;
+}
+
+.wheel .slot img {
+    width: 92px;
+    height: 92px;
+}
+
+.wheel .slot.s0 {transform: rotate(0deg);}
+.wheel .slot.s0 img {transform: rotate(0deg);}
+.wheel .slot.s45 {transform: rotate(-45deg);}
+.wheel .slot.s45 img {transform: rotate(45deg);}
+.wheel .slot.s90 {transform: rotate(-90deg);}
+.wheel .slot.s90 img {transform: rotate(90deg);}
+.wheel .slot.s135 {transform: rotate(-135deg);}
+.wheel .slot.s135 img {transform: rotate(135deg);}
+.wheel .slot.s180 {transform: rotate(-180deg);}
+.wheel .slot.s180 img {transform: rotate(180deg);}
+.wheel .slot.s225 {transform: rotate(-225deg);}
+.wheel .slot.s225 img {transform: rotate(225deg);}
+.wheel .slot.s270 {transform: rotate(-270deg);}
+.wheel .slot.s270 img {transform: rotate(270deg);}
+.wheel .slot.s315 {transform: rotate(-315deg);}
+.wheel .slot.s315 img {transform: rotate(315deg);}
+
+#radialCenter {
+    background-image: url(radial_menu_center_bg.png);
+    background-size: 100% 100%;
+    margin-left:auto;margin-right:auto;
+    width: 58%;
+    height: 58%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 2px 2px 2px #000;
+    font-size:18pt;
+}

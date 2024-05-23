@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="assets/style.css">
+    </head>
+    <body style="display:flex;align-items: center;">
+        <div class="wheel">
+            <!--  Starts at 3 o'clock, goes counter-clockwise -->
+            <div class="slot s0"><div></div></div>
+            <div class="slot s45"><div></div></div>
+            <div class="slot s90"><div></div></div>
+            <div class="slot s135"><div></div></div>
+            <div class="slot s180"><div></div></div>
+            <div class="slot s225"><div></div></div>
+            <div class="slot s270"><div></div></div>
+            <div class="slot s315"><div></div></div>
+
+            <div id="radialCenter">
+            </div>
+        </div>
+        <!--<span id="status" style="position: absolute; top:100px;left:100px"></span>-->
+        <audio id="WheelHUDIn" src="assets/WheelHUDIn.wav"></audio>
+        <audio id="WheelHUDOut" src="assets/WheelHUDOut.wav"></audio>
+        <script>
+            function IsRedM()
+            {
+                return (typeof GetParentResourceName != 'undefined') ? true : false
+            }   
+
+            // 4K fix
+            var x = (window.screen.width / 1920);
+            document.body.style.zoom = x;
+
+            function SetVisible(bVisible) 
+            {
+                var audioIn = document.getElementById("WheelHUDIn");
+                var audioOut = document.getElementById("WheelHUDOut");
+
+                audioIn.currentTime = 0;
+                audioOut.currentTime = 0;
+                audioIn.volume = 0.1;
+                audioOut.volume = 0.1;
+
+                if (bVisible)
+                {
+                    document.body.style.visibility = "visible";
+                    audioIn.play();
+                    audioOut.pause();
+                }
+                else
+                {
+                    document.body.style.visibility = "hidden";
+                    audioOut.play();
+                    audioIn.pause();
+                }
+            }
+
+            const slotAngles = [0, 45, 90, 135, 180, 225, 270, 315];
+            let emotes = [];
+
+            function AddEmotes(emoteList)
+            {
+                for (var i=0; i<slotAngles.length; i++)
+                {
+                    if (!emoteList[i])
+                        break;
+
+                    let slotClass = '.s'+slotAngles[i];
+                    let element = document.querySelector(`.slot${slotClass} > div`);
+                    let img = document.createElement("img");
+                    img.src = "../emote_icons/"+emoteList[i][2];
+                    element.appendChild(img);
+                    emotes.push(emoteList[i]);
+                }
+                
+            }
+
+            let selectedSlot = undefined;
+
+            function dist2d(a, b)
+            {
+                let x = b.x-a.x;
+                let y = b.y-a.y;
+
+                return Math.sqrt((x*x) + (y*y));
+            }
+
+            function UpdateWheel(input)
+            {
+                let center = {x: document.body.style.zoom*document.body.clientWidth/2, y: document.body.style.zoom*document.body.clientHeight/2}
+                var angleDeg = -Math.atan2(input.y - center.y, input.x - center.x) * 180 / Math.PI;
+
+                if (angleDeg < 0)
+                    angleDeg = angleDeg + 360.0;
+
+                let distance = dist2d(center, input);
+
+                if (distance > (200 * (window.screen.width/1920)))
+                {
+                    for (var i=0; i<slotAngles.length; i++)
+                    {
+                        var slotAngle = slotAngles[i];
+                        var min = slotAngle-22.5;
+                        var max = slotAngle+22.5
+
+                        if ((angleDeg < max && angleDeg > min) || (slotAngle==0.0 && angleDeg > 337.5))
+                        {
+                        
+                            if (selectedSlot != slotAngle)
+                            {
+                                selectedSlot = slotAngle;
+                                fetch(`https://${GetParentResourceName()}/onWheelSelect`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json; charset=UTF-8',
+                                    },
+                                    body: JSON.stringify({
+                                        emote: emotes[i][1],
+                                        slot: i
+                                    })
+                                });
+
+                                document.getElementById("radialCenter").innerText = emotes[i][0];
+                            }
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    ResetWheelSelection()
+                }
+
+                var selectedSlotClass = "s" + selectedSlot;
+
+                const slotElements = document.querySelectorAll(".wheel .slot");
+
+                slotElements.forEach((slotElement) => {
+                    if (slotElement.classList.contains(selectedSlotClass))
+                    {
+                        slotElement.classList.add("selected");
+                    }
+                    else
+                    {
+                        slotElement.classList.remove("selected");
+                    }
+                });
+
+                //document.getElementById("status").innerText = `x: ${input.x}, y: ${input.y} \n\nCenter: ${center.x}, ${center.y} \nAngle: ${angleDeg}\nSlot: ${selectedSlot}\nDistance: ${distance}`;
+            }
+
+            function ResetWheelSelection()
+            {
+                
+                const slotElements = document.querySelectorAll(".wheel .slot");
+
+                slotElements.forEach((slotElement) => {
+                    slotElement.classList.remove("selected");
+                });
+                if (selectedSlot != undefined)
+                {
+                    selectedSlot = undefined;
+
+                    fetch(`https://${GetParentResourceName()}/onWheelSelect`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json; charset=UTF-8',
+                        },
+                        body: JSON.stringify({
+                            emote: undefined,
+                            slot: undefined
+                        })
+                    });
+                }
+
+                document.getElementById("radialCenter").innerText = "";
+            }
+
+            window.addEventListener('message', function(event) {
+                if (event.data.cmd == "setVisibility")
+                {
+                    SetVisible(event.data.visible);
+                }
+
+                if (event.data.cmd == "setup")
+                {
+                    console.log(event.data.emotes);
+                }
+            });
+
+            window.addEventListener("load", (event) => {
+                if (!IsRedM())
+                {
+                    document.body.classList.add("not-redm")
+                    SetVisible(true);
+                }
+                else
+                {
+                    fetch(new Request("../emotes.json"))
+                    .then((response) => response.json())
+                    .then((data) => {
+                        AddEmotes(data);
+                    });
+                }
+            });
+
+            document.addEventListener("mousemove", (evt) => {
+                UpdateWheel({x: evt.clientX, y: evt.clientY})
+            });
+
+            document.addEventListener("keyup", (evt) => {
+                if (evt.keyCode == 20)
+                {
+                    fetch(`https://${GetParentResourceName()}/closeWheel`);
+                    ResetWheelSelection()
+                }
+            });
+
+        </script>
+        
+    </body>
+</html>
