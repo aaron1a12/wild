@@ -7,6 +7,9 @@
 -- Resources external to wild-core need to get the same instance of W this way
 W = exports["wild-core"]:Get()
 
+-- Notify wild-core this resource is running
+W.RegisterResource()
+
 -- Client copy of factions
 Factions = {}
 local _factions = nil
