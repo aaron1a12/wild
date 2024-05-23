@@ -694,7 +694,6 @@ AddEventHandler("wild:cl_onSelectPageItem", function(menu, item)
 end)
 
 local promptGroup = GetRandomIntInRange(1, 0xFFFFFF)
-local promptGroupStr = 0
 local prompt = 0
 local waitTime = 10
 
@@ -723,7 +722,9 @@ Citizen.CreateThread(function()
             end
         end
 
-        if bInValidAreas then         
+        if bInValidAreas then    
+            waitTime = 0
+            
             if prompt == 0 then -- Create prompt
                 prompt = PromptRegisterBegin()
                 PromptSetControlAction(prompt, `INPUT_CONTEXT_X`) -- R key
@@ -735,15 +736,13 @@ Citizen.CreateThread(function()
             
                 -- Useful management. Automatically deleted when restarting resource
                 W.Prompts.AddToGarbageCollector(prompt)
-
-                promptGroupStr = CreateVarString(10, "LITERAL_STRING", "General Store")
             end
 
             local activeGroup = DatabindingReadDataIntFromParent(wildData, "active_group")
 
-            --if activeGroup == 0 then
-                PromptSetActiveGroupThisFrame(promptGroup, promptGroupStr)
-            --end
+            if activeGroup == 0 then
+                PromptSetActiveGroupThisFrame(promptGroup, CreateVarString(10, "LITERAL_STRING", "General Store"))
+            end
 
             if UiPromptGetProgress(prompt) == 1.0 then
                 W.Prompts.RemoveFromGarbageCollector(prompt)

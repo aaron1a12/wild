@@ -294,6 +294,8 @@ Citizen.CreateThread(function()
         end
 
         if bInValidAreas and bButcherIsAvailable and (carriedEntity ~=0 or bHasPelts) then         
+            waitTime = 0
+
             if prompt == 0 then -- Create prompt
                 prompt = PromptRegisterBegin()
                 PromptSetControlAction(prompt, `INPUT_CONTEXT_X`) -- R key
