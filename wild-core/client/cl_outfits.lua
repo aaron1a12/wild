@@ -206,7 +206,7 @@ function OpenOutfitMenu()
     UpdatePrompts()
     
     -- Write to the wild data container about this active group (fixes conflicting prompt groups)
-    DatabindingAddDataInt(wildData, "active_group", outfitPromptGroup)
+    DatabindingAddDataInt(W.DataCont, "active_group", outfitPromptGroup)
     
     Citizen.CreateThread(function() 
         while outfitPromptTimeOut > 0 do
@@ -264,7 +264,7 @@ function OpenOutfitMenu()
 end
 
 function CloseOutfitMenu()
-    DatabindingAddDataInt(wildData, "active_group", 0)
+    DatabindingAddDataInt(W.DataCont, "active_group", 0)
 
     DeleteAllOutfitPrompts()
     bShowOutfitPrompt = false

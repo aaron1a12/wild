@@ -45,10 +45,32 @@ LoadConfig()
 -- RAGE engine supports a data binding framework for synchronizing information between the 
 -- game scripts and its UI. Luckily for us, we are able to exploit this system for fast 
 -- variable sharing between resources. Note that the information we store here, will persist
--- throughout the lifetime of the game instance. 
+-- throughout the lifetime of the RedM game instance. 
+--
+-- Usage
+-- =====
+-- For maximum performance, do not use W.DataCont if in a separate resource.
+-- Use DatabindingGetDataContainerFromPath("wild") and store the handle locally. Its value
+-- will be the same as W.DataCont.
+--
+-- Example: local data = DatabindingGetDataContainerFromPath("wild")
+-- 			local foo = DatabindingReadDataIntFromParent(data, "foo")
 --
 
-wildData = DatabindingAddDataContainerFromPath("", "wild")
+W.DataCont = 0
+
+function SetupDataContainer()
+	local cont = DatabindingGetDataContainerFromPath("wild")
+
+	if cont == 0 then
+		-- Create new data container for data binding...
+		W.DataCont = DatabindingAddDataContainerFromPath("", "wild")
+	else
+		-- Fetch existing data container
+		W.DataCont = cont
+	end
+end
+SetupDataContainer()
 
 --
 -- Shared NUI Functionality
@@ -516,6 +538,7 @@ AddEventHandler('onResourceStop', function(resourceName)
 end)
 
 local activeGroup = 0
+W.ActiveGroup = 0
 
 function W.Prompts.GetActiveGroup()
 	return activeGroup
