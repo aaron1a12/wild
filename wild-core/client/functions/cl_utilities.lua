@@ -174,6 +174,12 @@ function GetNearByHorse()
 	return Citizen.InvokeNative(0x0501D52D24EA8934, 1, Citizen.ResultAsInteger())
 end
 
+-- Returns the selected item in the weapon wheel. Only works while the wheel is open. 
+-- Use in conjunction with IsControlJustReleased(0, `INPUT_OPEN_WHEEL_MENU`) to detect item selection/usage.
+function GetItemInWheel()
+	return N_0x9c409bbc492cb5b1()
+end
+
 -- Original code from https://github.com/femga/rdr3_discoveries/
 function PlayAmbientSpeechFromEntity(entity_id, sound_ref_string, sound_name_string, speech_params_string, speech_line)
 	local sound_name = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", sound_name_string,Citizen.ResultAsLong())
