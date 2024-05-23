@@ -216,10 +216,9 @@ Citizen.CreateThread(function()
         end
 
         if IsEntityDead(PlayerPedId()) then -- Respawning
-            TriggerEvent('wild:cl_onPlayerDeath')
             if not bRespawning then
                 bRespawning = true
-
+                TriggerEvent('wild:cl_onPlayerDeath')
                 local delayDivided = math.floor(W.Config["respawnDelay"]/3)
 
                 AnimpostfxPlay("MP_SuddenDeath")

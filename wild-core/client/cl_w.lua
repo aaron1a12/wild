@@ -26,7 +26,7 @@ exports("Get", function()
     return W
 end)
 
-W.Foo = 0
+W.Foo = 123
 
 function W.GetFoo()
 	return W.Foo
@@ -582,17 +582,22 @@ function W.SetPlayerVisible(player, bVisible)
 	TriggerServerEvent('wild:sv_setPlayerVisible', player, bVisible)
 end
 
+--
+-- RedM provides no way to check if a resource is running.
+-- This is a simple way to register resources to check if running later.
+--
 
 local startedResources = {}
 
-AddEventHandler('onResourceStop', function(resourceName)
-	startedResources[resourceName] = nil
-end)
-
-AddEventHandler('onResourceStart', function(resourceName)
+function W.RegisterResource()
+	local resourceName = GetInvokingResource()
 	startedResources[resourceName] = true
-end)
+end
 
 function W.IsResourceRunning(resourceName)
 	return (startedResources[resourceName]==true)
 end
+
+AddEventHandler('onResourceStop', function(resourceName)
+	startedResources[resourceName] = nil
+end)
