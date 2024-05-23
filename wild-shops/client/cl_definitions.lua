@@ -3,4 +3,4 @@ W = exports["wild-core"]:Get()
 
 shopConfig = json.decode(LoadResourceFile(GetCurrentResourceName(), "shops.json"))
 
-wildData = DatabindingAddDataContainerFromPath("", "wild")
+wildData = DatabindingGetDataContainerFromPath("wild")
