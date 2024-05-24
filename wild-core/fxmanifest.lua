@@ -17,6 +17,7 @@ client_script
 	"client/cl_map.lua",
 	"client/cl_honor.lua",
 	'client/cl_crime.lua',
+	'client/cl_wanted.lua',
 	"client/cl_weaponWheel.lua",
 	"client/cl_debug.lua",
 }
