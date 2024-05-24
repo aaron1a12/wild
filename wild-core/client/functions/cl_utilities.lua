@@ -518,6 +518,19 @@ function DrawDebugSphereTimed(vCenter, fRadius, iR, iG, iB, iAlpha, durationMs)
 	end)
 end
 
+function DrawDebugCylinderTimed(vCenter, fRadius, fHeight, iR, iG, iB, iAlpha, durationMs)
+	Citizen.CreateThread(function()
+		local timeLeft = durationMs/1000
+		
+		while timeLeft > 0 do
+			Citizen.Wait(0)
+			Citizen.InvokeNative(0x2A32FAA57B937173, 0x94FDAE17, vCenter.x, vCenter.y, vCenter.z, 0, 0, 0, 0, 0, 0, fRadius, fRadius, fHeight, iR, iG, iB, iAlpha, 0, 0, 2, 0, 0, 0, 0)
+			
+			timeLeft = timeLeft - GetFrameTime()
+		end
+	end)
+end
+
 function RotateVectorYaw(vec, degrees)
     local radians = degrees * (math.pi/180)
 
