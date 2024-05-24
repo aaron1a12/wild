@@ -282,8 +282,10 @@ Citizen.CreateThread(function()
     while true do   
         Citizen.Wait(0)  
 
-        if IsControlJustPressed(0, `INPUT_RADIAL_MENU_NAV_LR`) or IsControlJustPressed(0, `INPUT_RADIAL_MENU_NAV_UD`) or IsControlJustPressed(0, `INPUT_INTERACT_LOCKON`) then
-            CloseOutfitMenu()
+        if prompt ~= 0 then
+            if IsControlJustPressed(0, `INPUT_RADIAL_MENU_NAV_LR`) or IsControlJustPressed(0, `INPUT_RADIAL_MENU_NAV_UD`) or IsControlJustPressed(0, `INPUT_INTERACT_LOCKON`) then
+                CloseOutfitMenu()
+            end
         end
 
         if IsControlJustPressed(0, "INPUT_OPEN_JOURNAL") and not bOutfitLock then
