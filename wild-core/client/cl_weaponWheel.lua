@@ -26,7 +26,7 @@ Citizen.CreateThread(function()
             if IsControlJustReleased(0, `INPUT_SELECT_NEXT_WHEEL`) then
                 currentWheel = currentWheel + 1
 
-                local bNearPlayerHorse = (GetMountOwnedByPlayer(PlayerId())==GetNearByHorse())
+                local bNearPlayerHorse = (GetMountOwnedByPlayer(PlayerId())==GetNearByHorse() and GetNearByHorse()~=0)
 
                 if currentWheel == 2 and not bNearPlayerHorse then
                     currentWheel = 0
@@ -34,7 +34,6 @@ Citizen.CreateThread(function()
                     currentWheel = 0
                 end
             end
-
 
             if currentWheel == 0 then
                 if W.IsResourceRunning("wild-war") then
