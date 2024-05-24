@@ -60,6 +60,10 @@ local function ValidatePlayerProps(playerEntry)
     if playerEntry["honor"] == nil then
         playerEntry["honor"] = 0.0
     end
+
+    if playerEntry["outfits"] ~= nil then
+        playerEntry["outfits"] = nil
+    end
 end
 
 local function ValidatePlayerOutfitProps(playerEntry)
