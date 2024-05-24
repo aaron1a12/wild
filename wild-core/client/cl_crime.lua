@@ -26,6 +26,19 @@ W.Events.AddHandler(`EVENT_CRIME_CONFIRMED`, function(data)
 	end
 end)
 
+W.Events.AddHandler(`EVENT_PLAYER_ESCALATED_PED`, function(data)
+	local escalator = data[1]
+	local ped = data[2]
+	
+	if escalator == PlayerPedId() then
+
+		if GetRelationshipBetweenPeds(ped, escalator) <= 3 then
+			-- Affect honor
+			W.AddPlayerHonor(W.Config.Honor["onEscalate"])    
+		end
+	end
+end)
+
 local blip = 0
 local blipTime = 0
 

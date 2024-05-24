@@ -8,6 +8,10 @@ W.EventHandlerMap = {}
 -- Source: https://github.com/femga/rdr3_discoveries/tree/master/AI/EVENTS
 -- TODO: Add all events
 W.EventDataInfo = {
+    [`EVENT_PLAYER_ESCALATED_PED`] = {
+        size = 2,
+        members = {"Int32", "Int32"} -- player ped id | escalated ped id
+    }, 
     [`EVENT_CALM_PED`] = {
         size = 4,
         members = {"Int32", "Int32", "Int32", "Int32"} -- calmer ped id | mount ped id | CalmTypeId | isFullyCalmed

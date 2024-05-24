@@ -1,5 +1,7 @@
 {
     "onGreet":  1.0,
     "onAntagonize": -0.5,
+    "onLootWitnessed": -0.1,
+    "onEscalate": -2.0,
     "onKill": -6.0
 }
