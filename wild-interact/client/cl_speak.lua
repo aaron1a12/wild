@@ -421,6 +421,17 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 		Citizen.Wait(0)
 	end
 
+	-- Affect honor
+	if sourcePed == PlayerPedId() and not IsPedAPlayer(targetPed) then
+		local amount = W.Config.Honor["onGreet"]
+
+		if bAntagonize then
+			amount = W.Config.Honor["onAntagonize"]
+		end
+
+		W.AddPlayerHonor(amount)
+	end
+
 	if not bAntagonize then
 		--
 		-- Greet

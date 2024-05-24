@@ -1,5 +1,6 @@
 update.bat
 wild-core/config.json
+wild-core/honor.json
 wild-core/players.json
 wild-core/player_outfits.json
 wild-core/npcs.json

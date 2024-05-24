@@ -33,6 +33,7 @@ files
 	'html/**/*',
 	"ipls.json",
 	"config.json",
+	"honor.json",
 	"peds.json",
 	"players.json",
 	"player_outfits.json",
