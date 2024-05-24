@@ -4,7 +4,9 @@
 --
 W.bPlayerSpawned = false
 W.PlayerData = nil
+W.PlayerOutfitData = nil
 local _playerData = nil
+local _playerOutfitData = nil
 
 -- Returns the locally cached player data.
 function W.GetPlayerData()
@@ -61,8 +63,9 @@ function W.SetPlayerWorld(worldHash)
 end
 
 RegisterNetEvent("wild:cl_onReceivePlayerData")
-AddEventHandler("wild:cl_onReceivePlayerData", function(newPlayerData)
+AddEventHandler("wild:cl_onReceivePlayerData", function(newPlayerData, newPlayerOutfitData)
     _playerData = newPlayerData
+    _playerOutfitData = newPlayerOutfitData
 end)
 
 -- Synchronously loads player data (money, spawn pos, etc) from the server
@@ -70,12 +73,14 @@ function RefreshPlayerData()
     if W.PlayerData == nil then -- TODO: Maybe include data age in W.PlayerData so we can check if outdated (1 min, 5 mins, etc.)
         TriggerServerEvent("wild:sv_getPlayerData", GetPlayerName(PlayerId()))
 
-        while _playerData == nil do
+        while _playerData == nil and _playerOutfitData == nil do
             Citizen.Wait(0)
         end
 
         W.PlayerData = _playerData
+        W.PlayerOutfitData = _playerOutfitData
         _playerData = nil
+        _playerOutfitData= nil
     end
 end
 

@@ -22,7 +22,7 @@ end
 
 function W.GetPlayerCurrentOutfit()
     RefreshPlayerData()
-    return W.PlayerData["outfits"][W.PlayerData["currentOutfit"]]
+    return W.PlayerOutfitData["outfits"][W.PlayerData["currentOutfit"]]
 end
 
 function W.GetPlayerCurrentOutfitIndex()
@@ -32,7 +32,7 @@ end
 
 function W.GetPlayerOutfitAtIndex(index)
     RefreshPlayerData()
-    return W.PlayerData["outfits"][index]
+    return W.PlayerOutfitData["outfits"][index]
 end
 
 function W.ModifyPlayerOutfit(index, outfit)
@@ -49,7 +49,7 @@ function W.ModifyPlayerOutfit(index, outfit)
         localOutfit.enabledDrawables[i] = {drawable[1], drawable[2],  drawable[3],  drawable[4], drawable[5], drawable[6], drawable[7], drawable[8]}
     end
 
-    W.PlayerData["outfits"][index] = localOutfit
+    W.PlayerOutfitData["outfits"][index] = localOutfit
     TriggerServerEvent("wild:sv_modifyPlayerOutfit", GetPlayerName(PlayerId()), index, localOutfit)
 end
 

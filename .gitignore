@@ -1,6 +1,7 @@
 update.bat
 wild-core/config.json
 wild-core/players.json
+wild-core/player_outfits.json
 wild-core/npcs.json
 wild-core/metapeds.ymt.pso.xml
 wild-war/factions.json

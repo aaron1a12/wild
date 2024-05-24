@@ -35,6 +35,7 @@ files
 	"config.json",
 	"peds.json",
 	"players.json",
+	"player_outfits.json",
 	"npcs.json",
 	"streamData/**.ymt",
 	"streamData/**.xml",

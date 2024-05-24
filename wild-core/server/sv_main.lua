@@ -11,6 +11,7 @@ end)
 
 local Players = {}
 local PlayerSources = {}
+local PlayerOutfits = {}
 
 function W.GetPlayerSourceCoords()
     local coordMap = {}
@@ -52,9 +53,21 @@ local function ValidatePlayerProps(playerEntry)
         playerEntry["world"] = `world`
     end
 
+    if playerEntry["currentOutfit"] == nil then
+        playerEntry["currentOutfit"] = 1
+    end
+
+    if playerEntry["honor"] == nil then
+        playerEntry["honor"] = 0.0
+    end
+end
+
+local function ValidatePlayerOutfitProps(playerEntry)
     if playerEntry["outfits"] == nil then
         playerEntry["outfits"] = {}
     end
+
+    -- TODO: This really should be a loop ._.
 
     if playerEntry["outfits"][1] == nil then
         playerEntry["outfits"][1] = NewDefaultOutfit()
@@ -71,16 +84,6 @@ local function ValidatePlayerProps(playerEntry)
     if playerEntry["outfits"][4] == nil then
         playerEntry["outfits"][4] = NewDefaultOutfit()
     end
-
-    if playerEntry["currentOutfit"] == nil then
-        playerEntry["currentOutfit"] = 1
-    end
-
-    -- Legacy fix. Todo: remove soon
-    if playerEntry.outfits[1].disabledDrawables ~= nil then playerEntry.outfits[1].disabledDrawables = nil end
-    if playerEntry.outfits[2].disabledDrawables ~= nil then playerEntry.outfits[2].disabledDrawables = nil end
-    if playerEntry.outfits[3].disabledDrawables ~= nil then playerEntry.outfits[3].disabledDrawables = nil end
-    if playerEntry.outfits[4].disabledDrawables ~= nil then playerEntry.outfits[4].disabledDrawables = nil end
 end
 
 local function LoadData()
@@ -94,10 +97,31 @@ local function LoadData()
     for playerName, playerEntry in pairs(Players) do
         ValidatePlayerProps(playerEntry)
     end
+
+    PlayerOutfits = json.decode(LoadResourceFile(GetCurrentResourceName(), "player_outfits.json"))
+
+    if PlayerOutfits == nil then
+        PlayerOutfits = {}
+    end
+
+    for playerName, _ in pairs(Players) do
+        if PlayerOutfits[playerName] == nil then
+            PlayerOutfits[playerName] = {}
+        end
+    end
+
+    for playerName, playerEntry in pairs(PlayerOutfits) do
+        ValidatePlayerOutfitProps(playerEntry)
+    end
 end
 
 local function SaveData()
     SaveResourceFile(GetCurrentResourceName(), "players.json", json.encode(Players), -1)
+end
+
+local function SaveDataAll()
+    SaveResourceFile(GetCurrentResourceName(), "players.json", json.encode(Players), -1)
+    SaveResourceFile(GetCurrentResourceName(), "player_outfits.json", json.encode(PlayerOutfits), -1)
 end
 
 local function OnStartUp()
@@ -122,10 +146,16 @@ AddEventHandler('playerJoining', function ()
         ValidatePlayerProps(Players[playerName])
     end
 
+    if PlayerOutfits[playerName] == nil then
+        PlayerOutfits[playerName] = {}
+
+        ValidatePlayerOutfitProps(PlayerOutfits[playerName])
+    end
+
     -- Save the source so we can map names to sources later
     PlayerSources[playerName] = source
 
-    SaveData()
+    SaveDataAll()
 end)
 
 -- Only used when restarting resource.
@@ -141,15 +171,17 @@ AddEventHandler('wild:sv_getPlayerData', function(strPlayerName)
     -- This is only possible if 'playerJoining' was skipped (restarting resource, debugging, etc)
     if Players[strPlayerName] == nil then
         Players[strPlayerName] = {}
+        PlayerOutfits[strPlayerName] = {}
     
         ValidatePlayerProps(Players[strPlayerName])
+        ValidatePlayerOutfitProps(PlayerOutfits[strPlayerName])
     
         -- Save the source so we can map names to sources later
         PlayerSources[strPlayerName] = source
-        SaveData()
+        SaveDataAll()
     end
 
-    TriggerClientEvent("wild:cl_onReceivePlayerData", source, Players[strPlayerName])
+    TriggerClientEvent("wild:cl_onReceivePlayerData", source, Players[strPlayerName], PlayerOutfits[strPlayerName])
 end)
 
 RegisterNetEvent("wild:sv_onPlayerFirstSpawn")
@@ -193,8 +225,9 @@ end)
 
 
 RegisterNetEvent('wild:sv_modifyPlayerOutfit', function(strPlayerName, outfitIndex, outfit)
-    Players[strPlayerName]["outfits"][outfitIndex] = outfit
-    SaveData()
+    PlayerOutfits[strPlayerName]["outfits"][outfitIndex] = outfit
+    --SaveData()
+    SaveResourceFile(GetCurrentResourceName(), "player_outfits.json", json.encode(PlayerOutfits), -1)
 end)
 
 --
