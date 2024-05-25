@@ -326,8 +326,8 @@ Citizen.CreateThread(function()
     while true do    
         Citizen.Wait(1212)
 
-		if W.GetPlayerHonor() > 0.0 then
-			goto skip -- Skip the face recognition code if honor is good
+		if W.GetPlayerHonor() > -75.0 then
+			goto skip -- Skip the face recognition code if honor not so bad
 		end
 
         if bBountyHuntersDeployed then
