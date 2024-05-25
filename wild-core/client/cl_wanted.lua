@@ -48,7 +48,7 @@ function SpawnBountyHunter(x, y, z)
     SetEntityAsMissionEntity(mount, true, true)
 
     SetPedRelationshipGroupHash(ped, bountyGroupHash)
-    --SetPedKeepTask(ped)
+    SetPedKeepTask(ped)
 
     SetRandomOutfitVariation(ped, true)
 
@@ -78,12 +78,11 @@ function DeployBountyHunters()
     end
     
     bBountyHuntersDeployed = true
-    ShowHelpText("Citizen alerted bounty hunters", 2000)
 
-    local count = 5
+    local count = 25
     local distance = 200.0
-    hunterReachTimeout = 60 * 1000
-    hunterTimeout = 5 * 60 * 1000
+    hunterReachTimeout = 5 * 60 * 1000
+    hunterTimeout = 10 * 60 * 1000
 
     -- First, create a search center by getting a random vehicle node around the player
 
@@ -92,13 +91,13 @@ function DeployBountyHunters()
     searchCenter = searchCenter+GetEntityCoords(PlayerPedId())
     _, searchCenter = GetClosestVehicleNode(searchCenter.x, searchCenter.y, searchCenter.z, 1, 3.0, 0.0)
 
-    DrawDebugCylinderTimed(searchCenter, 0.5, 1000.0, 255, 0, 0, 255, 5000)
+    --DrawDebugCylinderTimed(searchCenter, 0.5, 1000.0, 255, 0, 0, 255, 5000)
 
     -- Delete previous search?
     SpawnpointsCancelSearch()
 
     -- Spawn radius (in meters)
-    local spawnRadius = 10.0
+    local spawnRadius = 50.0
     local spaceBetweenSpawns = 3.0
     local floor = GetHeightmapBottomZForPosition(searchCenter.x, searchCenter.y)
     
@@ -116,6 +115,8 @@ function DeployBountyHunters()
         bBountyHuntersDeployed = false    
         return 0,0
     else
+        ShowHelpText("Citizen alerted bounty hunters", 2000)
+        
         local nSpawned = 0
         for i=0, nFound do
             local x, y, z = Citizen.InvokeNative(0x280C7E3AC7F56E90, i, Citizen.PointerValueFloat(), Citizen.PointerValueFloat(), Citizen.PointerValueFloat()) 
@@ -166,7 +167,7 @@ function DeployBountyHunters()
     Citizen.Wait(2000)
 
     for i=1, #hunters do  
-        TaskGoToEntity(hunters[i], PlayerPedId(), -1, 2.5, 1.5, 0, 0)
+        TaskGoToEntity(hunters[i], PlayerPedId(), -1, 2.5, 5.5, 0, 0)
         --TaskCombatPed(targetPed, sourcePed, 0, 0)
     end
 
@@ -246,13 +247,18 @@ end
 
 function OnPedSeenBadPlayer(ped, playerPed)
 	Citizen.CreateThread(function()
+		local timeLeft = 20.0 -- in seconds
+		
+		while timeLeft > 0 do
+			Citizen.Wait(0)
+			Citizen.InvokeNative(0x9F9A829C6751F3C7, PlayerId(), 31, 1) -- PLAYER_RESET_FLAG_DISABLE_AMBIENT_GREETS
+			
+			timeLeft = timeLeft - GetFrameTime()
+		end
+	end)
 
-		-- Official witness
-		local blip = BlipAddForEntity(`BLIP_STYLE_EYEWITNESS`, ped)
-		SetBlipSprite(blip, `blip_ambient_eyewitness`, true)
-		SetBlipScale(blip, 0.2)
-		SetBlipName(blip, "Eye witness")
-		BlipAddModifier(blip, `BLIP_MODIFIER_WITNESS_INVESTIGATING`)
+
+	Citizen.CreateThread(function()
 
 
 		local playerCoords = GetEntityCoords(PlayerPedId())
@@ -276,6 +282,13 @@ function OnPedSeenBadPlayer(ped, playerPed)
 
 		ClearPedTasks(ped, true, true)
 		TaskFleePed(ped, playerPed, 4, 524292, -1082130432, -1, 0)
+
+        -- Official witness
+		local blip = BlipAddForEntity(`BLIP_STYLE_EYEWITNESS`, ped)
+		SetBlipSprite(blip, `blip_ambient_eyewitness`, true)
+		SetBlipScale(blip, 0.2)
+		SetBlipName(blip, "Eye witness")
+		BlipAddModifier(blip, `BLIP_MODIFIER_WITNESS_INVESTIGATING`)
 
 		if CanPlayAmbientSpeech(ped, "LAW_HAIL") then
 			W.PlayAmbientSpeech(ped, "LAW_HAIL")
@@ -341,7 +354,7 @@ Citizen.CreateThread(function()
 		for _, ped in ipairs(GetGamePool('CPed')) do
 
 			if not DecorExistOn(ped, "witness_for") then
-				if DistSqr(GetEntityCoords(ped), playerCoords) < 100.0 then -- Must be at face recognition distance
+				if DistSqr(GetEntityCoords(ped), playerCoords) < 200.0 then -- Must be at face recognition distance
 
 					if not IsPedAPlayer(ped) and IsPedHuman(ped) then
 
@@ -358,7 +371,7 @@ Citizen.CreateThread(function()
 										DecorSetInt(ped, "witness_for", PlayerId())
 										Citizen.Wait(100)
 										OnPedSeenBadPlayer(ped, playerPed)
-										Citizen.Wait(10000)
+										Citizen.Wait(2123)
 									end
 								end
 								Citizen.Wait(1)
