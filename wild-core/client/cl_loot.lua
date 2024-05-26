@@ -3,6 +3,10 @@ local function CalculateLootForPed(ped)
 	math.randomseed(GetGameTimer()/7)
 	local money = math.random(1, 50) / 100
 
+	if GetEntityModel(ped) == `G_M_M_BountyHunters_01` then
+		money = math.random(100, 265) / 100
+	end
+
 	return money
 end
 
