@@ -136,6 +136,7 @@ function OpenPostOffice()
                     end
 
                     if msg:GetInt32(16) == `FAST_TRAVEL_UI_EVENT_EXIT` then
+                        RequestUiappTransitionByHash(`fast_travel_menu`, `EXIT`)
                         CloseUiappByHash(`fast_travel_menu`)
                         -- Free up memory?
                         DatabindingRemoveDataEntry(fastTravelData)
