@@ -6,6 +6,7 @@ client_script
 {
 	"client/functions/cl_utilities.lua",
 	"client/imaps/cl_imaps.lua",
+	"client/lootTables/cl_lootTables.lua",
 	"client/cl_w.lua",
 	"client/cl_events.lua",
 	"client/cl_npcManager.lua",

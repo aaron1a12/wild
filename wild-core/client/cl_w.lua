@@ -85,6 +85,7 @@ local tempCam = 0
 local bMenuLock = false
 local prevCtrlCtx = 0
 local menuOpenTime = GetGameTimer()
+local currentPageType = 0
 
 function W.UI.SetVisible(bVisible)
     W.UI.Message({cmd = "setVisibility", visible = bVisible})
@@ -118,8 +119,8 @@ function W.UI.RegisterCallback(cbName, func)
 end
 
 -- Create a ui app-style menu
-function W.UI.CreateMenu(strMenuId, strMenuTitle)
-    SendNUIMessage({cmd = "createMenu", menuId = strMenuId, menuTitle = strMenuTitle})
+function W.UI.CreateMenu(strMenuId, strMenuTitle, bCompact)
+    SendNUIMessage({cmd = "createMenu", menuId = strMenuId, menuTitle = strMenuTitle, compact =  bCompact})
 end
 
 local promptMenuSelect = 0
@@ -159,8 +160,16 @@ function W.UI.OpenMenu(strMenuId, bOpen, bNoCam)
 		SetNuiFocusKeepInput(true)
 
 		--ClearPedTasksImmediately(PlayerPedId(), true, false)
+		Citizen.CreateThread(function()
+			while currentMenu == strMenuId do
+				SetGameplayCamGranularFocusThisFrame(1.0, 1, 0.0, 1, 0.9)
+				DisableCinematicModeThisFrame()
+				Citizen.Wait(0)
+			end
+			SetGameplayCamGranularFocusThisFrame(0.0, 1, 0.0, 1, 0.0)
+		end)
 		
-		if bNoCam == false or bNoCam == nil then
+		--[[if bNoCam == false or bNoCam == nil then
 			local camCoords = GetFinalRenderedCamCoord()
 			local camRot = GetFinalRenderedCamRot()
 			local camFov = GetFinalRenderedCamFov() - 5
@@ -171,7 +180,7 @@ function W.UI.OpenMenu(strMenuId, bOpen, bNoCam)
 			RenderScriptCams(true, true, 400, true, true, 0)
 		else
 			tempCam = 0
-		end
+		end]]
 
 		Citizen.CreateThread(function()
 			Citizen.Wait(1)
@@ -216,15 +225,12 @@ function W.UI.OpenMenu(strMenuId, bOpen, bNoCam)
 		promptMenuBack = 0
 	end
 
-	local soundset_ref = "Study_Sounds"
-    local soundset_name =  "show_info"
 
-	if not bOpen then
-		soundset_name =  "hide_info"
+	if bOpen then
+		PlaySound("HUD_PLAYER_MENU", "MENU_ENTER")
+	else
+		PlaySound("HUD_PLAYER_MENU", "MENU_CLOSE")
 	end
-
-    Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
-    Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
 end
 
 function W.UI.IsAnyMenuOpen()
@@ -306,6 +312,10 @@ function W.UI.CreatePageItem(strMenuId, strPageId, strItemId, oExtraItemParams)
 		pageItemAltActions[strItemId] = oExtraItemParams.altAction
 	end
 
+	if oExtraItemParams.icon then
+		oExtraItemParams.icon = "https://cfx-nui-"..GetInvokingResource().."/" .. oExtraItemParams.icon
+	end
+
 	SendNUIMessage({cmd = "createPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId, extraItemParams = oExtraItemParams})
 end
 
@@ -350,38 +360,32 @@ W.UI.RegisterCallback("closeAllMenus", function(data, cb)
 end)
 
 W.UI.RegisterCallback("playNavUpSound", function(data, cb)
-	local soundset_ref = "HUD_DOMINOS_SOUNDSET"
-	local soundset_name =  "NAV_UP"
-	Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
-	Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+	PlaySound("HUD_PLAYER_MENU", "NAV_UP")
 
 	cb('ok')
 end)
 
 W.UI.RegisterCallback("playNavDownSound", function(data, cb)
-	local soundset_ref = "HUD_DOMINOS_SOUNDSET"
-	local soundset_name =  "NAV_DOWN"
-	Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
-	Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+	PlaySound("HUD_PLAYER_MENU", "NAV_DOWN")
 	
 	cb('ok')
 end)
 
 W.UI.RegisterCallback("playNavEnterSound", function(data, cb)
-	local soundset_ref = "HUD_SHOP_SOUNDSET"
-	local soundset_name =  "SELECT"
-	Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
-	Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+	PlaySound("HUD_PLAYER_MENU", "SELECT")
 
 	cb('ok')
 end)
 
 W.UI.RegisterCallback("playNavBackSound", function(data, cb)
-	local soundset_ref = "HUD_SHOP_SOUNDSET"
-	local soundset_name =  "BACK"
-	Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
-	Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+	PlaySound("HUD_PLAYER_MENU", "BACK")
 
+	cb('ok')
+end)
+
+
+W.UI.RegisterCallback("onPageFinishedOpening", function(data, cb)
+	currentPageType = data.pageType
 	cb('ok')
 end)
 
@@ -407,30 +411,24 @@ Citizen.CreateThread(function()
 				DisableFrontendThisFrame()
 				SetMouseCursorActiveThisFrame(true)
 
-				if IsControlJustPressed(0, "INPUT_GAME_MENU_DOWN") then
-					local soundset_ref = "HUD_DOMINOS_SOUNDSET"
-					local soundset_name =  "NAV_DOWN"
-					Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
-					Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
+				local bVertical = false
 
-					SendNUIMessage({cmd = "moveSelection", forward = true})
+				if currentPageType == 1 then
+					bVertical = true
+				end
+
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_DOWN") then
+					PlaySound("HUD_PLAYER_MENU", "NAV_DOWN")
+					SendNUIMessage({cmd = "moveSelection", forward = true, vertical = bVertical})
 				end
 
 				if IsControlJustPressed(0, "INPUT_GAME_MENU_UP") then
-					local soundset_ref = "HUD_DOMINOS_SOUNDSET"
-					local soundset_name =  "NAV_UP"
-					Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
-					Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
-
-					SendNUIMessage({cmd = "moveSelection", forward = false})
+					PlaySound("HUD_PLAYER_MENU", "NAV_UP")
+					SendNUIMessage({cmd = "moveSelection", forward = false, vertical = bVertical})
 				end
 
 				if IsControlJustPressed(0, "INPUT_GAME_MENU_ACCEPT") then
-					local soundset_ref = "HUD_SHOP_SOUNDSET"
-					local soundset_name =  "SELECT"
-					Citizen.InvokeNative(0x0F2A2175734926D8, soundset_name, soundset_ref); 
-					Citizen.InvokeNative(0x67C540AA08E4A6F5, soundset_name, soundset_ref, true, 0);
-
+					PlaySound("HUD_PLAYER_MENU", "SELECT")
 					SendNUIMessage({cmd = "triggerSelectedItem"})
 				end
 
@@ -439,13 +437,23 @@ Citizen.CreateThread(function()
 				end
 				
 				if IsControlJustPressed(0, "INPUT_GAME_MENU_LEFT") then
-					PlaySound("RDRO_Spectate_Sounds", "left_bumper")
-					SendNUIMessage({cmd = "flipCurrentSwitch", forward = false})
+					if currentPageType == 0 then
+						PlaySound("RDRO_Spectate_Sounds", "left_bumper")
+						SendNUIMessage({cmd = "flipCurrentSwitch", forward = false})
+					else
+						PlaySound("HUD_PLAYER_MENU", "NAV_UP")
+						SendNUIMessage({cmd = "moveSelection", forward = false})
+					end
 				end
 
 				if IsControlJustPressed(0, "INPUT_GAME_MENU_RIGHT") then
-					PlaySound("RDRO_Spectate_Sounds", "right_bumper")
-					SendNUIMessage({cmd = "flipCurrentSwitch", forward = true})
+					if currentPageType == 0 then
+						PlaySound("RDRO_Spectate_Sounds", "right_bumper")
+						SendNUIMessage({cmd = "flipCurrentSwitch", forward = true})
+					else
+						PlaySound("HUD_PLAYER_MENU", "NAV_DOWN")
+						SendNUIMessage({cmd = "moveSelection", forward = true})
+					end
 				end
 
 				if IsControlJustPressed(0, "INPUT_GAME_MENU_CANCEL") then -- or IsControlJustPressed(0, "INPUT_QUIT")
@@ -577,6 +585,39 @@ end)
 
 function W.PlayAmbientSpeech(ped, speech)
 	TriggerServerEvent('wild:sv_playAmbSpeech', PedToNet(ped), speech)
+end
+
+function W.GetPedLoot(ped)
+	if not IsPedHuman(ped) then
+
+		local damage = GetPedDamageCleanliness(ped)
+		local quality = GetPedQuality(ped)
+
+		if quality < 0 then
+			quality = 2
+		end
+	
+		local stars = quality+1
+	
+		if damage < 2 then
+			stars = stars - (2-damage)
+		end
+	
+		if stars < 1 then
+			stars = 1
+		end
+
+		local lootTable = lootTableAnimal[GetEntityModel(ped)]
+
+		-- Legendary?
+		if lootTable[stars] == nil then
+			stars = 3
+		end
+
+		return lootTable[stars]
+	end
+
+	return nil
 end
 
 

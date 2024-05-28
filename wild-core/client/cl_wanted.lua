@@ -72,8 +72,23 @@ RegisterCommand('end', function()
 	bBountyHuntersDeployed = false
 end, false)
 
+function W.DismissBountyHunters()
+    local playerPed = PlayerPedId()
+    
+    for i=1, #hunters do
+        SetPedRelationshipGroupHash(ped, 0)
+        ClearPedTasks(hunters[i], true, true)
+        TaskFleePed(hunters[i], playerPed, 4, 524292, -1082130432, -1, 0)
+    end
+    bBountyHuntersDeployed = false
+end
+
 function DeployBountyHunters()
     if bBountyHuntersDeployed then
+        return
+    end
+
+    if W.GetPlayerHonor() > -75.0 then
         return
     end
     
@@ -168,7 +183,7 @@ function DeployBountyHunters()
 
     for i=1, #hunters do  
         TaskGoToEntity(hunters[i], PlayerPedId(), -1, 2.5, 5.5, 0, 0)
-        --TaskCombatPed(targetPed, sourcePed, 0, 0)
+        --TaskCombatPed(hunters[i], PlayerPedId(), 0, 0)
     end
 
     -- Manage timeouts (unable to reach or lifetime too long)

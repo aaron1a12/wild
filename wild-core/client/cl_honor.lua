@@ -176,21 +176,3 @@ function W.AddPlayerHonor(fAmount)
 
 	UpdateHudHonorLevel()
 end
-
---
--- Unrelated
---
-
-function AddPlayerName()
-	local mpRankBar = DatabindingGetDataContainerFromPath("mp_rank_bar")
-	if mpRankBar == 0 then
-		mpRankBar = DatabindingAddDataContainerFromPath("", "mp_rank_bar")
-	end
-	
-	DatabindingAddDataString(mpRankBar, "rank_header_text", GetPlayerName(PlayerId()))
-	DatabindingAddDataString(mpRankBar, "rank_text", "1")
-	DatabindingAddDataFloat(mpRankBar, "xp_bar_minimum", 0.0)
-	DatabindingAddDataFloat(mpRankBar, "xp_bar_maximum", 100.0)
-	DatabindingAddDataFloat(mpRankBar, "xp_bar_value", 55.0)
-end
-AddPlayerName()
