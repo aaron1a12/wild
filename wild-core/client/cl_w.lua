@@ -672,3 +672,61 @@ end
 AddEventHandler('onResourceStop', function(resourceName)
 	startedResources[resourceName] = nil
 end)
+
+--
+-- Namespaced Exports For Resources
+-- Allows you query the validity of a resource method before calling it.
+--
+-- Example:		if W.Satchel then
+--					W.Satchel.Add("peanuts")
+--				end
+--
+-- Important: you must handle 'wild:cl_onOutdated' event to refresh W once a new resource
+-- registers. Also, if a resource ends, the registered functions will crash the Lua script until 
+-- W refreshes, which could take a while. This scenario has been untested. Therefore, it is
+-- probably not a good idea to use external resource calls in a loop, use DATABINDING for that.
+--
+
+local resourceNamespaces = {}
+local outdatedTime = 0
+
+function W.RegisterExport(namespace, name, method)
+	if W[namespace] == nil then
+		W[namespace] = {}
+
+		local resource = GetInvokingResource()
+
+		if resourceNamespaces[resource] == nil then
+			resourceNamespaces[resource] = {}
+		end
+
+		table.insert(resourceNamespaces[resource], namespace)
+	end
+
+	W[namespace][name] = method
+
+	-- The W object becomes outdated to other resources when modified.
+	-- Notify them
+
+	if GetGameTimer()-outdatedTime > 2000 then
+		outdatedTime = GetGameTimer()
+
+		Citizen.Wait(2100)
+		TriggerEvent('wild:cl_onOutdated')
+	end
+end
+
+AddEventHandler('onResourceStop', function(resourceName)
+	if resourceNamespaces[resourceName] == nil then
+		return
+	end
+
+	for i=1, #resourceNamespaces[resourceName] do
+		local namespace = resourceNamespaces[resourceName][i]
+
+		W[namespace] = nil
+	end
+
+	TriggerEvent('wild:cl_onOutdated')
+	collectgarbage("collect")
+end)

@@ -622,3 +622,8 @@ function DrawTextAtCoord(v, text, size, r, g, b, alpha)
 		end
 	end
 end
+
+function GetLocalizedStringFromHash(hash)
+    Citizen.InvokeNative(0xDFFC15AA63D04AAB, GetStringFromHashKey(hash))
+    return N_0xc59ab6a04333c502()
+end

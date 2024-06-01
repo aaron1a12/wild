@@ -82,3 +82,9 @@ function SetHorseGender(ped, bMale)
     SetCharExpression(ped, 41611, fCharExp)
     DecorSetInt(ped, "HorseGender", decor)
 end
+
+function GetHorseBreedString(modelName)
+    local hashName = string.upper(modelName)
+    hashName = string.sub(hashName, 10)
+    return GetLocalizedStringFromHash(GetHashKey("BREED"..hashName))
+end

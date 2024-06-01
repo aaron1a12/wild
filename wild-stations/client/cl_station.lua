@@ -180,6 +180,7 @@ Citizen.CreateThread(function()
                 
                 if UiPromptGetProgress(prompt) == 1.0 then
                     OpenPostOffice()
+                    Citizen.Wait(2000)
                 end
 
                 break

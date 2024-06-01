@@ -190,6 +190,15 @@ function SetupStables()
     for _, horse in pairs(horseCatalog) do
         local params = {}
         params.text = horse.name
+
+        if string.upper(string.sub(horse.name, 0, 10)) == "A_C_HORSE_" then
+            local breed = GetHorseBreedString(horse.model)
+
+            if breed ~= "" then
+                params.text = GetHorseBreedString(horse.model)
+            end
+        end
+
         params.description = 'Price: $'..FormatMoney(horse.price);
         params.action = function()
             

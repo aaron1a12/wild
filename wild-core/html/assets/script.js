@@ -751,6 +751,15 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
         });
     }
 
+
+    let detailElement = document.querySelector(`#menu_${strMenuId} .menuDetail`);
+    let detailTxt = page.items[itemIndex].extra.detail;
+
+    if (detailTxt != undefined)
+        detailElement.innerText = page.items[itemIndex].extra.detail;
+    else
+        detailElement.innerText = "";
+
     // Update description (under detail pane)
     let descElement = document.querySelector(`#menu_${strMenuId} .menuItemDescription`);
     let descTxt = page.items[itemIndex].extra.description;
@@ -1101,6 +1110,7 @@ else
         CreatePageItem("satchel", "root", 0, {
             icon: "test.jpg",
             description: "#"+i,
+            detail: "hello world",
             action: ()=>{
             },
         });
