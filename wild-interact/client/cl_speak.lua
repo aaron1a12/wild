@@ -263,6 +263,7 @@ local bIsFocusingOnPed = false
 local focusedPed = 0
 
 local bDisableEmoteWheel = true
+local promptDisableTime = 0
 
 Citizen.CreateThread(function()
     while true do
@@ -303,11 +304,21 @@ Citizen.CreateThread(function()
 				local playerPed = GetPlayerPed(PlayerId())
 
 				if IsAmbientSpeechPlaying(playerPed) or IsScriptedSpeechPlaying(playerPed) then
+					if UiPromptIsEnabled(greetPrompt) == 1 and promptDisableTime == 0 then
+						promptDisableTime = GetGameTimer()
+					end
+
 					PromptSetEnabled(greetPrompt, false)
 					PromptSetEnabled(antagonizePrompt, false)
+
+					if GetGameTimer()-promptDisableTime > 4500 then -- Timeout. Enable prompt anyway.
+						PromptSetEnabled(greetPrompt, true)
+						PromptSetEnabled(antagonizePrompt, true)
+					end
 				else
 					PromptSetEnabled(greetPrompt, true)
 					PromptSetEnabled(antagonizePrompt, true)
+					promptDisableTime = 0
 				end
 
 				-- R to greet, F to antagonize
@@ -422,14 +433,17 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 	end
 
 	-- Affect honor
-	if sourcePed == PlayerPedId() and not IsPedAPlayer(targetPed) then
+	if sourcePed == PlayerPedId() and not IsPedAPlayer(targetPed) and not DecorExistOn(targetPed, DECOR_IGNORING_PLAYER) then
 		local amount = W.Config.Honor["onGreet"]
 
 		if bAntagonize then
 			amount = W.Config.Honor["onAntagonize"]
 		end
 
-		W.AddPlayerHonor(amount)
+		-- Honor change only if not in dispute
+		if GetIsPedInDisputeWithPed(targetPed, sourcePed) == 0 then
+			W.AddPlayerHonor(amount)
+		end
 	end
 
 	if not bAntagonize then

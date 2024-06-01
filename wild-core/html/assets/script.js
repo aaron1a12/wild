@@ -57,8 +57,9 @@ let bMenuLock = false;
 
 var pageItemAutoId = 0
 let lastTriggerTime = 0;
+var currentPageType = 0
 
-function CreateMenu(strMenuId)
+function CreateMenu(strMenuId, bCompact)
 {
     console.log(`Creating menu ${strMenuId}...`)
     if (typeof menus[strMenuId] != "undefined")
@@ -75,6 +76,8 @@ function CreateMenu(strMenuId)
 
     var menuDiv = document.createElement("DIV");
     menuDiv.classList.add("menu");
+    if (bCompact)
+        menuDiv.classList.add("compact")
     menuDiv.id = 'menu_' + strMenuId;
 
     var menuBgDiv = document.createElement("DIV");
@@ -187,7 +190,12 @@ function OpenMenu(strMenuId, bOpen)
         }, 200);
     }
 
-    if (!bOpen) return; 
+    if (!bOpen) {
+        document.getElementById("roller").classList.remove("on")
+        return; 
+    }
+
+    document.getElementById("roller").classList.add("on")
 
     // Opening 
 
@@ -217,6 +225,8 @@ function OpenMenu(strMenuId, bOpen)
         }
         
     }
+
+    
 
     setTimeout(function(){
         activeMenu.classList.add("visible");
@@ -253,10 +263,16 @@ function CreatePage(strMenuId, strPageId, strPageTitle, strPageSubtitle, iType, 
     var pageDiv = document.createElement("DIV");
     pageDiv.className = "menuPage";
 
+    if (iType == 1)
+    {
+        pageDiv.classList.add("grid");
+    }
+
     menus[strMenuId]["pages"][strPageId] = {
         title: strPageTitle, 
         subtitle: strPageSubtitle,
         element: pageDiv,
+        type: iType,
         detailPanelSize: iDetailPanelSize,
         items: [],
         selectedItem: undefined
@@ -374,6 +390,22 @@ function GoToPage(strMenuId, strPageId, bGoingBack, bNoHistory)
         }
         
         navigationLock = false
+
+        currentPageType = page.type
+        if (IsRedM()) 
+        {
+            fetch(`https://${GetParentResourceName()}/onPageFinishedOpening`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=UTF-8',
+                },
+                body: JSON.stringify({
+                    menuId: strMenuId,
+                    pageId: currentPage,
+                    pageType: page.type
+                })
+            });
+        }    
     }, 100);
 }
 
@@ -539,7 +571,18 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
     {
         // Menu Item Content
         var itemContentDiv = document.createElement("DIV");
-        itemContentDiv.innerText = extraItemParams.text;
+
+        if (extraItemParams.text)
+        {
+            itemContentDiv.innerText = extraItemParams.text;
+        }
+        else if (extraItemParams.icon)
+        {
+            var img = document.createElement("IMG");
+            img.src = extraItemParams.icon;
+            itemContentDiv.appendChild(img);
+        }
+
         itemDiv.appendChild(itemContentDiv);
 
         // End 
@@ -708,6 +751,15 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
         });
     }
 
+
+    let detailElement = document.querySelector(`#menu_${strMenuId} .menuDetail`);
+    let detailTxt = page.items[itemIndex].extra.detail;
+
+    if (detailTxt != undefined)
+        detailElement.innerText = page.items[itemIndex].extra.detail;
+    else
+        detailElement.innerText = "";
+
     // Update description (under detail pane)
     let descElement = document.querySelector(`#menu_${strMenuId} .menuItemDescription`);
     let descTxt = page.items[itemIndex].extra.description;
@@ -777,7 +829,7 @@ function UpdateOverflowArrow()
         menuScrollerBottom.classList.remove("arrow");
 }
 
-function MoveSelection(bForward)
+function MoveSelection(bForward, bVertical)
 { 
     let menu = menus[currentMenuId]
     if (menu == undefined)
@@ -807,12 +859,27 @@ function MoveSelection(bForward)
         {
             if (page.items[i].id == page.selectedItem)
             {
-                var index = (bForward) ? i+1 : i-1;
+                var index = i;
 
-                
-                if (page.items[index] == undefined)
+                if (!bVertical)
                 {
-                    index = (bForward) ? 0 : page.items.length-1;
+                    index = (bForward) ? i+1 : i-1;
+            
+                    if (page.items[index] == undefined)
+                        index = (bForward) ? 0 : page.items.length-1;                  
+                }
+                else
+                {
+                    const cols = 4;
+                    index = (bForward) ? i+cols : i-cols;
+
+                    if (page.items[index] == undefined)
+                    {
+                        index = (bForward) ? i+1 : i-1;
+            
+                        if (page.items[index] == undefined)
+                            index = (bForward) ? 0 : page.items.length-1;    
+                    }
                 }
 
                 itemToSelect = page.items[index].id;
@@ -982,7 +1049,7 @@ else
     // Simulate RedM zoom for chrome
     document.body.style.zoom = window.screen.width / 1920;
 
-    CreateMenu("onlineMenu");
+    /*CreateMenu("onlineMenu");
     //SetElementTextByClass("onlineMenu", "menuSubtitle", "Not in faction")
     CreatePage("onlineMenu", "root", "CRAFTING\n UPGRADES", "Not in faction", 0, 4);
 
@@ -1032,14 +1099,30 @@ else
         description: "...",
     });
 
-    SetPageItemEndHtml("onlineMenu", "root", "btnSkin", "<tick>")
+    SetPageItemEndHtml("onlineMenu", "root", "btnSkin", "<tick>")*/
     
-    OpenMenu("onlineMenu", true);
+    CreateMenu("satchel", true);
+    CreatePage("satchel", "root", "Satchel", "Provisions", 1, 4);
+    SetMenuRootPage("satchel", "root");
+
+    for (var i=0; i<10; i++)
+    {
+        CreatePageItem("satchel", "root", 0, {
+            icon: "test.jpg",
+            description: "#"+i,
+            detail: "hello world",
+            action: ()=>{
+            },
+        });
+    }
+
+
+    OpenMenu("satchel", true);
 
     setTimeout(function(){
-        //OpenMenu("debug1", false);
+        //OpenMenu("onlineMenu", false);
         //DestroyMenuAndData("onlineMenu");
-    }, 1000);
+    }, 2000);
     
 }
 
@@ -1073,7 +1156,7 @@ window.addEventListener('message', function(event) {
 
     if (event.data.cmd == "createMenu")
     {
-        CreateMenu(event.data.menuId, event.data.menuTitle);
+        CreateMenu(event.data.menuId, event.data.menuTitle, event.data.compact);
     }
 
     if (event.data.cmd == "openMenu")
@@ -1138,7 +1221,7 @@ window.addEventListener('message', function(event) {
 
     if (event.data.cmd == "moveSelection")
     {
-        MoveSelection(event.data.forward);
+        MoveSelection(event.data.forward, event.data.vertical);
     }
 
     if (event.data.cmd == "flipCurrentSwitch")
@@ -1174,6 +1257,11 @@ window.addEventListener('message', function(event) {
 
 
 document.onkeydown = function(evt) {
+    var bVertical = false;
+
+    if (currentPageType==1)
+        bVertical = true;
+
     switch (evt.key) {
     case 'Escape':
 
@@ -1197,16 +1285,28 @@ document.onkeydown = function(evt) {
         break;
 
     case 'ArrowDown':
-        if (!IsRedM()) MoveSelection(true);
+        if (!IsRedM()) MoveSelection(true, bVertical);
         break;
     case 'ArrowUp':
-        if (!IsRedM()) MoveSelection(false);
+        if (!IsRedM()) MoveSelection(false, bVertical);
         break; 
     case 'ArrowRight':
-        if (!IsRedM()) FlipCurrentSwitch(true);
+        if (!IsRedM())
+        {
+            if (currentPageType==0)
+                FlipCurrentSwitch(true);
+            else
+                MoveSelection(true)
+        }
         break; 
     case 'ArrowLeft':
-        if (!IsRedM()) FlipCurrentSwitch(false);
+        if (!IsRedM())
+        {
+            if (currentPageType==0)
+                FlipCurrentSwitch(false);
+            else
+                MoveSelection(false)
+        }
         break;     
     case 'Enter':
         if (!IsRedM()) TriggerSelectedItem();

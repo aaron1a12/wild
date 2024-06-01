@@ -36,6 +36,10 @@ W.EventDataInfo = {
         size = 9,
         members = {"Int32", "Int32", "Int32", "Int32", "Int32", "Int32", "Float32", "Float32", "Float32"} --| entity | object (or ped id) that caused damage | weaponHash | ammo | damage amount | unknown | coord z | coord y | coord z
     },
+    [`EVENT_INVENTORY_ITEM_PICKED_UP`] = {
+        size = 5,
+        members = {"Int32", "Int32", "Int32", "Int32", "Int32"} -- inventory item hash | picked up entity model | isItemWasUsed | isItemWasBought | picked up entity id
+    },
     [`EVENT_LOOT_COMPLETE`] = {
         size = 3,
         members = {"Int32", "Int32", "Int32"} -- looter, ped, success

@@ -180,6 +180,14 @@ function GetItemInWheel()
 	return N_0x9c409bbc492cb5b1()
 end
 
+-- Sets the third person gameplay camera zoom level and blends in.
+-- Must be called every frame to interpolate.
+-- Important: offset and distance permanently affects subtle zoom in weapon wheel and possibly in menus too.
+-- Seems to be used by internal ui animation: Radial_Menu_Slot_Granular_Focus_Transition.ymt
+function SetGameplayCamGranularFocusThisFrame(fAlpha, iUnk0, fOffset, iUnk1, fDistance)
+	return N_0x066167c63111d8cf(fAlpha, iUnk0, fOffset, iUnk1, fDistance)
+end
+
 -- Original code from https://github.com/femga/rdr3_discoveries/
 function PlayAmbientSpeechFromEntity(entity_id, sound_ref_string, sound_name_string, speech_params_string, speech_line)
 	local sound_name = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", sound_name_string,Citizen.ResultAsLong())
@@ -613,4 +621,9 @@ function DrawTextAtCoord(v, text, size, r, g, b, alpha)
             DisplayText(str, sx, sy)
 		end
 	end
+end
+
+function GetLocalizedStringFromHash(hash)
+    Citizen.InvokeNative(0xDFFC15AA63D04AAB, GetStringFromHashKey(hash))
+    return N_0xc59ab6a04333c502()
 end
