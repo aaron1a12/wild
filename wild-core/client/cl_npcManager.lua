@@ -62,10 +62,14 @@ end)
 function W.NpcManager:EnsureNpcExists(uniqueName, params)
     -- Update the params so we can use the callbacks
 
+    -- Names get hashed now so we can sync faster with decors
+    uniqueName = GetHashKey(uniqueName)
+
     local resource = GetInvokingResource()
     W.NpcManager.ClientPool[uniqueName] = {
         ["Managed"] = false,
         ["Ped"] = nil,
+        ["NetId"] = nil,
         ["Params"] = params,
         ["Resource"] = resource
     }
@@ -118,6 +122,9 @@ AddEventHandler("wild:npcManager:cl_onCreatedPed", function(name, netId)
         timeOut = timeOut - 50
     end
 
+    W.NpcManager.ClientPool[name].NetId = netId
+
+    --[[
     local ped = NetToPed(netId)
 
     -- onCreatedPed is artificially triggered late on later joining clients.
@@ -136,6 +143,62 @@ AddEventHandler("wild:npcManager:cl_onCreatedPed", function(name, netId)
             params:onActivate(ped, bOwned, netId)
         end
     end
+    ]]
+end)
+
+local function RegisterDecorTypes()
+	DecorRegister("npc", 3);
+end
+RegisterDecorTypes()
+
+function W.NpcManager:GetNpcFromPed(ped)
+    for name, npc in pairs(W.NpcManager.ClientPool) do
+        if npc.Ped == ped then
+            return npc, name
+        end
+    end
+    return nil, nil
+end
+
+local function OnPedCreated(ped)
+    -- decors take a while to sync
+    local timeOut = 10000
+    while timeOut > 0 and not DecorExistOn(ped, "npc") do
+        Wait(50)
+        timeOut = timeOut - 50
+    end
+
+    if DecorExistOn(ped, "npc") then
+        local name = DecorGetInt(ped, "npc")  
+
+        while name == 0 do
+            Wait(100)
+            name = DecorGetInt(ped, "npc")
+        end
+
+        W.NpcManager.ClientPool[name].Ped = ped
+
+        local bOwned = NetworkHasControlOfEntity(ped)
+        W.NpcManager.ClientPool[name].Params:onActivate(ped, bOwned, PedToNet(ped))
+
+        Citizen.CreateThread(function()
+            while DoesEntityExist(ped) do
+                Citizen.Wait(1234)
+            end
+
+            W.NpcManager.ClientPool[name].Ped = 0
+
+            if W.NpcManager.ClientPool[name].Params.onDeactivate ~= nil then
+                W.NpcManager.ClientPool[name].Params:onDeactivate()
+            end
+        end)
+    end
+end
+
+-- The ped will get destroyed and recreated by RAGE. We must hook into the event
+W.Events.AddHandler(`EVENT_PED_CREATED`, function(data)
+    local ped = data[1]
+    OnPedCreated(ped)
 end)
 
 RegisterNetEvent("wild:npcManager:cl_onDeletePed")
@@ -146,7 +209,7 @@ AddEventHandler("wild:npcManager:cl_onDeletePed", function(name)
     params.Ped = 0
 
     if params.onDeactivate ~= nil then
-        params:onDeactivate()
+        ---params:onDeactivate()
     end
 end)
 
@@ -286,6 +349,9 @@ function W.NpcManager:ManageNow()
                 local ped = CreatePed(npc.Params.Model, pedCoords.x, pedCoords.y, pedCoords.z - 0.75, pedHeading, true)
                 --EquipMetaPedOutfitPreset(ped, 0, false)
                 SetEntityAsMissionEntity(ped, true, true)
+
+                -- Might fix double ped spawning
+                npc.Ped = ped
             
                 local netId = PedToNet(ped)
                 SetNetworkIdExistsOnAllMachines(netId, true)
@@ -310,7 +376,11 @@ function W.NpcManager:ManageNow()
                 if not NetworkHasControlOfEntity(ped) then
                     print("Failed to gain control of entity!")
                 end
-            
+
+                DecorSetInt(ped, "npc", name)
+                -- EVENT_PED_CREATED seems to be skipped on first tick for peds created with CREATE_PED?
+                -- Here, we force handling of the event, since it most likely didn't fire.
+                OnPedCreated(ped) 
 
             elseif nOutsideMaxCull == nPlayerCount then -- Outside of everybody's cull range
 

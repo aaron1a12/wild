@@ -52,6 +52,14 @@ W.EventDataInfo = {
         size = 5,
         members = {"Int32", "Int32", "Int32", "Int32", "Int32"} -- inventory item hash | picked up entity model | isItemWasUsed | isItemWasBought | picked up entity id
     },
+    [`EVENT_PED_CREATED`] = {
+        size = 1,
+        members = {"Int32"}
+    },
+    [`EVENT_PED_DESTROYED`] = {
+        size = 1,
+        members = {"Int32"}
+    },
     [`EVENT_PED_ANIMAL_INTERACTION`] = {
         size = 3,
         members = {"Int32", "Int32", "Int32"} -- ped | animal ped | interaction type hash
