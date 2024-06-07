@@ -28,43 +28,27 @@ ePedAttribute = {
 }
 
 
-
-
-
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)
 
-        	if IsControlJustReleased(0, `INPUT_OPEN_WHEEL_MENU`) then
+        if IsControlJustReleased(0, `INPUT_OPEN_WHEEL_MENU`) then
+            local lastWheel = DatabindingReadDataIntFromParent(wildData, "last_quick_select_wheel")
 
-                local item = N_0x9c409bbc492cb5b1()
-                local group = GetItemGroup(item)
+            local item = N_0x9c409bbc492cb5b1()
+            local group = GetItemGroup(item)
 
-                if group == `CONSUMABLE` then
-                    --RemoveItemFromInventory(item, 1)
-                    SatchelRemoveItem(item, 1)
-
-                    Citizen.Wait(2000)
-
-                    AddItemToInventory(`UPGRADE_STAMINA_TANK_1`, 1)
-
-                    SetAttributePoints(PlayerPedId(), ePedAttribute.PA_HEALTH, GetMaxAttributePoints(PlayerPedId(), ePedAttribute.PA_HEALTH))
-                    SetAttributePoints(PlayerPedId(), ePedAttribute.PA_STAMINA, GetMaxAttributePoints(PlayerPedId(), ePedAttribute.PA_STAMINA))
-            
-                    SetAttributeCoreValue(PlayerPedId(), 0, 200)
-                    SetAttributeCoreValue(PlayerPedId(), 1, 200)
-                    
-                    SetEntityHealth(PlayerPedId(), 200, 0)
-                    RestorePedStamina(PlayerPedId(), 200.0)
-                    
-
-            		local playerPed = PlayerPedId()
-            		RequestAnimDict("mech_inventory@eating@canned_food@cylinder@d8-2_h10-5")
-            		while not HasAnimDictLoaded("mech_inventory@eating@canned_food@cylinder@d8-2_h10-5") do
-                		Wait(100)
-            		end
-            		TaskPlayAnim(playerPed, "mech_inventory@eating@canned_food@cylinder@d8-2_h10-5", "left_hand", 8.0, -8.0, -1, 1 << 4 | 1 << 3 | 1 << 16, 0.0, false, 0, false, "UpperBodyFixup_filter", false)
+            if group == `CONSUMABLE` or group == `kit` then
+                if lastWheel == 2 then
+                    if item == `kit_horse_brush` then
+                        TriggerEvent('REQUEST_BRUSH_HORSE')
+                    else
+                        TriggerEvent('REQUEST_FEED_HORSE', item)
+                    end
+                else
+                    SatchelUseItem(item)
                 end
-        	end
+            end
+        end
 	end
 end)

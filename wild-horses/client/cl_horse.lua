@@ -26,7 +26,7 @@ function CreatePlayerHorse()
     SpawnpointsCancelSearch()
 
     -- Spawn radius (in meters)
-    local spawnRadius = 100.0
+    local spawnRadius = 10.0 --100.0
 
     math.randomseed(123)
     local noiseX = math.random() * spawnRadius
@@ -95,124 +95,9 @@ function CreatePlayerHorse()
     -- Horse stuff
     --
 
-    -- Wait until the mount has attributes
-    while GetMaxAttributePoints(mount, ePedAttribute.PA_HEALTH) == 0 do
-        Citizen.Wait(0)
-    end
-
-    SetMountSecurityEnabled(mount, false)
-    SetPlayerOwnsMount(PlayerId(), mount)
-    SetPedAsSaddleHorseForPlayer(PlayerId(), mount)
-    SetPedActivePlayerHorse(PlayerId(), mount)
-
-    --
-    -- as in R* scripts (player_horse.c)
-    -- 
-
-    ClearActiveAnimalOwner(mount, 0)
-
-    SetPedOwnsAnimal(PlayerPedId(), mount, false) -- Enables rearing
-    SetPedPersonality(mount, `PLAYER_HORSE`)
-
-    SetAnimalIsWild(mount, false)
-
-    SetPedConfigFlag(mount, 324, true) -- Unknown condition
-    SetPedConfigFlag(mount, 211, true)
-    SetPedConfigFlag(mount, 208, true)
-    SetPedConfigFlag(mount, 209, true)
-    SetPedConfigFlag(mount, 400, true)
-    SetPedConfigFlag(mount, 297, true)
-    SetPedConfigFlag(mount, 136, false)
-    SetPedConfigFlag(mount, 312, false)
-    SetPedConfigFlag(mount, 113, false)
-    SetPedConfigFlag(mount, 301, false)
-    SetPedConfigFlag(mount, 277, true)
-    SetPedConfigFlag(mount, 319, true)
-    SetPedConfigFlag(mount, 6, true)
-
-    SetAnimalTuningBoolParam(mount, 25, false) -- ATB_FlockEnablePavementGraph
-    SetAnimalTuningBoolParam(mount, 24, false) -- ATB_FlockEnableFlee
-
-    --
-    -- Custom (not R*)
-    --
-
-    --SetPedConfigFlag(mount, 297, true) --PCF_ForceInteractionLockonOnTargetPed
-    SetPedConfigFlag(mount, 300, false) -- PCF_DisablePlayerHorseLeading
-    SetPedConfigFlag(mount, 312, true) -- PCF_DisableHorseGunshotFleeResponse
-    --SetPedConfigFlag(mount, 442, true) -- disable flee
-    --SetPedConfigFlag(mount, 444, false) -- disable flee horse by player ??
-    SetPedConfigFlag(mount, 546, false) -- PCF_IgnoreOwnershipForHorseFeedAndBrush
-    SetPedConfigFlag(mount, 594, false) -- Wild horse
-
-    --
-    -- Max out all ranks/points
-    --
-
-    SetAttributeBaseRank(mount, ePedAttribute.PA_HEALTH, GetMaxAttributeRank(mount, ePedAttribute.PA_HEALTH))
-    SetAttributeBaseRank(mount, ePedAttribute.PA_STAMINA, GetMaxAttributeRank(mount, ePedAttribute.PA_STAMINA))
-    SetAttributeBaseRank(mount, ePedAttribute.PA_SPECIALABILITY, GetMaxAttributeRank(mount, ePedAttribute.PA_SPECIALABILITY))
-    SetAttributeBaseRank(mount, ePedAttribute.PA_COURAGE, GetMaxAttributeRank(mount, ePedAttribute.PA_COURAGE))
-    SetAttributeBaseRank(mount, ePedAttribute.PA_AGILITY, GetMaxAttributeRank(mount, ePedAttribute.PA_AGILITY))
-    SetAttributeBaseRank(mount, ePedAttribute.PA_SPEED, GetMaxAttributeRank(mount, ePedAttribute.PA_SPEED))
-    SetAttributeBaseRank(mount, ePedAttribute.PA_ACCELERATION, GetMaxAttributeRank(mount, ePedAttribute.PA_ACCELERATION))
-    SetAttributeBaseRank(mount, ePedAttribute.PA_BONDING, GetMaxAttributeRank(mount, ePedAttribute.PA_BONDING))
-    SetAttributeBaseRank(mount, ePedAttribute.SA_BODYWEIGHT, GetMaxAttributeRank(mount, ePedAttribute.SA_BODYWEIGHT))
-    SetAttributeBaseRank(mount, ePedAttribute.MTR_STRENGTH, GetMaxAttributeRank(mount, ePedAttribute.MTR_STRENGTH))
-    SetAttributeBaseRank(mount, ePedAttribute.MTR_GRIT, GetMaxAttributeRank(mount, ePedAttribute.MTR_GRIT))
-    SetAttributeBaseRank(mount, ePedAttribute.MTR_INSTINCT, GetMaxAttributeRank(mount, ePedAttribute.MTR_INSTINCT))
-    SetAttributeBaseRank(mount, ePedAttribute.SA_DIRTINESSSKIN, 0) -- clean
-    SetAttributePoints(mount, ePedAttribute.PA_HEALTH, GetMaxAttributePoints(mount, ePedAttribute.PA_HEALTH))
-    SetAttributePoints(mount, ePedAttribute.PA_STAMINA, GetMaxAttributePoints(mount, ePedAttribute.PA_STAMINA))
-    SetAttributePoints(mount, ePedAttribute.PA_SPECIALABILITY, GetMaxAttributePoints(mount, ePedAttribute.PA_SPECIALABILITY))
-    SetAttributePoints(mount, ePedAttribute.PA_COURAGE, GetMaxAttributePoints(mount, ePedAttribute.PA_COURAGE))
-    SetAttributePoints(mount, ePedAttribute.PA_AGILITY, GetMaxAttributePoints(mount, ePedAttribute.PA_AGILITY))
-    SetAttributePoints(mount, ePedAttribute.PA_SPEED, GetMaxAttributePoints(mount, ePedAttribute.PA_SPEED))
-    SetAttributePoints(mount, ePedAttribute.PA_ACCELERATION, GetMaxAttributePoints(mount, ePedAttribute.PA_ACCELERATION))
-    SetAttributePoints(mount, ePedAttribute.PA_BONDING, GetMaxAttributePoints(mount, ePedAttribute.PA_BONDING))
-    SetAttributePoints(mount, ePedAttribute.SA_BODYWEIGHT, GetMaxAttributePoints(mount, ePedAttribute.SA_BODYWEIGHT))
-    SetAttributePoints(mount, ePedAttribute.MTR_STRENGTH, GetMaxAttributePoints(mount, ePedAttribute.MTR_STRENGTH))
-    SetAttributePoints(mount, ePedAttribute.MTR_GRIT, GetMaxAttributePoints(mount, ePedAttribute.MTR_GRIT))
-    SetAttributePoints(mount, ePedAttribute.MTR_INSTINCT, GetMaxAttributePoints(mount, ePedAttribute.MTR_INSTINCT))
-    SetAttributePoints(mount, ePedAttribute.SA_DIRTINESSSKIN, 0) -- clean
-
-    --
-    -- as in R* scripts (net_stable_mount.c)
-    -- 
-    
-    SetPedConfigFlag(PlayerPedId(), 561, true) -- PCF_EnableHorseCollectPlantInteractionInMP
-
-    SetPedCanBeLassoed(mount, false)
-    RequestPedVisibilityTracking(mount)
-    SetPedShouldIgnoreAvoidanceVolumes(mount, 1)
-    SetPedConfigFlag(mount, 400, true)
-    SetPedConfigFlag(mount, 208, true)
-    SetPedConfigFlag(mount, 209, true)
-    SetPedConfigFlag(mount, 297, true)
-    SetPedConfigFlag(mount, 277, true)
-    SetPedConfigFlag(mount, 230, true)
-    SetPedConfigFlag(mount, 324, true)
-    SetPedConfigFlag(mount, 319, true)
-    SetPedLassoHogtieFlag(mount, 0, false)
-
-    SetPedConfigFlag(mount, 388, false) --PCF_DisableFatallyWoundedBehaviour
-
-    SetPedShouldIgnoreAvoidanceVolumes(mount, 2)
-    SetPedRelationshipGroupHash(mount, GetPedRelationshipGroupHash(PlayerPedId()))
-
-    SetTransportConfigFlag(mount, 6, 0)
-    SetTransportConfigFlag(mount, 3, 0)
-
-    SetPlayerOwnsMount(PlayerId(), mount)
-    SetPlayerMountStateActive(PlayerId(), true)
-    --SetPedAsTempPlayerHorse(PlayerId(), mount)
-
-    SetMountBondingLevel(mount, GetMaxAttributeRank(mount, ePedAttribute.PA_BONDING))
-    CompendiumHorseBonding(mount, GetMaxAttributeRank(mount, ePedAttribute.PA_BONDING))
-
+    SetMountForPlayerPed(mount, PlayerPedId())
 
     --SetPedConfigFlag(mount, 412, false) --disable horse prompts
-
 
     -- Prompt stuff
 
@@ -271,7 +156,6 @@ function CreatePlayerHorse()
                 ShowHelpText("Your horse has died.", 5000)
                 TriggerServerEvent("wild:sv_deleteMount")
 
-
                 local corpse = mount
                 mount = 0 
                 ReleasePedVisibilityTracking(mount)
@@ -281,14 +165,18 @@ function CreatePlayerHorse()
                 DeletePed(corpse)
             else
 
-                local playerPed = PlayerPedId()
+                --[[local playerPed = PlayerPedId()
                 local playerCoords = GetEntityCoords(playerPed)
                 local mountCoords = GetEntityCoords(mount)
                 local dist = GetVectorDistSqr(playerCoords, mountCoords)
 
-                if dist < 7.6 then
+                if dist < 7.6 then]]
+                
+                local closeMount = Citizen.InvokeNative(0x0501D52D24EA8934, 1, Citizen.ResultAsInteger())
+
+                if mount == closeMount then
                     PromptSetVisible(brushPrompt, 1)
-                    PromptSetVisible(feedPrompt, 1)
+                    PromptSetVisible(feedPrompt, 1)                 
 
                     -- Motivation of 1.0 means super agitated towards player
                     if GetPedMotivation(mount, 3, playerPed) < 0.001 and not bRunningTask then
@@ -299,6 +187,7 @@ function CreatePlayerHorse()
                         PromptSetEnabled(feedPrompt, 0)
                     end
                 else
+                    PromptSetVisible(horseCargoPrompt, 0)
                     PromptSetVisible(brushPrompt, 0)
                     PromptSetVisible(feedPrompt, 0)
                 end                    
@@ -313,8 +202,39 @@ function CreatePlayerHorse()
 end
 
 
+-- Debug Events    
+Citizen.CreateThread(function()
+	while true do
+		Citizen.Wait(0)
+		local size = GetNumberOfEvents(0)
+		if size > 0 then
+			for i = 0, size - 1 do
+				local evt = GetEventAtIndex(0, i)
+                if evt ~= 735942751 and evt ~= 1626561060 and evt ~= -1863021589 and evt ~= -1231347001 and evt ~= 1351025667 and evt ~= 1669410864 then
+                    print(evt)
+                end
+			end
+		end
 
-W.Events.AddHandler(`EVENT_PED_ANIMAL_INTERACTION`, function(data)
+	end
+end)
+
+
+
+AddEventHandler("wild:cl_onNewPlayerPed", function()  
+    if mount == 0 then
+        return
+    end
+
+    if not DoesEntityExist(mount) then
+        return
+    end
+
+    SetMountForPlayerPed(mount, PlayerPedId())
+end)
+
+
+AddEventHandler("EVENT_PED_ANIMAL_INTERACTION", function(data)  
     local humanPed = data[1]
     local animalPed = data[2]
 
@@ -341,7 +261,7 @@ W.Events.AddHandler(`EVENT_PED_ANIMAL_INTERACTION`, function(data)
     end
 end)
 
-W.Events.AddHandler(`EVENT_CALM_PED`, function(data)
+AddEventHandler("EVENT_CALM_PED", function(data)  
     local calmer = data[1]
     local model = GetEntityModel(calmer)
 
@@ -405,20 +325,55 @@ function OnBrush()
     end)
 end
 
-function OnFeed()
-    bRunningTask = true
-    TaskAnimalInteraction(PlayerPedId(), mount, `Interaction_Food`, `p_apple01x`, 0)
+function OnFeed(item)
+    if W.Satchel then
 
-    SetTimeout(5000, function()
-        bRunningTask = false
-        SetAttributePoints(mount, ePedAttribute.PA_HEALTH, GetMaxAttributePoints(mount, ePedAttribute.PA_HEALTH))
-        SetAttributePoints(mount, ePedAttribute.PA_STAMINA, GetMaxAttributePoints(mount, ePedAttribute.PA_STAMINA))
+        local horseFoodItems = {}
 
-        SetAttributeCoreValue(mount, 0, 200)
-        SetAttributeCoreValue(mount, 1, 200)
-        SetEntityHealth(mount, GetMaxAttributePoints(mount, ePedAttribute.PA_HEALTH), 0)
-        RestorePedStamina(mount, 100.0)
-    end)
+        if item then
+            table.insert(horseFoodItems, {item=item, quantity=1})
+        else
+            horseFoodItems = W.Satchel.GetInventoryWithFilter("horse food")
+        end
+
+        -- Pick a random item for food
+        if #horseFoodItems > 0 then
+            math.randomseed(GetGameTimer()/7)
+
+            -- food.item, food.quantity
+            local food = horseFoodItems[math.random(#horseFoodItems)]
+
+            if food.quantity > 0 then
+                bRunningTask = true
+
+                -- Note: in all RDR2 scripts, INTERACTION_FOOD uses no model. Perhaps they add it manually and rely on HasAnimEventFired?
+                TaskAnimalInteraction(PlayerPedId(), mount, `INTERACTION_FOOD`, 0, 0) --INTERACTION_FOOD, INTERACTION_INJECTION_QUICK, INTERACTION_OINTMENT, INTERACTION_BRUSH  `p_apple01x`
+            
+                Citizen.Wait(1)
+
+
+                local start = GetGameTimer()
+                while GetGameTimer()-start < 5000 and not HasAnimEventFired(PlayerPedId(), `INTERACT`) do
+                    Citizen.Wait(0)
+                end
+
+                if HasAnimEventFired(PlayerPedId(), `INTERACT`) then
+                    bRunningTask = false
+                    SetAttributePoints(mount, ePedAttribute.PA_HEALTH, GetMaxAttributePoints(mount, ePedAttribute.PA_HEALTH))
+                    SetAttributePoints(mount, ePedAttribute.PA_STAMINA, GetMaxAttributePoints(mount, ePedAttribute.PA_STAMINA))
+            
+                    SetAttributeCoreValue(mount, 0, 200)
+                    SetAttributeCoreValue(mount, 1, 200)
+                    SetEntityHealth(mount, GetMaxAttributePoints(mount, ePedAttribute.PA_HEALTH), 0)
+                    RestorePedStamina(mount, 100.0)
+
+                    W.Satchel.RemoveItem(food.item, 1)
+                end
+            end
+        end
+    else
+        ShowHelpText("No satchel for food", 5000)
+    end
 end
 
 
@@ -453,27 +408,34 @@ Citizen.CreateThread(function()
         ModifyPlayerUiPrompt(PlayerId(), 49, 0, 1)
         ModifyPlayerUiPrompt(PlayerId(), 50, 0, 1)
 
-        ModifyPlayerUiPrompt(PlayerId(), 28, 0, 0) -- PP_HORSE_ITEMS
+        ModifyPlayerUiPrompt(PlayerId(), 28, 0, 1) -- PP_HORSE_ITEMS
         ModifyPlayerUiPrompt(PlayerId(), 45, 0, 0) -- PP_HORSE_WEAPONS_HOLD
         ModifyPlayerUiPrompt(PlayerId(), 46, 0, 0) -- PP_HORSE_WEAPONS
         ModifyPlayerUiPrompt(PlayerId(), 47, 0, 0) -- PP_HORSE_PROXIMITY_INTERACT
 	end
 end)
 
-local foo = 0
+
+AddEventHandler("REQUEST_BRUSH_HORSE", OnBrush)
+
+AddEventHandler("REQUEST_FEED_HORSE", function(item)
+    OnFeed(item)
+end)
 
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)	
+        local playerPed = PlayerPedId()
+
 		if IsControlJustPressed(0, `INPUT_WHISTLE`) then
             OnWhistle()
         end
 
-        if IsControlJustPressed(0, `INPUT_INTERACT_HORSE_BRUSH`) then
+        if IsControlJustPressed(0, `INPUT_INTERACT_HORSE_BRUSH`) and not IsPedOnMount(playerPed) then
             OnBrush()
         end
 
-        if IsControlJustPressed(0, `INPUT_INTERACT_HORSE_FEED`) then
+        if IsControlJustPressed(0, `INPUT_INTERACT_HORSE_FEED`) and not IsPedOnMount(playerPed) then
             OnFeed()
         end
 

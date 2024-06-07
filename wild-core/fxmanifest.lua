@@ -40,8 +40,10 @@ files
 	"players.json",
 	"player_outfits.json",
 	"npcs.json",
+	"custom_ped_loot_table.json",
 	"streamData/**.ymt",
 	"streamData/**.xml",
+	"streamData/**.meta",
 }
 
 data_file 'EXPRESSION_SETS_FILE' 'streamData/expression_sets.xml'

@@ -1,6 +1,6 @@
 
 local witnessTime = 0
-W.Events.AddHandler(`EVENT_CRIME_CONFIRMED`, function(data)
+AddEventHandler("EVENT_CRIME_CONFIRMED", function(data) 
 	local crime = data[1]
 	local criminalPed = data[2]
 	local witnessPed = data[3]
@@ -26,7 +26,7 @@ W.Events.AddHandler(`EVENT_CRIME_CONFIRMED`, function(data)
 	end
 end)
 
-W.Events.AddHandler(`EVENT_PLAYER_ESCALATED_PED`, function(data)
+AddEventHandler("EVENT_PLAYER_ESCALATED_PED", function(data) 
 	local escalator = data[1]
 	local ped = data[2]
 	

@@ -380,6 +380,7 @@ h1, h2, h3 {font-family: 'rdr-lino';}
     align-items: center;
     text-align: center;
     justify-content: center;
+    flex-direction: column;
 }
 
 .menuItemDescription {
@@ -466,7 +467,13 @@ h1, h2, h3 {font-family: 'rdr-lino';}
 }
 
 .menu.compact .menuBodyMainArea {
-    padding-top: 5px;
+    margin-top: 10px;
+    background-image: url(grid_cell.png);
+    background-size: 105px 105px;
+    background-position: 0px 0px;
+    background-attachment: local;
+    width: 420px;
+    margin-left:10px;
 }
 
 .menu.compact .menuPage.grid
@@ -479,29 +486,81 @@ h1, h2, h3 {font-family: 'rdr-lino';}
     width: 105px;
     height: 105px;
     float: left;
-    margin-left:7px;
-}
-
-.menu.compact .grid .menuItem {
-    display:block;
+    margin-left: 5px;
+    margin-right: -5px;
+    display: block;
 }
 
 .menu.compact .grid .menuItem div {
     margin: 5px;
     text-align: center;
-    margin-top: 2px;
 }
 
 .menu.compact .grid .menuItem img {
     width:90px;
     height:90px;
+    margin-top: 4px;
 }
 
 .menu.compact .grid .menuItem::before {
-    background-image: url(inkroller_1a.png);
+    /*background-image: url(inkroller_1a.png);*/
+    background-image: none;
+    height:100%;
 }
 
 .menu.compact .grid .menuItem.selected::after {
     background-image: url(item_square_highlight.png);
-    top: -6px;
+    top: 0px;
+}
+
+.menu.compact .grid .menuItem quantity {
+    display: flex;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    position: absolute;
+    bottom: 7px;
+    right: 7px;
+    width: 30px;
+    height: 30px;
+    padding-top: 0px;
+    border: 2px solid;
+    background-color: #ffffffb0;
+    color: #000;
+    border-radius: 100px;
+    font-family: 'rdr-lino';
+    justify-items: center;
+    font-weight: 100;
+    justify-content: center;
+    align-items: self-end;
+}
+
+.menu.compact .grid .menuItem onHorse {
+    display: inline-block;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 50px;
+    height: 50px;
+    background-image: url(horse_equipped.png);
+}
+
+.menuNav {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.menuNav img {
+    display: block;
+    width:32px;
+    opacity: 0.25;
+}
+
+.menuNav img.selected {
+    opacity: 1.0;
 }

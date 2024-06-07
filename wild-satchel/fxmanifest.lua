@@ -5,7 +5,9 @@ rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aw
 client_script {
 	"@wild-core/client/functions/cl_utilities.lua",
 	'client/cl_itemCatalogSp.lua',
+	'client/cl_carcassData.lua',
 	'client/cl_definitions.lua',
+	'client/cl_taskInteract.lua',
 	'client/cl_inventory.lua',
 	'client/cl_itemWheel.lua',
 	'client/cl_satchel.lua',
@@ -24,7 +26,17 @@ files
 {
 	"player_inventories.json",
 	"itemCatalogUiData.json",
-	"buffer.dat",
 	"slot_ids.json",
 	'item_textures/**/*',
+	'satchel_icons/**/*',
+	'custom_items.json',
+	"stream/*.ytd",
+	
+	"streamData/**.ymt",
+	"streamData/**.xml",
+	"streamData/**.meta",
 }
+
+data_file 'DEFAULT_CARRIABLES_DATA_FILE' 'streamData/defaultcarriablesdata.meta'
+
+ui_page 'html/index.html'

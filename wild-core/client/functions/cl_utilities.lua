@@ -252,6 +252,9 @@ end
 --See for more: https://gist.github.com/nonameset/b338aab76bbaa0c4f879630a61d97122
 --Example: ShowHelpText("Press ~INPUT_ENTER~ to browse shop", 1000)
 function ShowHelpText(strMessage, durationMs)
+	if not durationMs then
+		durationMs = 3000
+	end
 	local str = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", strMessage, Citizen.ResultAsLong())
 	
 	local struct1 = DataView.ArrayBuffer(8*13)
@@ -567,7 +570,7 @@ function GetLookAtRotation(startCoords, endCoords)
     yaw = (yaw * degreesPerRadian)+90
     pitch = pitch * degreesPerRadian
     
-    return {pitch, 0.0, yaw}
+    return vector3(pitch, 0.0, yaw)
 end
 
 function GetCamForward(dist)

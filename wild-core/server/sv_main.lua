@@ -30,6 +30,7 @@ end
 
 function NewDefaultOutfit()
     local outfit = {}
+    outfit.name = "Arthur Morgan"
     outfit.model = "player_zero"
     outfit.preset = 3
     outfit.enabledDrawables = {}
@@ -215,10 +216,39 @@ AddEventHandler("wild:sv_giveMoney", function(strPlayerName, fAmount)
     SaveData()
 end)
 
+-- DEPRECATED
 RegisterNetEvent("wild:sv_dumpIpls")
 AddEventHandler("wild:sv_dumpIpls", function(ipls)
     SaveResourceFile(GetCurrentResourceName(), "ipls.json", json.encode(ipls), -1)
     TriggerClientEvent("wild:cl_dumpIplsDone", source)
+end)
+
+
+RegisterNetEvent('wild:sv_updateIpl', function(hash, enable)
+
+    ipls = json.decode(LoadResourceFile(GetCurrentResourceName(), "ipls.json"))
+
+    -- enabled list
+    for i = 1, #ipls[1] do
+        if not enable and ipls[1][i] == hash then
+            table.remove(ipls[1], i)
+        end
+    end
+
+    -- disabled list
+    for i = 1, #ipls[2] do
+        if enable and ipls[2][i] == hash then
+            table.remove(ipls[2], i)
+        end
+    end
+
+    if enable then
+        table.insert(ipls[1], hash)
+    else
+        table.insert(ipls[2], hash)
+    end
+
+    SaveResourceFile(GetCurrentResourceName(), "ipls.json", json.encode(ipls), -1)
 end)
 
 RegisterNetEvent("wild:sv_setPlayerKeyValue")
@@ -233,6 +263,13 @@ RegisterNetEvent('wild:sv_modifyPlayerOutfit', function(strPlayerName, outfitInd
     --SaveData()
     SaveResourceFile(GetCurrentResourceName(), "player_outfits.json", json.encode(PlayerOutfits), -1)
 end)
+
+RegisterNetEvent('wild:sv_deletePlayerOutfit', function(strPlayerName, outfitIndex)
+    PlayerOutfits[strPlayerName]["outfits"][outfitIndex] = nil
+    --SaveData()
+    SaveResourceFile(GetCurrentResourceName(), "player_outfits.json", json.encode(PlayerOutfits), -1)
+end)
+
 
 --
 -- Auto-restart resources (glitchy)

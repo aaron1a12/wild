@@ -164,7 +164,9 @@ end, false)
 RegisterCommand('cleanup', function() 
     for _, ped in ipairs(GetGamePool('CPed')) do
 		if not IsPedAPlayer(ped) then
-            if IsPedDeadOrDying(ped) then
+
+                DeletePed(ped)
+            --if IsPedDeadOrDying(ped) then
 
                 local timeOut = 5000
                 while timeOut > 0 and not NetworkHasControlOfEntity(ped) do
@@ -175,7 +177,9 @@ RegisterCommand('cleanup', function()
                 if NetworkHasControlOfEntity(ped) then
                     DeletePed(ped)
                 end
-            end
+
+                
+            --end
         end
     end
 end, false)

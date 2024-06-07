@@ -1,10 +1,21 @@
 local PlayerInventories = {}
 
 local function LoadData()
-    PlayerInventories = json.decode(LoadResourceFile(GetCurrentResourceName(), "player_inventories.json"))
+    local _playerInventories = json.decode(LoadResourceFile(GetCurrentResourceName(), "player_inventories.json"))
 
-    if PlayerInventories == nil then
-        PlayerInventories = {}
+    if _playerInventories == nil then
+        _playerInventories = {}
+    end
+
+    -- Replace all keys with number versions
+    for playerName, inventory in pairs(_playerInventories) do
+
+        PlayerInventories[playerName] = {}
+
+        for item, data in pairs(inventory) do
+            PlayerInventories[playerName][tonumber(item)] = data
+        end
+        
     end
 end
 LoadData()
@@ -28,26 +39,28 @@ RegisterNetEvent('wild:satchel:cl_add', function(item, quantity)
     local playerName = GetPlayerName(source)
 
     if PlayerInventories[playerName][item] == nil then
-        PlayerInventories[playerName][item] = 0
+        PlayerInventories[playerName][item] = {0, 0}
     end
 
-    PlayerInventories[playerName][item] = PlayerInventories[playerName][item] + quantity
+    local inventoryItem = PlayerInventories[playerName][item]
+    inventoryItem[1] = inventoryItem[1] + quantity
 
     SaveData()
 end)
 
 
-RegisterNetEvent('wild:satchel:cl_remove', function(item, quantity)
+RegisterNetEvent('wild:satchel:cl_updateItem', function(item, data)
     local playerName = GetPlayerName(source)
 
-
     if PlayerInventories[playerName][item] == nil then
-        PlayerInventories[playerName][item] = 0
+        PlayerInventories[playerName][item] = {0, 0}
     end
 
-    PlayerInventories[playerName][item] = PlayerInventories[playerName][item] - quantity
+    local inventoryItem = PlayerInventories[playerName][item]
+    inventoryItem[1] = data[1]
+    inventoryItem[2] = data[2]
 
-    if PlayerInventories[playerName][item] < 1 then
+    if inventoryItem[1] < 1 then
         PlayerInventories[playerName][item] = nil
     end
 
@@ -74,3 +87,7 @@ end)
 RegisterCommand('save', function() 
 	SaveResourceFile(GetCurrentResourceName(), "inventory_catalog.json", json.encode(catalog), -1)
 end, false)
+
+RegisterNetEvent('wild:satchel:cl_setItemPickable', function(objNetId)
+    TriggerClientEvent('wild:satchel:cl_setItemPickable', -1, objNetId)
+end)

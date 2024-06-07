@@ -5,6 +5,10 @@
 
 local bPlayerAlreadySpawnedOnce = false
 
+function W.HasPlayerSpawned()
+    return bPlayerAlreadySpawnedOnce
+end
+
 local function ChooseSpawnPoint(deathCoords)
     local coords = deathCoords
     local heading = 0

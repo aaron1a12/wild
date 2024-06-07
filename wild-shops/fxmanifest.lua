@@ -6,6 +6,7 @@ client_script {
 	"@wild-core/client/functions/cl_utilities.lua",
 	'client/cl_definitions.lua',
 	'client/cl_butchers.lua',
+	'client/cl_dressing_room.lua',
 	'client/cl_general_stores.lua'
 }
 
@@ -23,4 +24,4 @@ files
 	"pedDrawables.json"
 }
 
-this_is_a_map "yes" -- set to "no" when debugging for fast reload
+this_is_a_map "no" -- set to "no" when debugging for fast reload

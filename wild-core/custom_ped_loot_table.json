@@ -1,0 +1,35 @@
+{
+    "G_M_M_BountyHunters_01": [
+        ["currency_cash", [100, 265]], ["document_wanted_posters", 1, 0.25]
+    ],
+    "A_F_M_BlWUpperClass_01": [
+        ["currency_cash", [100, 265]]
+    ],
+    "A_F_M_NbxUpperClass_01": [
+        ["currency_cash", [100, 265]]
+    ],
+    "A_F_M_RhdUpperClass_01": [
+        ["currency_cash", [100, 265]]
+    ],
+    "A_F_O_BlWUpperClass_01": [
+        ["currency_cash", [100, 265]]
+    ],
+    "A_F_O_SDUpperClass_01": [
+        ["currency_cash", [100, 265]]
+    ],
+    "A_M_M_BlWUpperClass_01": [
+        ["currency_cash", [100, 265]]
+    ],
+    "A_M_M_NbxUpperClass_01": [
+        ["currency_cash", [100, 265]]
+    ],
+    "A_M_M_RhdUpperClass_01": [
+        ["currency_cash", [100, 265]]
+    ],
+    "A_M_O_BlWUpperClass_01": [
+        ["currency_cash", [100, 265]]
+    ],
+    "A_M_O_SDUpperClass_01": [
+        ["currency_cash", [100, 265]]
+    ]
+}

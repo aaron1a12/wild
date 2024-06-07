@@ -73,414 +73,6 @@ end
 SetupDataContainer()
 
 --
--- Shared NUI Functionality
---
-
-W.UI = {}
-
-local timeVisible = 0
-local bIsVisible = false
-local currentMenu = ""
-local tempCam = 0
-local bMenuLock = false
-local prevCtrlCtx = 0
-local menuOpenTime = GetGameTimer()
-local currentPageType = 0
-
-function W.UI.SetVisible(bVisible)
-    W.UI.Message({cmd = "setVisibility", visible = bVisible})
-    bIsVisible = bVisible
-
-    if bVisible then
-        timeVisible = 0 -- Reset counter
-    end
-end
-
-function W.UI.IsVisible()
-    return bIsVisible
-end
-
-function W.UI.SetMoneyAmount(fAmount)
-    W.UI.Message({cmd = "setMoneyAmount", amount = fAmount})
-end
-
-function W.UI.Ping()
-    SendNUIMessage({cmd = "ping"})
-end
-
--- Same as SendNUIMessage
-function W.UI.Message(messageObj)
-	SendNUIMessage(messageObj)
-end
-
--- Same as RegisterNUICallback
-function W.UI.RegisterCallback(cbName, func)
-    RegisterNUICallback(cbName, func)
-end
-
--- Create a ui app-style menu
-function W.UI.CreateMenu(strMenuId, strMenuTitle, bCompact)
-    SendNUIMessage({cmd = "createMenu", menuId = strMenuId, menuTitle = strMenuTitle, compact =  bCompact})
-end
-
-local promptMenuSelect = 0
-local promptMenuBack = 0
-
-function W.UI.OpenMenu(strMenuId, bOpen, bNoCam)
-	local now = GetGameTimer()
-	if now-menuOpenTime < 500 then
-		return
-	end
-
-	if bOpen and currentMenu == strMenuId then
-		return -- Reopening same menu, exit
-	end
-
-	if not bOpen and currentMenu == "" then
-		return -- Closing menu that isn't open, ext
-	end
-
-	menuOpenTime = now
-
-	if not bIsVisible then -- ui not visible
-		W.UI.SetVisible(true)
-	end
-
-    SendNUIMessage({cmd = "openMenu", menuId = strMenuId, open = bOpen})
-	
-	if bOpen then
-		currentMenu = strMenuId
-		-- RedM has a bug where if you focus the nui while running (or pressing any other control)
-		-- the game never receives the key-up message and the player character will continue to run forever.
-		-- A solution is to set control context to frontend (blocks movement input) and use SetMouseCursorActiveThisFrame().
-		-- With SetNuiFocusKeepInput(), we'll use input from the game and only use SetNuiFocus() when entering text.
-
-		prevCtrlCtx = GetCurrentControlContext(0)
-		SetControlContext(0, `GameMenu`)
-		SetNuiFocusKeepInput(true)
-
-		--ClearPedTasksImmediately(PlayerPedId(), true, false)
-		Citizen.CreateThread(function()
-			while currentMenu == strMenuId do
-				SetGameplayCamGranularFocusThisFrame(1.0, 1, 0.0, 1, 0.9)
-				DisableCinematicModeThisFrame()
-				Citizen.Wait(0)
-			end
-			SetGameplayCamGranularFocusThisFrame(0.0, 1, 0.0, 1, 0.0)
-		end)
-		
-		--[[if bNoCam == false or bNoCam == nil then
-			local camCoords = GetFinalRenderedCamCoord()
-			local camRot = GetFinalRenderedCamRot()
-			local camFov = GetFinalRenderedCamFov() - 5
-		
-			tempCam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", camCoords.x, camCoords.y, camCoords.z, camRot.x, camRot.y, camRot.z, camFov, false, 0)
-
-			SetCamActive(tempCam, true)
-			RenderScriptCams(true, true, 400, true, true, 0)
-		else
-			tempCam = 0
-		end]]
-
-		Citizen.CreateThread(function()
-			Citizen.Wait(1)
-			SetNuiFocus(true)
-		end)
-
-		promptMenuSelect = PromptRegisterBegin()
-        PromptSetControlAction(promptMenuSelect, `INPUT_GAME_MENU_ACCEPT`)
-        PromptSetText(promptMenuSelect, CreateVarString(10, "LITERAL_STRING", "Select"))
-        PromptRegisterEnd(promptMenuSelect)
-
-		promptMenuBack = PromptRegisterBegin()
-        PromptSetControlAction(promptMenuBack, `INPUT_GAME_MENU_CANCEL`)
-        PromptSetText(promptMenuBack, CreateVarString(10, "LITERAL_STRING", "Back"))
-        PromptRegisterEnd(promptMenuBack)
-
-	else
-		TriggerEvent('wild:cl_onMenuClosing', currentMenu)
-
-		currentMenu = ""
-
-		SetNuiFocus(false)
-		
-		if tempCam ~= 0 then
-			RenderScriptCams(false, true, 400, true, true, 0)
-			SetPlayerControl(PlayerId(), true, 0, true)
-		end
-
-		-- Release menu lock after fully blended out
-		Citizen.CreateThread(function()
-			Citizen.Wait(400)
-			SetControlContext(0, prevCtrlCtx)
-			if tempCam ~= 0 then
-				SetCamActive(tempCam, false)
-				DestroyCam(tempCam, true)
-			end	
-		end)
-
-		PromptDelete(promptMenuSelect)
-		PromptDelete(promptMenuBack)
-		promptMenuSelect = 0
-		promptMenuBack = 0
-	end
-
-
-	if bOpen then
-		PlaySound("HUD_PLAYER_MENU", "MENU_ENTER")
-	else
-		PlaySound("HUD_PLAYER_MENU", "MENU_CLOSE")
-	end
-end
-
-function W.UI.IsAnyMenuOpen()
-end
-
-function W.UI.SetElementTextByClass(strMenuId, strClass, strText)
-	SendNUIMessage({cmd = "setElementTextByClass", menuId = strMenuId, class = strClass, text = strText})
-end
-
-function W.UI.SetElementTextById(strMenuId, strId, strText)
-	SendNUIMessage({cmd = "setElementTextById", menuId = strMenuId, id = strId, text = strText})
-end
-
-function W.UI.CreatePage(strMenuId, strPageId, strPageTitle, strPageSubtitle, iType, iDetailPanelSize)	
-	SendNUIMessage({cmd = "createPage", menuId = strMenuId, pageId = strPageId, pageTitle = strPageTitle, pageSubtitle = strPageSubtitle, type = iType, detailPanelSize = iDetailPanelSize})
-end
-
-function W.UI.EditPage(strMenuId, strPageId, strPageTitle, strPageSubtitle)	
-	SendNUIMessage({cmd = "editPage", menuId = strMenuId, pageId = strPageId, pageTitle = strPageTitle, pageSubtitle = strPageSubtitle})
-end
-
-function W.UI.GoToPage(strMenuId, strPageId, bNoHistory)	
-	SendNUIMessage({cmd = "goToPage", menuId = strMenuId, pageId = strPageId, noHistory = bNoHistory})
-end
-
-function W.UI.GoBack()	
-	SendNUIMessage({cmd = "goBack"})
-	TriggerEvent('wild:cl_onMenuBack', currentMenu)
-end
-
-function W.UI.ClearHistory()	
-	SendNUIMessage({cmd = "clearHistory"})
-end
-
-function W.UI.DestroyMenuAndData(strMenuId)	
-	SendNUIMessage({cmd = "destroyMenuAndData", menuId = strMenuId})
-end
-
-function W.UI.DestroyPage(strMenuId, strPageId)	
-	SendNUIMessage({cmd = "destroyPage", menuId = strMenuId, pageId = strPageId})
-end
-
-function W.UI.SetMenuRootPage(strMenuId, strPageId)	
-	SendNUIMessage({cmd = "setMenuRootPage", menuId = strMenuId, pageId = strPageId})
-end
-
-function W.UI.SetSwitchIndex(strMenuId, strPageId, strItemId, iIndex)
-	SendNUIMessage({cmd = "setSwitchIndex", menuId = strMenuId, pageId = strPageId, itemId = strItemId, index = iIndex})
-end
-
-function W.UI.IsMenuOpen(strMenuId)	
-	return (currentMenu == strMenuId)
-end
-
-function W.UI.GetCurrentMenu()	
-	return currentMenu
-end
-
-local pageItemActions = {}
-local pageItemAltActions = {}
-local pageItemAutoId = 0
-
-function W.UI.CreatePageItem(strMenuId, strPageId, strItemId, oExtraItemParams)
-	if strItemId == 0 or strItemId == "" or strItemId == nil then
-		strItemId = tostring(pageItemAutoId)
-	end
-
-	pageItemAutoId = pageItemAutoId + 1
-
-	if oExtraItemParams.action == nil then
-		pageItemActions[strItemId] = function()
-			ShowText("No action assigned")
-		end
-	else
-		pageItemActions[strItemId] = oExtraItemParams.action
-	end
-
-	if oExtraItemParams.altAction ~= nil then
-		pageItemAltActions[strItemId] = oExtraItemParams.altAction
-	end
-
-	if oExtraItemParams.icon then
-		oExtraItemParams.icon = "https://cfx-nui-"..GetInvokingResource().."/" .. oExtraItemParams.icon
-	end
-
-	SendNUIMessage({cmd = "createPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId, extraItemParams = oExtraItemParams})
-end
-
-
-function W.UI.SetPageItemEndHtml(strMenuId, strPageId, strItemId, strHtml)
-	SendNUIMessage({cmd = "setPageItemEndHtml", menuId = strMenuId, pageId = strPageId, itemId = strItemId, html = strHtml})
-end
-
-function W.UI.DestroyPageItem(strMenuId, strPageId, strItemId)
-	pageItemActions[strItemId] = nil
-	pageItemAltActions[strItemId] = nil
-
-	SendNUIMessage({cmd = "destroyPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId})
-	Citizen.Wait(0)
-end
-
-
-W.UI.RegisterCallback("onSelectPageItem", function(data, cb)
-	TriggerEvent('wild:cl_onSelectPageItem', data.menuId, data.itemId)	
-	cb('ok')
-end)
-
-W.UI.RegisterCallback("triggerSelectedItem", function(data, cb)
-	if pageItemActions[data.itemId] ~= nil then
-		if data.switchOption == nil then
-			if not data.bAlt then
-				pageItemActions[data.itemId]()
-			elseif pageItemAltActions[data.itemId] ~= nil then
-				pageItemAltActions[data.itemId]()
-			end
-		else
-			pageItemActions[data.itemId](data.switchOption)
-		end
-	end
-	
-	cb('ok')
-end)
-
-W.UI.RegisterCallback("closeAllMenus", function(data, cb)
-	W.UI.OpenMenu(currentMenu, false)
-	cb('ok')
-end)
-
-W.UI.RegisterCallback("playNavUpSound", function(data, cb)
-	PlaySound("HUD_PLAYER_MENU", "NAV_UP")
-
-	cb('ok')
-end)
-
-W.UI.RegisterCallback("playNavDownSound", function(data, cb)
-	PlaySound("HUD_PLAYER_MENU", "NAV_DOWN")
-	
-	cb('ok')
-end)
-
-W.UI.RegisterCallback("playNavEnterSound", function(data, cb)
-	PlaySound("HUD_PLAYER_MENU", "SELECT")
-
-	cb('ok')
-end)
-
-W.UI.RegisterCallback("playNavBackSound", function(data, cb)
-	PlaySound("HUD_PLAYER_MENU", "BACK")
-
-	cb('ok')
-end)
-
-
-W.UI.RegisterCallback("onPageFinishedOpening", function(data, cb)
-	currentPageType = data.pageType
-	cb('ok')
-end)
-
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(0)
-
-        if bIsVisible then
-		    timeVisible = timeVisible + GetFrameTime()
-
-            if (timeVisible > 3.0 or IsPauseMenuActive()) and currentMenu == "" then
-				-- Hide the UI
-                W.UI.SetVisible(false)				
-            end
-
-			if currentMenu ~= "" and IsPauseMenuActive() then
-				-- Close the open menu
-				W.UI.OpenMenu(currentMenu, false)
-			end
-
-			if currentMenu ~= "" then
-				HideHudAndRadarThisFrame()
-				DisableFrontendThisFrame()
-				SetMouseCursorActiveThisFrame(true)
-
-				local bVertical = false
-
-				if currentPageType == 1 then
-					bVertical = true
-				end
-
-				if IsControlJustPressed(0, "INPUT_GAME_MENU_DOWN") then
-					PlaySound("HUD_PLAYER_MENU", "NAV_DOWN")
-					SendNUIMessage({cmd = "moveSelection", forward = true, vertical = bVertical})
-				end
-
-				if IsControlJustPressed(0, "INPUT_GAME_MENU_UP") then
-					PlaySound("HUD_PLAYER_MENU", "NAV_UP")
-					SendNUIMessage({cmd = "moveSelection", forward = false, vertical = bVertical})
-				end
-
-				if IsControlJustPressed(0, "INPUT_GAME_MENU_ACCEPT") then
-					PlaySound("HUD_PLAYER_MENU", "SELECT")
-					SendNUIMessage({cmd = "triggerSelectedItem"})
-				end
-
-				if IsControlJustPressed(0, "INPUT_GAME_MENU_OPTION") then
-					SendNUIMessage({cmd = "triggerSelectedItemAlt"})
-				end
-				
-				if IsControlJustPressed(0, "INPUT_GAME_MENU_LEFT") then
-					if currentPageType == 0 then
-						PlaySound("RDRO_Spectate_Sounds", "left_bumper")
-						SendNUIMessage({cmd = "flipCurrentSwitch", forward = false})
-					else
-						PlaySound("HUD_PLAYER_MENU", "NAV_UP")
-						SendNUIMessage({cmd = "moveSelection", forward = false})
-					end
-				end
-
-				if IsControlJustPressed(0, "INPUT_GAME_MENU_RIGHT") then
-					if currentPageType == 0 then
-						PlaySound("RDRO_Spectate_Sounds", "right_bumper")
-						SendNUIMessage({cmd = "flipCurrentSwitch", forward = true})
-					else
-						PlaySound("HUD_PLAYER_MENU", "NAV_DOWN")
-						SendNUIMessage({cmd = "moveSelection", forward = true})
-					end
-				end
-
-				if IsControlJustPressed(0, "INPUT_GAME_MENU_CANCEL") then -- or IsControlJustPressed(0, "INPUT_QUIT")
-					W.UI.GoBack()
-					--W.UI.OpenMenu(currentMenu, false)
-				end
-			end
-        end
-        
-        if IsControlJustPressed(0, "INPUT_REVEAL_HUD") then
-            W.UI.SetVisible(true)
-			
-			-- TODO: Get current town (e.g., TOWN_BLACKWATER)
-			ShowLocalInfo("Wild Server", "", 2000) 
-        end
-
-	end
-end)
-
-AddEventHandler("wild:cl_onPlayerDeath", function()
-	if currentMenu ~= "" then
-		W.UI.GoBack()
-		W.UI.OpenMenu(currentMenu, false)
-	end
-end)
-
---
 -- Prompt Management (garbage collection)
 --
 -- Got tired of having leftover prompts blocking everything
@@ -494,7 +86,7 @@ function W.Prompts.AddToGarbageCollector(promptId)
 	if resourceName == nil then
 		resourceName = GetCurrentResourceName()
 	end
-	
+
 	if W.Prompts.Pool[resourceName] == nil then
 		W.Prompts.Pool[resourceName] = {}
 	end
@@ -555,6 +147,494 @@ end
 function W.Prompts.SetActiveGroup(group)
 	activeGroup = group
 end
+
+--
+-- Shared NUI Functionality
+--
+
+W.UI = {}
+
+local timeVisible = 0
+local bIsVisible = false
+local currentMenu = ""
+local tempCam = 0
+local bMenuLock = false
+local prevCtrlCtx = 0
+local menuOpenTime = GetGameTimer()
+local currentPageType = 0
+local currentPage = ""
+
+function W.UI.SetVisible(bVisible, bImmediately)
+    W.UI.Message({cmd = "setVisibility", visible = bVisible, immediately = bImmediately})
+    bIsVisible = bVisible
+
+    if bVisible then
+        timeVisible = 0 -- Reset counter
+    end
+end
+
+function W.UI.IsVisible()
+    return bIsVisible
+end
+
+function W.UI.SetMoneyAmount(fAmount)
+    W.UI.Message({cmd = "setMoneyAmount", amount = fAmount})
+end
+
+function W.UI.Ping()
+    SendNUIMessage({cmd = "ping"})
+end
+
+-- Same as SendNUIMessage
+function W.UI.Message(messageObj)
+	SendNUIMessage(messageObj)
+end
+
+-- Same as RegisterNUICallback
+function W.UI.RegisterCallback(cbName, func)
+    RegisterNUICallback(cbName, func)
+end
+
+-- Create a ui app-style menu
+function W.UI.CreateMenu(strMenuId, strMenuTitle, bCompact)
+    SendNUIMessage({cmd = "createMenu", menuId = strMenuId, menuTitle = strMenuTitle, compact =  bCompact})
+end
+
+local promptMenuSelect = 0
+local promptMenuBack = 0
+
+-- Do not use this to open/close menus. Use for temporary cases
+function W.UI.SetMenusVisibleAndActive(bEnable, bImmediately)
+	if bEnable then
+		if not bIsVisible then -- ui not visible
+			W.UI.SetVisible(true)
+		end
+
+		-- RedM has a bug where if you focus the nui while running (or pressing any other control)
+		-- the game never receives the key-up message and the player character will continue to run forever.
+		-- A solution is to set control context to frontend (blocks movement input) and use SetMouseCursorActiveThisFrame().
+		-- With SetNuiFocusKeepInput(), we'll use input from the game and only use SetNuiFocus() when entering text.
+
+		prevCtrlCtx = GetCurrentControlContext(0)
+		SetControlContext(0, `GameMenu`)
+		SetNuiFocusKeepInput(true)
+
+		UiPromptSetVisible(promptMenuSelect, true)
+        UiPromptSetEnabled(promptMenuBack, true)
+
+		Citizen.CreateThread(function()
+			Citizen.Wait(1)
+			SetNuiFocus(true)
+		end)
+	else
+		if bIsVisible then -- ui visible
+			W.UI.SetVisible(false, bImmediately)
+		end
+
+		SetNuiFocus(false)
+		SetControlContext(0, prevCtrlCtx)
+
+		UiPromptSetVisible(promptMenuSelect, false)
+        UiPromptSetEnabled(promptMenuBack, false)
+	end
+end
+
+function W.UI.OpenMenu(strMenuId, bOpen, bNoCam)
+	local now = GetGameTimer()
+	if now-menuOpenTime < 500 then
+		return
+	end
+
+	if bOpen and currentMenu == strMenuId then
+		return -- Reopening same menu, exit
+	end
+
+	if not bOpen and currentMenu == "" then
+		return -- Closing menu that isn't open, ext
+	end
+
+	menuOpenTime = now
+
+    SendNUIMessage({cmd = "openMenu", menuId = strMenuId, open = bOpen})
+	
+	if bOpen then
+		currentMenu = strMenuId
+
+		promptMenuSelect = PromptRegisterBegin()
+        PromptSetControlAction(promptMenuSelect, `INPUT_GAME_MENU_ACCEPT`)
+        PromptSetText(promptMenuSelect, CreateVarString(10, "LITERAL_STRING", "Select"))
+        PromptRegisterEnd(promptMenuSelect)
+
+		promptMenuBack = PromptRegisterBegin()
+        PromptSetControlAction(promptMenuBack, `INPUT_GAME_MENU_CANCEL`)
+        PromptSetText(promptMenuBack, CreateVarString(10, "LITERAL_STRING", "Back"))
+        PromptRegisterEnd(promptMenuBack)
+
+		W.UI.SetMenusVisibleAndActive(true)
+
+		Citizen.CreateThread(function()
+			while currentMenu == strMenuId do
+				SetGameplayCamGranularFocusThisFrame(1.0, 1, 0.0, 1, 0.9)
+				DisableCinematicModeThisFrame()
+				Citizen.Wait(0)
+			end
+			SetGameplayCamGranularFocusThisFrame(0.0, 1, 0.0, 1, 0.0)
+		end)
+	else
+		TriggerEvent('wild:cl_onMenuClosing', currentMenu)
+
+		currentMenu = ""
+
+		SetNuiFocus(false)
+		W.UI.SetMenusVisibleAndActive(false)
+		--[[Citizen.Wait(400)
+
+		SetControlContext(0, prevCtrlCtx)]]
+
+		PromptDelete(promptMenuSelect)
+		PromptDelete(promptMenuBack)
+		promptMenuSelect = 0
+		promptMenuBack = 0
+	end
+
+
+	if bOpen then
+		PlaySound("HUD_PLAYER_MENU", "MENU_ENTER")
+	else
+		PlaySound("HUD_PLAYER_MENU", "MENU_CLOSE")
+	end
+end
+
+function W.UI.GetActivePrompt()
+	return promptMenuSelect
+end
+
+function W.UI.IsAnyMenuOpen()
+end
+
+function W.UI.SetElementTextByClass(strMenuId, strClass, strText)
+	SendNUIMessage({cmd = "setElementTextByClass", menuId = strMenuId, class = strClass, text = strText})
+end
+
+function W.UI.SetElementTextById(strMenuId, strId, strText)
+	SendNUIMessage({cmd = "setElementTextById", menuId = strMenuId, id = strId, text = strText})
+end
+
+function W.UI.CreatePage(strMenuId, strPageId, strPageTitle, strPageSubtitle, iType, iDetailPanelSize)	
+	SendNUIMessage({cmd = "createPage", menuId = strMenuId, pageId = strPageId, pageTitle = strPageTitle, pageSubtitle = strPageSubtitle, type = iType, detailPanelSize = iDetailPanelSize})
+end
+
+function W.UI.EditPage(strMenuId, strPageId, strPageTitle, strPageSubtitle)	
+	SendNUIMessage({cmd = "editPage", menuId = strMenuId, pageId = strPageId, pageTitle = strPageTitle, pageSubtitle = strPageSubtitle})
+end
+
+function W.UI.CreatePageFilterIcons(strMenuId, strPageId, arrIcons)
+	local res = GetInvokingResource()
+
+	for i=1, #arrIcons do
+		arrIcons[i] = "https://cfx-nui-"..res.."/" .. arrIcons[i]
+	end
+
+	SendNUIMessage({cmd = "createPageFilterIcons", menuId = strMenuId, pageId = strPageId, icons = arrIcons})
+end
+
+function W.UI.SelectPageFilterIcon(strMenuId, strPageId, iIndex)	
+	SendNUIMessage({cmd = "selectPageFilterIcon", menuId = strMenuId, pageId = strPageId, index = iIndex})
+end
+
+function W.UI.FeedbackFilter(bForward)	
+	SendNUIMessage({cmd = "feedbackFilter", forward = bForward})
+end
+
+function W.UI.GoToPage(strMenuId, strPageId, bNoHistory)
+	SendNUIMessage({cmd = "goToPage", menuId = strMenuId, pageId = strPageId, noHistory = bNoHistory})
+	currentPage = strPageId
+	TriggerEvent('wild:cl_onGoToPage', strMenuId, strPageId)
+end
+
+function W.UI.GoBack()	
+	SendNUIMessage({cmd = "goBack"})
+	TriggerEvent('wild:cl_onMenuBack', currentMenu)
+end
+
+function W.UI.ClearHistory()	
+	SendNUIMessage({cmd = "clearHistory"})
+end
+
+function W.UI.DestroyMenuAndData(strMenuId)	
+	SendNUIMessage({cmd = "destroyMenuAndData", menuId = strMenuId})
+end
+
+function W.UI.DestroyPage(strMenuId, strPageId)	
+	SendNUIMessage({cmd = "destroyPage", menuId = strMenuId, pageId = strPageId})
+end
+
+function W.UI.EmptyPage(strMenuId, strPageId)	
+	SendNUIMessage({cmd = "emptyPage", menuId = strMenuId, pageId = strPageId})
+end
+
+function W.UI.SetMenuRootPage(strMenuId, strPageId)	
+	SendNUIMessage({cmd = "setMenuRootPage", menuId = strMenuId, pageId = strPageId})
+end
+
+function W.UI.SetSwitchIndex(strMenuId, strPageId, strItemId, iIndex)
+	strItemId = "menuItem"..strMenuId .. strItemId
+	SendNUIMessage({cmd = "setSwitchIndex", menuId = strMenuId, pageId = strPageId, itemId = strItemId, index = iIndex})
+end
+
+function W.UI.IsMenuOpen(strMenuId)	
+	return (currentMenu == strMenuId)
+end
+
+function W.UI.GetCurrentMenu()	
+	return currentMenu
+end
+
+function W.UI.GetCurrentPage()	
+	return currentPage
+end
+
+local pageItemActions = {}
+local pageItemAltActions = {}
+local pageItemAutoId = 0
+local pageItems = {}
+
+function W.UI.CreatePageItem(strMenuId, strPageId, strItemId, oExtraItemParams)
+	if strItemId == 0 or strItemId == "" or strItemId == nil then
+		strItemId = tostring(pageItemAutoId)
+	end
+	pageItemAutoId = pageItemAutoId + 1
+	strItemId = "menuItem"..strMenuId .. strItemId
+
+	pageItems[strItemId] = oExtraItemParams
+
+	if oExtraItemParams.action == nil then
+		pageItemActions[strItemId] = function()
+			ShowText("No action assigned")
+		end
+	else
+		pageItemActions[strItemId] = oExtraItemParams.action
+	end
+
+	if oExtraItemParams.altAction ~= nil then
+		pageItemAltActions[strItemId] = oExtraItemParams.altAction
+	end
+
+	if oExtraItemParams.icon then
+		oExtraItemParams.icon = "https://cfx-nui-"..GetInvokingResource().."/" .. oExtraItemParams.icon
+	end
+
+	SendNUIMessage({cmd = "createPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId, extraItemParams = oExtraItemParams})
+end
+
+
+function W.UI.SetPageItemEndHtml(strMenuId, strPageId, strItemId, strHtml)
+	strItemId = "menuItem"..strMenuId .. strItemId
+	SendNUIMessage({cmd = "setPageItemEndHtml", menuId = strMenuId, pageId = strPageId, itemId = strItemId, html = strHtml})
+end
+
+function W.UI.DestroyPageItem(strMenuId, strPageId, strItemId)
+	pageItemActions[strItemId] = nil
+	pageItemAltActions[strItemId] = nil
+
+	strItemId = "menuItem"..strMenuId .. strItemId
+	pageItems[strItemId] = nil
+
+	SendNUIMessage({cmd = "destroyPageItem", menuId = strMenuId, pageId = strPageId, itemId = strItemId})
+	Citizen.Wait(0)
+end
+
+
+W.UI.RegisterCallback("onSelectPageItem", function(data, cb)
+	local strBegin =  "menuItem"..data.menuId
+	local itemId = string.sub(data.itemId, #strBegin+1, 99)
+	currentPage = data.pageId
+
+	TriggerEvent('wild:cl_onSelectPageItem', data.menuId, data.pageId, itemId)	
+	
+	--[[local params = pageItems[data.itemId]
+
+	if params then
+		if params.prompt then
+			UiPromptSetText(promptMenuSelect, CreateVarString(10, "LITERAL_STRING", params.prompt))
+		else
+			UiPromptSetText(promptMenuSelect, CreateVarString(10, "LITERAL_STRING", "Select"))
+		end
+
+
+		if params.promptDisabled == true then
+			UiPromptSetEnabled(promptMenuSelect, false)
+		else
+			UiPromptSetEnabled(promptMenuSelect, true)
+		end		
+	end]]
+	
+	cb('ok')
+end)
+
+W.UI.RegisterCallback("triggerSelectedItem", function(data, cb)
+
+	local params = pageItems[data.itemId]
+
+	if params ~= nil then
+
+		if pageItemActions[data.itemId] ~= nil and UiPromptIsEnabled(promptMenuSelect) ~= 0 then
+			if data.switchOption == nil then
+				PlaySound("HUD_PLAYER_MENU", "SELECT")
+
+				if not data.bAlt then
+					pageItemActions[data.itemId]()
+				elseif pageItemAltActions[data.itemId] ~= nil then
+					pageItemAltActions[data.itemId]()
+				end
+			else
+				pageItemActions[data.itemId](data.switchOption)
+			end
+		end
+	end
+	
+	cb('ok')
+end)
+
+W.UI.RegisterCallback("closeAllMenus", function(data, cb)
+	W.UI.OpenMenu(currentMenu, false)
+	cb('ok')
+end)
+
+W.UI.RegisterCallback("playNavUpSound", function(data, cb)
+	PlaySound("HUD_PLAYER_MENU", "NAV_UP")
+
+	cb('ok')
+end)
+
+W.UI.RegisterCallback("playNavDownSound", function(data, cb)
+	PlaySound("HUD_PLAYER_MENU", "NAV_DOWN")
+	
+	cb('ok')
+end)
+
+W.UI.RegisterCallback("playNavEnterSound", function(data, cb)
+	PlaySound("HUD_PLAYER_MENU", "SELECT")
+
+	cb('ok')
+end)
+
+W.UI.RegisterCallback("playNavBackSound", function(data, cb)
+	PlaySound("HUD_PLAYER_MENU", "BACK")
+
+	cb('ok')
+end)
+
+
+W.UI.RegisterCallback("onPageFinishedOpening", function(data, cb)
+	currentPage = data.pageId
+	currentPageType = data.pageType
+	cb('ok')
+end)
+
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(0)
+
+        if bIsVisible then
+		    timeVisible = timeVisible + GetFrameTime()
+
+            if (timeVisible > 3.0 or IsPauseMenuActive()) and currentMenu == "" then
+				-- Hide the UI
+                W.UI.SetVisible(false)				
+            end
+
+			if currentMenu ~= "" and IsPauseMenuActive() then
+				-- Close the open menu
+				W.UI.OpenMenu(currentMenu, false)
+			end
+
+			if currentMenu ~= "" then
+				--HideHudAndRadarThisFrame()
+				EnableHudContextThisFrame(`HUD_CTX_OUTDOOR_SHOP`)
+				EnableHudContextThisFrame(`HUD_CTX_HACK_RADAR_FORCE_HIDE`)
+				DisableFrontendThisFrame()
+				SetMouseCursorActiveThisFrame(true)
+
+				local bVertical = false
+
+				if currentPageType == 1 then
+					bVertical = true
+				end
+
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_DOWN") then
+					PlaySound("HUD_PLAYER_MENU", "NAV_DOWN")
+					SendNUIMessage({cmd = "moveSelection", forward = true, vertical = bVertical})
+				end
+
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_UP") then
+					PlaySound("HUD_PLAYER_MENU", "NAV_UP")
+					SendNUIMessage({cmd = "moveSelection", forward = false, vertical = bVertical})
+				end
+
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_ACCEPT") then
+					SendNUIMessage({cmd = "triggerSelectedItem"})
+				end
+
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_OPTION") then
+					SendNUIMessage({cmd = "triggerSelectedItemAlt"})
+				end
+				
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_LEFT") then
+					if currentPageType == 0 then
+						PlaySound("RDRO_Spectate_Sounds", "left_bumper")
+						SendNUIMessage({cmd = "flipCurrentSwitch", forward = false})
+					else
+						PlaySound("HUD_PLAYER_MENU", "NAV_UP")
+						SendNUIMessage({cmd = "moveSelection", forward = false})
+					end
+				end
+
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_RIGHT") then
+					if currentPageType == 0 then
+						PlaySound("RDRO_Spectate_Sounds", "right_bumper")
+						SendNUIMessage({cmd = "flipCurrentSwitch", forward = true})
+					else
+						PlaySound("HUD_PLAYER_MENU", "NAV_DOWN")
+						SendNUIMessage({cmd = "moveSelection", forward = true})
+					end
+				end
+
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_TAB_LEFT") then -- or IsControlJustPressed(0, "INPUT_QUIT")
+					TriggerEvent('wild:cl_onMenuFilter', currentMenu, 0)
+					PlaySound("RDRO_Spectate_Sounds", "left_bumper")
+					W.UI.FeedbackFilter(false)
+				end
+
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_TAB_RIGHT") then -- or IsControlJustPressed(0, "INPUT_QUIT")
+					TriggerEvent('wild:cl_onMenuFilter', currentMenu, 1)
+					PlaySound("RDRO_Spectate_Sounds", "left_bumper")
+					W.UI.FeedbackFilter(true)
+				end
+
+				if IsControlJustPressed(0, "INPUT_GAME_MENU_CANCEL") then -- or IsControlJustPressed(0, "INPUT_QUIT")
+					W.UI.GoBack()
+					--W.UI.OpenMenu(currentMenu, false)
+				end
+			end
+        end
+        
+        if IsControlJustPressed(0, "INPUT_REVEAL_HUD") then
+            W.UI.SetVisible(true)
+			
+			-- TODO: Get current town (e.g., TOWN_BLACKWATER)
+			ShowLocalInfo("Wild Server", "", 2000) 
+        end
+
+	end
+end)
+
+AddEventHandler("wild:cl_onPlayerDeath", function()
+	if currentMenu ~= "" then
+		W.UI.GoBack()
+		W.UI.OpenMenu(currentMenu, false)
+	end
+end)
 
 --
 -- Model lookup
@@ -711,8 +791,9 @@ function W.RegisterExport(namespace, name, method)
 	if GetGameTimer()-outdatedTime > 2000 then
 		outdatedTime = GetGameTimer()
 
-		Citizen.Wait(2100)
-		TriggerEvent('wild:cl_onOutdated')
+		Citizen.SetTimeout(2100, function()
+			TriggerEvent('wild:cl_onOutdated')
+		end)
 	end
 end
 

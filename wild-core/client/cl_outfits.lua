@@ -37,11 +37,13 @@ end
 
 function W.ModifyPlayerOutfit(index, outfit)
     local localOutfit = {}
+    localOutfit.name = outfit.name
     localOutfit.model = outfit.model
     localOutfit.preset = outfit.preset
     localOutfit.voice = outfit.voice
     localOutfit.loco = outfit.loco
-
+    localOutfit.onWheel = outfit.onWheel
+    
     -- Copy the drawables
     localOutfit.enabledDrawables = {}
 
@@ -51,6 +53,11 @@ function W.ModifyPlayerOutfit(index, outfit)
 
     W.PlayerOutfitData["outfits"][index] = localOutfit
     TriggerServerEvent("wild:sv_modifyPlayerOutfit", GetPlayerName(PlayerId()), index, localOutfit)
+end
+
+function W.DeletePlayerOutfit(index)
+    W.PlayerOutfitData["outfits"][index] = nil
+    TriggerServerEvent("wild:sv_deletePlayerOutfit", GetPlayerName(PlayerId()), index)
 end
 
 function W.SetPedOutfit(ped, outfit)
@@ -98,6 +105,22 @@ function W.SetPedOutfit(ped, outfit)
     end
 end
 
+function W.GetPlayerOutfitCount()
+    return #W.PlayerOutfitData["outfits"]
+end
+
+function W.GetPlayerWheelOutfitsCount()
+    local count = 0
+    for i=1, #W.PlayerOutfitData["outfits"] do
+        local outfit = W.PlayerOutfitData["outfits"][i]
+        if outfit.onWheel == 1 then
+            count = count + 1
+        end
+    end
+
+    return count
+end
+
 function W.SwitchPlayerOutfitAtIndex(index)
     local outfit = W.GetPlayerOutfitAtIndex(index)
 
@@ -121,6 +144,9 @@ function W.SwitchPlayerOutfitAtIndex(index)
 
     W.PlayerData["currentOutfit"] = index
     TriggerServerEvent("wild:sv_setPlayerKeyValue", GetPlayerName(PlayerId()), "currentOutfit", index)
+
+    -- For horses
+    TriggerEvent('wild:cl_onNewPlayerPed')
 end
 
 
@@ -149,7 +175,7 @@ local function ChooseCamCoords()
     end
 end
 
-local function CreateOutfitPrompt(controlHash, text)
+local function CreateOutfitPrompt(controlHash, text, outfitIndex)
     local outfitPrompt = PromptRegisterBegin()
     PromptSetControlAction(outfitPrompt, controlHash)
     PromptSetText(outfitPrompt, CreateVarString(10, "LITERAL_STRING", text))
@@ -159,25 +185,14 @@ local function CreateOutfitPrompt(controlHash, text)
     UiPromptSetEnabled(outfitPrompt, false)
     UiPromptSetVisible(outfitPrompt, true)
     UiPromptSetAttribute(outfitPrompt, 10, true)
-
-    for i=10, 40 do
-        if i ~= 21 and i~= 29 then
-            --UiPromptSetAttribute(outfitPrompt, i, false) 
-        end
-    end
---[[    UiPromptSetAttribute(outfitPrompt, 1, true) 
-    UiPromptSetAttribute(outfitPrompt, 3, true) 
-    UiPromptSetAttribute(outfitPrompt, 4, true) 
-    UiPromptSetAttribute(outfitPrompt, 9, true) 
-    UiPromptSetAttribute(outfitPrompt, 10, true)]]
     PromptRegisterEnd(outfitPrompt)
 
-    table.insert(outfitPrompts, outfitPrompt)
+    table.insert(outfitPrompts, {outfitPrompt, outfitIndex})
 end
 
 local function DeleteAllOutfitPrompts()
     for i=1, #outfitPrompts do
-        PromptDelete(outfitPrompts[i])
+        PromptDelete(outfitPrompts[i][1])
     end
     outfitPrompts = {}
 end
@@ -186,11 +201,13 @@ function UpdatePrompts()
     local currentOutfit = W.GetPlayerCurrentOutfitIndex()
 
     for i=1, #outfitPrompts do
-        UiPromptSetEnabled(outfitPrompts[i], (i ~= currentOutfit))
+        local associatedOutfit = outfitPrompts[i][2]
+        UiPromptSetEnabled(outfitPrompts[i][1], (associatedOutfit ~= currentOutfit))
     end
 end
 
 
+DatabindingAddDataInt(W.DataCont, "active_group", 0)
 
 function OpenOutfitMenu()
     bOutfitLock = true
@@ -199,14 +216,42 @@ function OpenOutfitMenu()
 
     ModifyPlayerUiPrompt(PlayerId(), 0, 1, true)
 
-    CreateOutfitPrompt(`INPUT_EMOTE_DANCE`, "Outfit 1")
-    CreateOutfitPrompt(`INPUT_EMOTE_GREET`, "Outfit 2")
-    CreateOutfitPrompt(`INPUT_EMOTE_COMM`, "Outfit 3")
-    CreateOutfitPrompt(`INPUT_EMOTE_TAUNT`, "Outfit 4")
+
+
+    local controls = {`INPUT_EMOTE_DANCE`, `INPUT_EMOTE_GREET`, `INPUT_EMOTE_COMM`, `INPUT_EMOTE_TAUNT`}
+    local iAddedIndex = 0
+
+    --CreateOutfitPrompt(`INPUT_EMOTE_DANCE`, "Outfit 1")
+    --CreateOutfitPrompt(`INPUT_EMOTE_GREET`, "Outfit 2")
+    --CreateOutfitPrompt(`INPUT_EMOTE_COMM`, "Outfit 3")
+    --CreateOutfitPrompt(`INPUT_EMOTE_TAUNT`, "Outfit 4")
+
+    for i=1, #W.PlayerOutfitData["outfits"] do
+
+        local outfit = W.PlayerOutfitData["outfits"][i]
+
+        if outfit.onWheel == 1 then
+            iAddedIndex = iAddedIndex + 1
+
+            if iAddedIndex > 4 then
+                break
+            else
+                local name = "Outfit "..tostring(iAddedIndex)
+
+                if outfit.name then
+                    name = outfit.name
+                end
+
+                CreateOutfitPrompt(controls[iAddedIndex], name, i)
+            end
+            
+        end
+    end
+
     UpdatePrompts()
     
     -- Write to the wild data container about this active group (fixes conflicting prompt groups)
-    DatabindingAddDataInt(W.DataCont, "active_group", outfitPromptGroup)
+    DatabindingWriteDataIntFromParent(W.DataCont, "active_group", outfitPromptGroup)
     
     Citizen.CreateThread(function() 
         while outfitPromptTimeOut > 0 do
@@ -214,7 +259,7 @@ function OpenOutfitMenu()
             outfitPromptTimeOut = outfitPromptTimeOut - 50
 
             for i=1, #outfitPrompts do
-                if UiPromptGetProgress(outfitPrompts[i]) ~= 0.0 then
+                if UiPromptGetProgress(outfitPrompts[i][1]) ~= 0.0 then
                     outfitPromptTimeOut = 3000
                     break
                 end
@@ -233,11 +278,11 @@ function OpenOutfitMenu()
             SetControlContext(4, `UI_EMOTES_RADIAL_MENU`)
 
             for i=1, #outfitPrompts do
-                if UiPromptGetProgress(outfitPrompts[i]) == 1.0 then
-                    UiPromptRestartModes(outfitPrompts[i])
+                if UiPromptGetProgress(outfitPrompts[i][1]) == 1.0 then
+                    UiPromptRestartModes(outfitPrompts[i][1])
 
                     SetEntityVisible(PlayerPedId(), false)
-                    W.SwitchPlayerOutfitAtIndex(i)
+                    W.SwitchPlayerOutfitAtIndex(outfitPrompts[i][2])
                     UpdatePrompts()
                     Citizen.Wait(100)
                     SetEntityVisible(PlayerPedId(), true)
@@ -258,7 +303,7 @@ function OpenOutfitMenu()
     local playerCoords = GetEntityCoords(PlayerPedId())+vector3(0,0, 0.1)
     local rot = GetLookAtRotation(camCoords, playerCoords)
 
-    cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", camCoords.x, camCoords.y, camCoords.z, rot[1], rot[2], rot[3], 55.0, false, 0)
+    cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", camCoords.x, camCoords.y, camCoords.z, rot.x, rot.y, rot.z, 55.0, false, 0)
     SetCamActive(cam, true)
     RenderScriptCams(true, false, 0, true, true, 0)
 end

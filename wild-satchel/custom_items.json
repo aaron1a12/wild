@@ -1,0 +1,8 @@
+{
+    "document_wanted_posters": {
+        "name": "Wanted Posters",
+        "description": "A collection of wanted posters. Can be taken to a Butcher and sold for cash.",
+        "group": "document",
+        "value": 0.10
+    }
+}

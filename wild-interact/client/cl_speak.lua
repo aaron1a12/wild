@@ -505,7 +505,7 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 		-- Antagonize
 		--
 
-		AddShockingEventForEntity(GetHashKey("EVENT_SHOCKING_MELEE_FIGHT"), sourcePed, 0.5, -1.0, -1.0, -1.0, -1.0, 180.0, false, false, -1, -1)
+		AddShockingEventForEntity(GetHashKey("EVENT_SHOCKING_BEAT_SURPRISING"), sourcePed, 0.5, -1.0, -1.0, -1.0, -1.0, 180.0, false, false, -1, -1)
 
 		if not IsPedAPlayer(targetPed) then -- NPC reaction
 			

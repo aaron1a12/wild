@@ -183,20 +183,20 @@ local function OnPedCreated(ped)
 
         Citizen.CreateThread(function()
             while DoesEntityExist(ped) do
-                Citizen.Wait(1234)
+                Citizen.Wait(0)
             end
 
-            W.NpcManager.ClientPool[name].Ped = 0
-
-            if W.NpcManager.ClientPool[name].Params.onDeactivate ~= nil then
-                W.NpcManager.ClientPool[name].Params:onDeactivate()
+            if W.NpcManager.ClientPool[name] then
+                if W.NpcManager.ClientPool[name].Params.onDeactivate then
+                    W.NpcManager.ClientPool[name].Params:onDeactivate()
+                end
             end
         end)
     end
 end
 
 -- The ped will get destroyed and recreated by RAGE. We must hook into the event
-W.Events.AddHandler(`EVENT_PED_CREATED`, function(data)
+AddEventHandler("EVENT_PED_CREATED", function(data) 
     local ped = data[1]
     OnPedCreated(ped)
 end)
@@ -205,6 +205,7 @@ RegisterNetEvent("wild:npcManager:cl_onDeletePed")
 AddEventHandler("wild:npcManager:cl_onDeletePed", function(name)
     local params = W.NpcManager.ClientPool[name].Params
 
+    print("Setting ped to zero... (cl_onDeletePed)")
     W.NpcManager.ClientPool[name].Ped = 0
     params.Ped = 0
 
@@ -272,6 +273,8 @@ AddEventHandler("wild:npcManager:cl_halt", function()
     TriggerServerEvent("wild:npcManager:sv_halted")
 end)
 
+local timeSinceSpawned = 0
+
 function W.NpcManager:ManageNow()
     --[[
         local allPlayerCoords = {}
@@ -327,10 +330,15 @@ function W.NpcManager:ManageNow()
                     if dist > npc.Params.CullMaxDistance then
                         nOutsideMaxCull = nOutsideMaxCull + 1
                     end
-                end            
+                end       
+                
+                if bShouldCreate and GetGameTimer()-timeSinceSpawned < 5000 then
+                    bShouldCreate = false
+                end
             end
 
             if bShouldCreate then -- Create ped
+                timeSinceSpawned = GetGameTimer()
 
                 -- Fetch last coords
                 if npc.Params.SaveCoordsAndHeading then
@@ -380,7 +388,8 @@ function W.NpcManager:ManageNow()
                 DecorSetInt(ped, "npc", name)
                 -- EVENT_PED_CREATED seems to be skipped on first tick for peds created with CREATE_PED?
                 -- Here, we force handling of the event, since it most likely didn't fire.
-                OnPedCreated(ped) 
+                -- DISREGARD, this bug isn't happening with the latest event system
+                --OnPedCreated(ped) 
 
             elseif nOutsideMaxCull == nPlayerCount then -- Outside of everybody's cull range
 
@@ -452,8 +461,15 @@ AddEventHandler('onResourceStop', function(resourceName)
         for name, npc in pairs(W.NpcManager.ClientPool) do
             if npc.Resource == resourceName then
                 if DoesEntityExist(npc.Ped) then
+                    print("Delete ped: "..tostring(npc.Ped))
                     SetEntityAsNoLongerNeeded(npc.Ped)
                     DeletePed(npc.Ped)
+                else
+                    print("Did not delete ped #"..tostring(npc.Ped))
+                end
+
+                if W.NpcManager.ClientPool[name].Params.onDeactivate ~= nil then
+                    W.NpcManager.ClientPool[name].Params:onDeactivate()
                 end
 
                 W.NpcManager.ClientPool[name] = nil

@@ -189,7 +189,7 @@ local function DumpIpls()
         iplsToDeactivate
     }
 
-    TriggerServerEvent("wild:sv_dumpIpls", hashes)
+    --TriggerServerEvent("wild:sv_dumpIpls", hashes)
 end
 
 RegisterNetEvent("wild:cl_dumpIplsDone")
@@ -237,6 +237,7 @@ local function ToggleIpl()
         end
 
         table.insert(iplsToActivate, hash)
+
         RequestIplHash(hash)
     else
         for i = 1, #iplsToActivate do
@@ -248,6 +249,8 @@ local function ToggleIpl()
         table.insert(iplsToDeactivate, hash)
         RemoveIplHash(hash)
     end
+
+    TriggerServerEvent("wild:sv_updateIpl", hash, bEnable)
 end
 
 AddEventHandler("wild:cl_onPlayerFirstSpawn", function()
@@ -433,3 +436,50 @@ Citizen.CreateThread(function()
 	end
 end)
 ]]
+
+
+Citizen.CreateThread(function()
+    if W.Config["debugMode"] == true then
+        
+
+        while true do    
+            Citizen.Wait(0)        
+            local playerCoords = GetEntityCoords(GetPlayerPed(player))
+            
+
+            for _, ped in ipairs(GetGamePool('CPed')) do
+                local coords = GetEntityCoords(ped)
+                local dist = GetVectorDist(coords, playerCoords)
+
+                local netId = 0
+
+                if NetworkGetEntityIsNetworked(ped) then
+                    netId = PedToNet(ped)
+                end
+                
+                local bManaged = false
+
+                local npc, name = W.NpcManager:GetNpcFromPed(ped)
+
+                if npc then
+                    if npc.Managed then
+                        bManaged = npc.Managed
+                    end
+                end
+    
+                if dist < 10.0 then
+                    --DrawTextAtCoord(coords, "Ped ID: " .. ped .. "\nNet: "..netId.."\nRelation: " .. GetPedRelationshipGroupHash(ped) .. "\nIsNPC: "..tostring(DecorExistOn(ped, "npc")) .. "\nManaged: "..tostring(bManaged), 0.25, 255, 255, 255, 255)
+                    DrawTextAtCoord(coords, "Ped ID: " .. ped .. "\nHealth: "..tostring(GetEntityHealth(ped)), 0.25, 255, 255, 255, 255)
+                end
+
+            end
+
+
+            
+             -- ALT + 3
+            if IsControlJustPressed(0, "INPUT_EMOTE_TWIRL_GUN_VAR_D") and IsControlPressed(0, "INPUT_HUD_SPECIAL") then
+                TestGang()
+            end
+        end
+    end       
+end)

@@ -16,7 +16,7 @@ function IsRedM()
     return (typeof GetParentResourceName != 'undefined') ? true : false
 }       
 
-function SetVisible(bVisible) 
+function SetVisible(bVisible, bImmediately) 
 {
     if (IsAnyMenuOpen()) {
         //console.log("Menus are open");
@@ -30,12 +30,15 @@ function SetVisible(bVisible)
     }
     else
     {
-        setTimeout(function(){
-            if (!document.body.classList.contains("visible"))
-            {
-                document.body.style.visibility = "hidden";
-            }
-        }, 1000);
+        if (!bImmediately)
+        {
+            setTimeout(function(){
+                if (!document.body.classList.contains("visible"))
+                {
+                    document.body.style.visibility = "hidden";
+                }
+            }, 1000);
+        }
     }
 
     if (bVisible) 
@@ -45,6 +48,9 @@ function SetVisible(bVisible)
     else
     {
         document.body.classList.remove("visible");
+
+        if (bImmediately)
+            document.body.style.visibility = "hidden";    
     }
 }
 
@@ -105,6 +111,13 @@ function CreateMenu(strMenuId, bCompact)
             var menuSubtitle = document.createElement("H2");
             menuSubtitle.classList.add("menuSubtitle");
             menuBodyDiv.appendChild(menuSubtitle);
+        }
+
+        // Nav cycles
+        {
+            var nav = document.createElement("div");
+            nav.classList.add("menuNav");
+            menuBodyDiv.appendChild(nav);
         }
 
         // Top Scroller Line
@@ -236,14 +249,13 @@ function OpenMenu(strMenuId, bOpen)
 
 function SetElementTextByClass(strMenuId, strClass, strText)
 {
-    console.log(`#menu_${strMenuId} .${strClass}`)
     let el = document.querySelector(`#menu_${strMenuId} .${strClass}`);
     el.innerText = strText;
 }
 
 function SetElementTextById(strMenuId, strId, strText)
 {
-    let el = document.querySelector(`#menu_${strMenuId}_item_${strId} div`);
+    let el = document.querySelector(`#menuItem${strMenuId}${strId} div`);
     el.innerText = strText;                
 }
 
@@ -321,6 +333,75 @@ function EditPage(strMenuId, strPageId, strPageTitle, strPageSubtitle)
         titleElement.innerText = page.title;
         menuSubtitleElement.innerText = page.subtitle;
     }
+}
+
+
+function CreatePageFilterIcons(strMenuId, strPageId, icons)
+{
+    if (menus[strMenuId] == undefined)
+    {
+        console.log("Error: non-existent parent menu");
+        return; // non-existent parent menu
+    }
+
+    let page = menus[strMenuId]["pages"][strPageId];
+
+    if (page == undefined)
+        return;
+
+    page.filterIcons = [];
+
+    let menuNav = document.querySelector(`#menu_${strMenuId} .menuNav`);
+    menuNav.innerHTML = "";
+
+    for (i in icons)
+    {
+        var img = document.createElement("img");
+        img.src = icons[i];
+        menuNav.appendChild(img);
+
+        page.filterIcons.push(img);
+    }
+}
+
+
+function SelectPageFilterIcon(strMenuId, strPageId, index)
+{
+    
+    if (menus[strMenuId] == undefined)
+    {
+        console.log("Error: non-existent parent menu");
+        return; // non-existent parent menu
+    }
+
+    let page = menus[strMenuId]["pages"][strPageId];
+
+    if (page == undefined)
+    {
+        return;
+    }
+
+    for (i in page.filterIcons)
+    {
+        if (i == index)
+            page.filterIcons[i].classList.add("selected");
+        else
+            page.filterIcons[i].classList.remove("selected");
+    }
+}
+
+function FeedbackFilter(bForward)
+{
+    let which = (bForward) ? "after" : "before";
+    document.getElementById("runtimeCss").innerText = `
+    .menu.compact h2::${which} {
+        background-color:#aaa;
+    }
+    `;
+
+    setTimeout(()=>{
+        document.getElementById("runtimeCss").innerText = "";
+    },100);
 }
 
 let navigationLock = false;
@@ -566,7 +647,7 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
     let id = (strItemId != 0 && strItemId != "") ? strItemId : pageItemAutoId+"";
     pageItemAutoId++;
 
-    itemDiv.id = `menu_${strMenuId}_item_${id}`;
+    itemDiv.id = strItemId;
 
     {
         // Menu Item Content
@@ -580,6 +661,11 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
         {
             var img = document.createElement("IMG");
             img.src = extraItemParams.icon;
+            img.addEventListener("error", function(event) {
+                event.target.src = "assets/unknown.png"
+                event.onerror = null
+            })
+
             itemContentDiv.appendChild(img);
         }
 
@@ -603,8 +689,8 @@ function CreatePageItem(strMenuId, strPageId, strItemId, extraItemParams)
     });
 
     itemDiv.addEventListener("click", (evt)=>{
-        if (IsRedM())
-            fetch(`https://${GetParentResourceName()}/playNavEnterSound`);
+        /*if (IsRedM())
+            fetch(`https://${GetParentResourceName()}/playNavEnterSound`);*/
 
         if (!extraItemParams.switch)
         {
@@ -659,7 +745,7 @@ function SetPageItemEndHtml(strMenuId, strPageId, strItemId, html)
 }
 
 function DestroyPageItem(strMenuId, strPageId, strItemId)
-{
+{    
     if (menus[strMenuId] == undefined)
         return;
 
@@ -675,10 +761,26 @@ function DestroyPageItem(strMenuId, strPageId, strItemId)
             let item = page.items[i];
 
             // Are we deleting a selected item?
-            if (i > 0 && page.selectedItem == strItemId)
-            {
-                // Select item behind it
-                SelectPageItem(strMenuId, strPageId, page.items[i-1].id);
+            if (page.selectedItem == strItemId)
+            {              
+                if (i != 0)
+                {
+                    console.log("Select item behind it");
+                    // Select item behind it
+                    SelectPageItem(strMenuId, strPageId, page.items[i-1].id);
+                }
+                else if(page.items.length > 1)
+                {
+                    console.log("Select forward item");
+                    // Select forward item
+                    SelectPageItem(strMenuId, strPageId, page.items[i+1].id);
+                }
+                else
+                {
+                    // Empty page
+                    SelectPageItem(strMenuId, strPageId, 0);
+                    console.log("empty page");
+                }
             }
 
             item.element.remove();
@@ -711,7 +813,14 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
     }
 
     if (itemIndex == -1)
+    {
+        // TODO: handle page going empty.
+        document.querySelector(`#menu_${strMenuId} .menuDetail`).innerHTML = "";
+        document.querySelector(`#menu_${strMenuId} .menuItemDescription`).innerHTML = "";
+        document.querySelector(`#menu_${strMenuId} .menuItemDescription`).innerHTML = "";
+        document.querySelector(`#menu_${currentMenuId} .menuScrollerCount`).innerText = "";
         return; // no item found
+    }
 
     page.selectedItem = strItemId;
 
@@ -724,6 +833,7 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
             },
             body: JSON.stringify({
                 menuId: strMenuId,
+                pageId: strPageId,
                 itemId: strItemId
             })
         });
@@ -738,6 +848,10 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
 
     var elementTop = element.offsetTop;
     var elementBottom = elementTop + element.offsetHeight;
+
+    // Scroll a little higher on compact grid pages
+    if (page.type == 1)
+        elementTop += - 15;
 
     var bElementIsVisible = (elementTop >= upperBound && elementBottom <= lowerBound);
    
@@ -756,9 +870,9 @@ function SelectPageItem(strMenuId, strPageId, strItemId)
     let detailTxt = page.items[itemIndex].extra.detail;
 
     if (detailTxt != undefined)
-        detailElement.innerText = page.items[itemIndex].extra.detail;
+        detailElement.innerHTML = page.items[itemIndex].extra.detail;
     else
-        detailElement.innerText = "";
+        detailElement.innerHTML = "";
 
     // Update description (under detail pane)
     let descElement = document.querySelector(`#menu_${strMenuId} .menuItemDescription`);
@@ -1020,6 +1134,22 @@ function DestroyPage(strMenuId, strPageId)
     delete menu.pages[strPageId];
 }
 
+function EmptyPage(strMenuId, strPageId)
+{
+    if (!menus[strMenuId])
+        return;
+
+    let menu = menus[strMenuId];
+    let page = menu.pages[strPageId];
+
+    if (!page)
+        return
+    
+    page.element.innerHTML = "";
+    page.selectedItem = undefined
+    page.items = []
+}
+
 window.addEventListener("load", (event) => {
     if (!IsRedM())
     {
@@ -1103,19 +1233,30 @@ else
     
     CreateMenu("satchel", true);
     CreatePage("satchel", "root", "Satchel", "Provisions", 1, 4);
+    CreatePageFilterIcons("satchel", "root", ["assets/satchel_nav_fish_sack.png", "assets/satchel_nav_provisions.png"]);
+    SelectPageFilterIcon("satchel", "root", 0)
+
     SetMenuRootPage("satchel", "root");
 
     for (var i=0; i<10; i++)
     {
-        CreatePageItem("satchel", "root", 0, {
-            icon: "test.jpg",
+        CreatePageItem("satchel", "root", "item_" + i, {
+            icon: "assets/test.png",
             description: "#"+i,
-            detail: "hello world",
+            detail: "<h3>Fine Brandy</h3><p>hello world</p>",
             action: ()=>{
             },
         });
-    }
 
+        if (Math.random() < 0.5)
+        {
+            SetPageItemEndHtml("satchel", "root", "item_" + i, "<quantity>"+Math.round(Math.random()*10)+"</quantity>");
+        }
+        else
+        {
+            SetPageItemEndHtml("satchel", "root", "item_" + i, "<onHorse />");
+        }
+    }
 
     OpenMenu("satchel", true);
 
@@ -1136,7 +1277,7 @@ window.addEventListener('message', function(event) {
 
     if (event.data.cmd == "setVisibility")
     {
-        SetVisible(event.data.visible);
+        SetVisible(event.data.visible, event.data.immediately);
     }
 
     if (event.data.cmd == "setMoneyAmount")
@@ -1182,6 +1323,22 @@ window.addEventListener('message', function(event) {
     if (event.data.cmd == "editPage")
     {
         EditPage(event.data.menuId, event.data.pageId, event.data.pageTitle, event.data.pageSubtitle);
+    }
+
+    
+    if (event.data.cmd == "createPageFilterIcons")
+    {
+        CreatePageFilterIcons(event.data.menuId, event.data.pageId, event.data.icons);
+    }
+
+    if (event.data.cmd == "selectPageFilterIcon")
+    {
+        SelectPageFilterIcon(event.data.menuId, event.data.pageId, event.data.index);
+    }
+
+    if (event.data.cmd == "feedbackFilter")
+    {
+        FeedbackFilter(event.data.forward);
     }
 
     if (event.data.cmd == "goToPage")
@@ -1253,6 +1410,11 @@ window.addEventListener('message', function(event) {
     {
         DestroyPage(event.data.menuId, event.data.pageId);
     }
+
+    if (event.data.cmd == "emptyPage")
+    {
+        EmptyPage(event.data.menuId, event.data.pageId);
+    }
 });
 
 
@@ -1310,14 +1472,13 @@ document.onkeydown = function(evt) {
         break;     
     case 'Enter':
         if (!IsRedM()) TriggerSelectedItem();
-        break; 
+        break;
     }
 };
-
 document.addEventListener("wheel", (evt) => {
     MoveSelection((evt.deltaY/100)+1)
 });
 
 document.body.addEventListener("contextmenu", (evt) => {
-    GoBack()
+    //GoBack()
 });

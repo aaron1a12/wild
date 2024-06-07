@@ -1,4 +1,4 @@
-local damageRate = 0.005
+local damageRate = 0.00005
 Citizen.CreateThread(function()
     local function clamp(n, min, max)
         if n > max then
@@ -62,10 +62,6 @@ local function UpdateStats()
 end
 
 Citizen.CreateThread(function()
-
-    AddItemToInventory(`kit_gun_oil`, 3)
-
-
 	while true do
 		Citizen.Wait(0)
 

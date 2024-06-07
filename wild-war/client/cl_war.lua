@@ -432,7 +432,7 @@ end)
 
 
 
-Citizen.CreateThread(function()
+--[[Citizen.CreateThread(function()
     if W.Config["debugMode"] == true then
         
 
@@ -459,7 +459,7 @@ Citizen.CreateThread(function()
             end
         end
     end       
-end)
+end)]]
 
 AddEventHandler('onResourceStop', function(resourceName)
 end)

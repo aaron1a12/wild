@@ -86,5 +86,123 @@ end
 function GetHorseBreedString(modelName)
     local hashName = string.upper(modelName)
     hashName = string.sub(hashName, 10)
-    return GetLocalizedStringFromHash(GetHashKey("BREED"..hashName))
+    --return GetLocalizedStringFromHash(GetHashKey("BREED"..hashName))
+    return GetStringFromHashKey(GetHashKey("BREED"..hashName))
+end
+
+function SetMountForPlayerPed(mount, playerPed)
+    -- Wait until the mount has attributes
+    while GetMaxAttributePoints(mount, ePedAttribute.PA_HEALTH) == 0 do
+        Citizen.Wait(0)
+    end
+
+    SetMountSecurityEnabled(mount, false)
+    SetPlayerOwnsMount(PlayerId(), mount)
+    SetPedAsSaddleHorseForPlayer(PlayerId(), mount)
+    SetPedActivePlayerHorse(PlayerId(), mount)
+
+    --
+    -- as in R* scripts (player_horse.c)
+    -- 
+
+    ClearActiveAnimalOwner(mount, 0)
+
+    SetPedOwnsAnimal(playerPed, mount, false) -- Enables rearing
+    SetPedPersonality(mount, `PLAYER_HORSE`)
+
+    SetAnimalIsWild(mount, false)
+
+    SetPedConfigFlag(mount, 324, true) -- Unknown condition
+    SetPedConfigFlag(mount, 211, true)
+    SetPedConfigFlag(mount, 208, true)
+    SetPedConfigFlag(mount, 209, true)
+    SetPedConfigFlag(mount, 400, true)
+    SetPedConfigFlag(mount, 297, true)
+    SetPedConfigFlag(mount, 136, false)
+    SetPedConfigFlag(mount, 312, false)
+    SetPedConfigFlag(mount, 113, false)
+    SetPedConfigFlag(mount, 301, false)
+    SetPedConfigFlag(mount, 277, true)
+    SetPedConfigFlag(mount, 319, true)
+    SetPedConfigFlag(mount, 6, true)
+
+    SetAnimalTuningBoolParam(mount, 25, false) -- ATB_FlockEnablePavementGraph
+    SetAnimalTuningBoolParam(mount, 24, false) -- ATB_FlockEnableFlee
+
+    --
+    -- Custom (not R*)
+    --
+
+    --SetPedConfigFlag(mount, 297, true) --PCF_ForceInteractionLockonOnTargetPed
+    SetPedConfigFlag(mount, 300, false) -- PCF_DisablePlayerHorseLeading
+    SetPedConfigFlag(mount, 312, true) -- PCF_DisableHorseGunshotFleeResponse
+    --SetPedConfigFlag(mount, 442, true) -- disable flee
+    --SetPedConfigFlag(mount, 444, false) -- disable flee horse by player ??
+    SetPedConfigFlag(mount, 546, false) -- PCF_IgnoreOwnershipForHorseFeedAndBrush
+    SetPedConfigFlag(mount, 594, false) -- Wild horse
+
+    --
+    -- Max out all ranks/points
+    --
+
+    SetAttributeBaseRank(mount, ePedAttribute.PA_HEALTH, GetMaxAttributeRank(mount, ePedAttribute.PA_HEALTH))
+    SetAttributeBaseRank(mount, ePedAttribute.PA_STAMINA, GetMaxAttributeRank(mount, ePedAttribute.PA_STAMINA))
+    SetAttributeBaseRank(mount, ePedAttribute.PA_SPECIALABILITY, GetMaxAttributeRank(mount, ePedAttribute.PA_SPECIALABILITY))
+    SetAttributeBaseRank(mount, ePedAttribute.PA_COURAGE, GetMaxAttributeRank(mount, ePedAttribute.PA_COURAGE))
+    SetAttributeBaseRank(mount, ePedAttribute.PA_AGILITY, GetMaxAttributeRank(mount, ePedAttribute.PA_AGILITY))
+    SetAttributeBaseRank(mount, ePedAttribute.PA_SPEED, GetMaxAttributeRank(mount, ePedAttribute.PA_SPEED))
+    SetAttributeBaseRank(mount, ePedAttribute.PA_ACCELERATION, GetMaxAttributeRank(mount, ePedAttribute.PA_ACCELERATION))
+    SetAttributeBaseRank(mount, ePedAttribute.PA_BONDING, GetMaxAttributeRank(mount, ePedAttribute.PA_BONDING))
+    SetAttributeBaseRank(mount, ePedAttribute.SA_BODYWEIGHT, GetMaxAttributeRank(mount, ePedAttribute.SA_BODYWEIGHT))
+    SetAttributeBaseRank(mount, ePedAttribute.MTR_STRENGTH, GetMaxAttributeRank(mount, ePedAttribute.MTR_STRENGTH))
+    SetAttributeBaseRank(mount, ePedAttribute.MTR_GRIT, GetMaxAttributeRank(mount, ePedAttribute.MTR_GRIT))
+    SetAttributeBaseRank(mount, ePedAttribute.MTR_INSTINCT, GetMaxAttributeRank(mount, ePedAttribute.MTR_INSTINCT))
+    SetAttributeBaseRank(mount, ePedAttribute.SA_DIRTINESSSKIN, 0) -- clean
+    SetAttributePoints(mount, ePedAttribute.PA_HEALTH, GetMaxAttributePoints(mount, ePedAttribute.PA_HEALTH))
+    SetAttributePoints(mount, ePedAttribute.PA_STAMINA, GetMaxAttributePoints(mount, ePedAttribute.PA_STAMINA))
+    SetAttributePoints(mount, ePedAttribute.PA_SPECIALABILITY, GetMaxAttributePoints(mount, ePedAttribute.PA_SPECIALABILITY))
+    SetAttributePoints(mount, ePedAttribute.PA_COURAGE, GetMaxAttributePoints(mount, ePedAttribute.PA_COURAGE))
+    SetAttributePoints(mount, ePedAttribute.PA_AGILITY, GetMaxAttributePoints(mount, ePedAttribute.PA_AGILITY))
+    SetAttributePoints(mount, ePedAttribute.PA_SPEED, GetMaxAttributePoints(mount, ePedAttribute.PA_SPEED))
+    SetAttributePoints(mount, ePedAttribute.PA_ACCELERATION, GetMaxAttributePoints(mount, ePedAttribute.PA_ACCELERATION))
+    SetAttributePoints(mount, ePedAttribute.PA_BONDING, GetMaxAttributePoints(mount, ePedAttribute.PA_BONDING))
+    SetAttributePoints(mount, ePedAttribute.SA_BODYWEIGHT, GetMaxAttributePoints(mount, ePedAttribute.SA_BODYWEIGHT))
+    SetAttributePoints(mount, ePedAttribute.MTR_STRENGTH, GetMaxAttributePoints(mount, ePedAttribute.MTR_STRENGTH))
+    SetAttributePoints(mount, ePedAttribute.MTR_GRIT, GetMaxAttributePoints(mount, ePedAttribute.MTR_GRIT))
+    SetAttributePoints(mount, ePedAttribute.MTR_INSTINCT, GetMaxAttributePoints(mount, ePedAttribute.MTR_INSTINCT))
+    SetAttributePoints(mount, ePedAttribute.SA_DIRTINESSSKIN, 0) -- clean
+
+    --
+    -- as in R* scripts (net_stable_mount.c)
+    -- 
+
+    SetPedConfigFlag(playerPed, 561, true) -- PCF_EnableHorseCollectPlantInteractionInMP
+
+    SetPedCanBeLassoed(mount, false)
+    RequestPedVisibilityTracking(mount)
+    SetPedShouldIgnoreAvoidanceVolumes(mount, 1)
+    SetPedConfigFlag(mount, 400, true)
+    SetPedConfigFlag(mount, 208, true)
+    SetPedConfigFlag(mount, 209, true)
+    SetPedConfigFlag(mount, 297, true)
+    SetPedConfigFlag(mount, 277, true)
+    SetPedConfigFlag(mount, 230, true)
+    SetPedConfigFlag(mount, 324, true)
+    SetPedConfigFlag(mount, 319, true)
+    SetPedLassoHogtieFlag(mount, 0, false)
+
+    SetPedConfigFlag(mount, 388, false) --PCF_DisableFatallyWoundedBehaviour
+
+    SetPedShouldIgnoreAvoidanceVolumes(mount, 2)
+    SetPedRelationshipGroupHash(mount, GetPedRelationshipGroupHash(playerPed))
+
+    SetTransportConfigFlag(mount, 6, 0)
+    SetTransportConfigFlag(mount, 3, 0)
+
+    SetPlayerOwnsMount(PlayerId(), mount)
+    SetPlayerMountStateActive(PlayerId(), true)
+    --SetPedAsTempPlayerHorse(PlayerId(), mount)
+
+    SetMountBondingLevel(mount, GetMaxAttributeRank(mount, ePedAttribute.PA_BONDING))
+    CompendiumHorseBonding(mount, GetMaxAttributeRank(mount, ePedAttribute.PA_BONDING))
 end

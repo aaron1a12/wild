@@ -1,6 +1,8 @@
 local bQuickSelectOpen = false
 local currentWheel = 0
 
+DatabindingAddDataInt(W.DataCont, "last_quick_select_wheel", 0)
+
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)
@@ -34,6 +36,8 @@ Citizen.CreateThread(function()
                         if msg:GetInt32(8) == 3 and msg:GetInt32(16) == -1472057397 then
                             currentWheel = 2 -- Horse wheel
                         end
+
+                        DatabindingWriteDataIntFromParent(W.DataCont, "last_quick_select_wheel", currentWheel)
                     end
                 else
                     Citizen.Wait(0)

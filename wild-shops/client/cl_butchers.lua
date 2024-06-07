@@ -1,3 +1,13 @@
+-- Some inventory flags
+local ITEM_FLAG_IS_MEAT = (1 << 24)
+local ITEM_FLAG_IS_PELT = (1 << 20) -- MUST CONFIRM
+local ITEM_FLAG_IS_PELT_2 = (1 << 20) -- MUST CONFIRM
+local ITEM_FLAG_IS_PELT_3 = (1 << 19) -- MUST CONFIRM
+local ITEM_FLAG_QUALITY_RUINED = (1 << 27)
+local ITEM_FLAG_QUALITY_POOR = (1 << 28)
+local ITEM_FLAG_QUALITY_NORMAL = (1 << 29)
+local ITEM_FLAG_QUALITY_PRISTINE = (1 << 30)
+local ITEM_FLAG_LEGENDARY = (1 << 2)
 
 --
 -- Butcher Areas
@@ -42,91 +52,6 @@ function SetupButchers()
 end
 SetupButchers()
 
-local function GetBuyLine(speaker, entity)
-    math.randomseed(GetGameTimer()/7)
-
-    local pool = {}
-    local line = ""
-
-    local rating = GetPedDamageCleanliness(entity)
-
-    if GetIsCarriablePelt(entity) then -- large pelt items have no damage cleanliness
-        local peltId = GetCarriableFromEntity(entity)
-        local pelt = shopConfig.pelts[tostring(peltId)]
-
-        if pelt ~= nil then
-            local nameBegin = string.sub(pelt[1] ,1,4)
-
-            if nameBegin == "Poor" then
-                rating = 0
-            end
-
-            if nameBegin == "Good" then
-                rating = 1
-            end
-
-            if nameBegin == "Perf" then
-                rating = 2
-            end
-
-            if nameBegin == "Lege" then
-                rating = 2
-            end
-        end
-    end
-
-    if rating == 0 then
-        if CanPlayAmbientSpeech(speaker, "BUY_COMMON_ITEM") then
-            table.insert(pool, "BUY_COMMON_ITEM")
-        end
-
-        if CanPlayAmbientSpeech(speaker, "BUY_MESSY_KILL") then
-            table.insert(pool, "BUY_MESSY_KILL")
-        end
-
-        if CanPlayAmbientSpeech(speaker, "BUY_POOR_ITEM") then
-            table.insert(pool, "BUY_POOR_ITEM")
-        end
-    end
-
-    if rating == 1 then
-        if CanPlayAmbientSpeech(speaker, "BUY_AVERAGE_ITEM") then
-            table.insert(pool, "BUY_AVERAGE_ITEM")
-        end
-    end
-
-    if rating == 2 then
-        if CanPlayAmbientSpeech(speaker, "BUY_NICE_KILL") then
-            table.insert(pool, "BUY_NICE_KILL")
-        end     
-        
-        if CanPlayAmbientSpeech(speaker, "BUY_QUALITY_ITEM") then
-            table.insert(pool, "BUY_QUALITY_ITEM")
-        end   
-    end
-
-
-    if math.random() < 0.20 then
-        if CanPlayAmbientSpeech(speaker, "CHAT_SHOPKEEPER_GOSSIP") then
-            table.insert(pool, "CHAT_SHOPKEEPER_GOSSIP")
-        end
-
-        if CanPlayAmbientSpeech(speaker, "CHAT_LOCAL_AREA") then
-            table.insert(pool, "CHAT_SHOPKEEPER_GOSSIP")
-        end
-
-        if CanPlayAmbientSpeech(speaker, "CHAT_1907") then
-            table.insert(pool, "CHAT_1907")
-        end
-    end
-
-	-- Pick random
-	if #pool > 0 then
-		line = pool[math.random(#pool)]
-	end
-
-    return line
-end
 
 function PickMountForLoad(player)
     local playerPed = GetPlayerPed(player)
@@ -225,6 +150,208 @@ local function CalculatePrice(entity)
 	return finalPrice
 end
 
+local currentLocation = nil
+local butcherPed = 0
+local butcherCam = 0
+local butcherCamPos = vector3(0,0,0)
+local bStallOpen = false
+
+function OpenStall()
+    if W.Satchel then
+        W.Satchel.Open(true)
+        bStallOpen = true
+
+        ClearPedTasks(butcherPed)
+
+        --W.PlayAmbientSpeech(butcherPed, "HOWS_IT_GOING")
+        local butcherCoords = vector3(currentLocation[1], currentLocation[2], currentLocation[3])
+
+        butcherCamPos = RotateVectorYaw(vector3(0, 1, 0), currentLocation[4])
+        butcherCamPos = butcherCamPos * 1.1
+        butcherCamPos = butcherCamPos + butcherCoords
+        butcherCamPos = butcherCamPos + vector3(0,0, 0.5)
+
+        TaskLookAtCoord(butcherPed, butcherCamPos.x, butcherCamPos.y, butcherCamPos.z, 5000, 0, 51, false)
+        TaskGoToCoordAnyMeans(butcherPed, currentLocation[1], currentLocation[2], currentLocation[3], 1.0, 0, false, 524419, -1.0)
+        --TaskGoToCoordWhileAimingAtCoord(butcherPed, currentLocation[1], currentLocation[2], currentLocation[3], butcherCamPos.x, butcherCamPos.y, butcherCamPos.z, 1.5, 1, 0.5, 1082130432, 1, 1, 0, `FIRING_PATTERN_BURST_FIRE`, 0)
+
+        Citizen.CreateThread(function()
+            local bReached = false
+            while bStallOpen and not bReached do
+                Citizen.Wait(0)
+
+                if GetVectorDistSqr(GetEntityCoords(butcherPed), butcherCoords) < 0.2 then
+                    bReached = true
+                end
+            end
+
+            TaskTurnPedToFaceCoord(butcherPed, butcherCamPos.x, butcherCamPos.y, butcherCamPos.z, 10000)
+        end)
+
+        local lookAt = RotateVectorYaw(vector3(0.02, 1, 0), currentLocation[4])
+        lookAt = lookAt + vector3(0,0,0.49) + butcherCoords
+
+        local rot = GetLookAtRotation(butcherCamPos, lookAt)
+        butcherCam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", butcherCamPos.x, butcherCamPos.y, butcherCamPos.z, rot.x, 0.0, rot.z, 60.0, false, 0)
+        SetCamActive(butcherCam, true)
+        RenderScriptCams(true, false, 0, true, true, 0)
+    else
+        ShowHelpText("Satchel not available", 2000)
+    end
+end
+
+function CloseStall()
+    bStallOpen = false
+
+    RenderScriptCams(false, false, 0, true, true, 0)
+    SetCamActive(butcherCam, false)
+    DestroyCam(butcherCam, true)
+end
+
+
+function PlayGesture(ped, dict, clip)
+    RequestAnimDict(dict)
+    while not HasAnimDictLoaded(dict) do
+        Wait(100)
+    end
+    
+    TaskPlayAnim(ped, dict, clip, 8.0, -8.0, 2000, (1 << 3) | (1 << 22), 0.0, false, 0, false, 0, false)
+end
+
+local reactionTime = 0
+AddEventHandler("wild:cl_onSell", function(item, quantity)
+    if W.Satchel then
+        math.randomseed(GetGameTimer()/7)
+
+        local totalSale = W.Satchel.GetItemValue(item) * quantity
+        TriggerServerEvent("wild:sv_giveMoney", GetPlayerName(PlayerId()), totalSale)
+
+        -- See catalog_sp.ymt
+        local info = DataView.ArrayBuffer(8 * 7)
+        Citizen.InvokeNative(0xFE90ABBCBFDC13B2, item, info:Buffer())
+        local group = info:GetInt32(16) -- weapon, provision, consumable, etc
+        local category = info:GetInt32(8) -- Note that categories are actually a subset of "group"
+
+        --
+        -- Butcher reaction
+        --
+
+        if GetGameTimer()-reactionTime < 3000 then
+            return
+        end
+
+        reactionTime = GetGameTimer()
+
+        local pool = {}
+        local line = ""
+
+        local gesturePool = {}
+        local gesture = {"", ""}
+        
+        if category == 235313564 then -- seems to be animal item category. 
+            
+            local bIsMeat = (InventoryIsInventoryItemFlagEnabled(item, ITEM_FLAG_IS_MEAT)==1)
+            local bIsRuined = (InventoryIsInventoryItemFlagEnabled(item, ITEM_FLAG_QUALITY_RUINED)==1)
+            local bIsPoor = (InventoryIsInventoryItemFlagEnabled(item, ITEM_FLAG_QUALITY_POOR)==1)
+            local bIsNormal = (InventoryIsInventoryItemFlagEnabled(item, ITEM_FLAG_QUALITY_NORMAL)==1)
+            local bIsPerfect = (InventoryIsInventoryItemFlagEnabled(item, ITEM_FLAG_QUALITY_PRISTINE)==1)
+            local bIsLegendary = (InventoryIsInventoryItemFlagEnabled(item, ITEM_FLAG_LEGENDARY)==1)
+            local bIsPelt = (InventoryGetInventoryItemIsAnimalPelt(item)==1)
+
+
+            if bIsPelt and bIsPerfect and CanPlayAmbientSpeech(butcherPed, "BUY_QUALITY_PELT") then
+                --GREET_POINT_OUT_PELT
+                table.insert(pool, "BUY_QUALITY_PELT")
+            end
+
+            if bIsPerfect and not bIsPelt then
+                if CanPlayAmbientSpeech(butcherPed, "BUY_NICE_KILL") then
+                    table.insert(pool, "BUY_NICE_KILL")
+                end     
+                
+                if CanPlayAmbientSpeech(butcherPed, "BUY_QUALITY_ITEM") then
+                    table.insert(pool, "BUY_QUALITY_ITEM")
+                end
+
+                table.insert(gesturePool, {"ai_gestures@gen_male@standing@silent@rt_hand", "silent_neutral_punctuate_f_001"})
+                table.insert(gesturePool, {"ai_gestures@gen_male@standing@speaker@no_hat", "silent_neutral_bow_l_001"})
+            end
+
+            if bIsNormal and CanPlayAmbientSpeech(butcherPed, "BUY_AVERAGE_ITEM") then
+                table.insert(pool, "BUY_AVERAGE_ITEM")
+                table.insert(gesturePool, {"ai_gestures@gen_male@standing@speaker", "neutral_punctuate_fr_003"})
+                table.insert(gesturePool, {"ai_gestures@gen_male@standing@speaker", "empathise_nod_f_001"})
+                table.insert(gesturePool, {"ai_gestures@gen_male@standing@speaker", "positive_nod_f_003"})
+                table.insert(gesturePool, {"ai_gestures@gen_male@standing@speaker", "positive_nod_f_004"})
+            end
+
+            if bIsPoor or bIsRuined then
+                if CanPlayAmbientSpeech(butcherPed, "BUY_COMMON_ITEM") then
+                    table.insert(pool, "BUY_COMMON_ITEM")
+                end
+        
+                if CanPlayAmbientSpeech(butcherPed, "BUY_MESSY_KILL") then
+                    table.insert(pool, "BUY_MESSY_KILL")
+                end
+        
+                if CanPlayAmbientSpeech(butcherPed, "BUY_POOR_ITEM") then
+                    table.insert(pool, "BUY_POOR_ITEM")
+                end
+
+                table.insert(gesturePool, {"ai_gestures@gen_male@standing@speaker", "negative_headshake_f_004"})
+                table.insert(gesturePool, {"ai_gestures@gen_male@standing@silent@rt_hand", "silent_surprised_react_f_001"})
+                table.insert(gesturePool, {"ai_gestures@gen_male@standing@silent@rt_hand", "silent_negative_disagree_l_002"})
+            end
+        else
+            table.insert(gesturePool, {"ai_gestures@gen_male@standing@speaker", "neutral_punctuate_fr_003"})
+            table.insert(gesturePool, {"ai_gestures@gen_male@standing@speaker", "empathise_nod_f_001"})
+            table.insert(gesturePool, {"ai_gestures@gen_male@standing@speaker", "positive_nod_f_003"})
+            table.insert(gesturePool, {"ai_gestures@gen_male@standing@speaker", "positive_nod_f_004"})
+
+            if math.random() < 0.25 then
+                if CanPlayAmbientSpeech(butcherPed, "CHAT_SHOPKEEPER_GOSSIP") then
+                    table.insert(pool, "CHAT_SHOPKEEPER_GOSSIP")
+                end
+        
+                if CanPlayAmbientSpeech(butcherPed, "CHAT_LOCAL_AREA") then
+                    table.insert(pool, "CHAT_SHOPKEEPER_GOSSIP")
+                end
+        
+                if CanPlayAmbientSpeech(butcherPed, "CHAT_1907") then
+                    table.insert(pool, "CHAT_1907")
+                end
+            end
+        end
+
+        -- Pick random
+        if #pool > 0 then
+            line = pool[math.random(#pool)]
+        end
+
+        -- Pick random
+        if #gesturePool > 0 then
+            gesture = gesturePool[math.random(#gesturePool)]
+        end
+    
+        W.PlayAmbientSpeech(butcherPed, line)   
+        PlayGesture(butcherPed, gesture[1], gesture[2])
+
+        TaskLookAtCoord(butcherPed, butcherCamPos.x, butcherCamPos.y, butcherCamPos.z-1.0, -1, 1, 51, false)  
+        Citizen.Wait(1000)
+        TaskLookAtCoord(butcherPed, butcherCamPos.x, butcherCamPos.y, butcherCamPos.z, 3000, 1, 51, false)        
+              
+    end
+end)
+
+AddEventHandler("wild:cl_onMenuClosing", function(menu)
+    if menu == "satchel" then
+        CloseStall()
+    end
+end)
+
+
+
+
 
 local promptGroup = GetRandomIntInRange(1, 0xFFFFFF)
 local prompt = 0
@@ -239,7 +366,6 @@ Citizen.CreateThread(function()
         local playerCoords = GetEntityCoords(playerPed)
         
         local bInValidAreas = false
-        local currentLocation = nil
         local currentLocationCoords = nil
 
         for i = 1, #butcherLocations do
@@ -256,7 +382,6 @@ Citizen.CreateThread(function()
         end
 
         local bButcherIsAvailable = false
-        local butcherPed = 0
 
         if bInValidAreas then
             butcherPed = currentLocation[7].Ped           
@@ -266,7 +391,7 @@ Citizen.CreateThread(function()
                     local butcherCoords = GetEntityCoords(butcherPed)
                     local distSqr = GetVectorDistSqr(butcherCoords, currentLocationCoords)
     
-                    if distSqr < 1.0 then
+                    if distSqr < 100.0 then
                         bButcherIsAvailable = true
                     end
                 end
@@ -285,22 +410,22 @@ Citizen.CreateThread(function()
             end
         end
 
-        if bInValidAreas and bButcherIsAvailable and carriedEntity == 0 then
+        --[[if bInValidAreas and bButcherIsAvailable and carriedEntity == 0 then
             if (GetGameTimer() - helpLastTime > 20000) then
                 helpLastTime = GetGameTimer()
     
                 ShowHelpText("To sell here, you must carry the large items and keep your pelts nearby", 10000)
             end
-        end
+        end]]
 
-        if bInValidAreas and bButcherIsAvailable and (carriedEntity ~=0 or bHasPelts) then         
+        if bInValidAreas and bButcherIsAvailable then         
             waitTime = 0
 
             if prompt == 0 then -- Create prompt
                 prompt = PromptRegisterBegin()
                 PromptSetControlAction(prompt, `INPUT_CONTEXT_X`) -- R key
                 PromptSetText(prompt, CreateVarString(10, "LITERAL_STRING", "Sell Items"))
-                UiPromptSetHoldMode(prompt, 1000)
+                UiPromptSetHoldMode(prompt, 200)
                 PromptSetGroup(prompt, promptGroup, 0) 
                 PromptRegisterEnd(prompt)
             
@@ -315,7 +440,9 @@ Citizen.CreateThread(function()
                 PromptDelete(prompt)
                 prompt = 0
 
-                local price = 0.0
+                OpenStall()
+
+                --[[local price = 0.0
                 
                 -- Carried large item
                 if carriedEntity ~= 0 then
@@ -337,22 +464,26 @@ Citizen.CreateThread(function()
                             break
                         end
                     end
-                end
+                end]]
 
                 -- Action
 
                 local playerCoords = GetEntityCoords(PlayerPedId())
-                TaskReact(butcherPed, PlayerPedId(), playerCoords.x, playerCoords.y, playerCoords.z, "Default_Curious", 1.0, 10.0, 4)
 
-                TriggerServerEvent("wild:sv_giveMoney", GetPlayerName(PlayerId()), price)
+                
+                --TaskReact(butcherPed, PlayerPedId(), playerCoords.x, playerCoords.y, playerCoords.z, "Default_Shocked", 10.0, 3.0, 4)
+
+
+
+                --
             
-                if carriedEntity ~= 0 then
-                    TriggerServerEvent('wild:shops:sv_playAmbSpeech', PedToNet(butcherPed), GetBuyLine(butcherPed, carriedEntity))
+                --[[if carriedEntity ~= 0 then
+                    --TriggerServerEvent('wild:shops:sv_playAmbSpeech', PedToNet(butcherPed), GetBuyLine(butcherPed, carriedEntity))
                     DeleteEntity(carriedEntity)
                     carriedEntity = 0
                 else
-                    W.PlayAmbientSpeech(butcherPed, "BUY_QUALITY_PELT")
-                end
+                    
+                end]]
                 
                 Citizen.Wait(1*1000) -- too soon?
             end

@@ -3,7 +3,37 @@
         {
             "location": [-322.21, 803.275, 117.881],
             "dressingRoom": {"player": [-327.567, 807.9, 117.894, -93.0], "cam": [-325.65, 807.13, 118.25, -10.0, 81.65]}
+        },
+        {
+            "location": [-785.394, -1322.197, 45.884, 178],
+            "dressingRoom": {"player": [-767.854, -1294.86, 43.844, 222.23], "cam": [-765.78, -1295.744, 44.328, -10.0, 68.367]}
         }
+    ],
+
+    "guns" : [
+        {"item":"weapon_melee_knife", "price": 2.0},
+        {"item":"weapon_revolver_cattleman", "price": 10.0},
+        {"item":"weapon_revolver_schofield", "price": 10.0},
+        {"item":"weapon_lasso_reinforced", "price": 10.0},
+        {"item":"weapon_rifle_boltaction", "price": 10.0}
+    ],
+
+    "ammo" : [
+        {"item":"AMMO_REVOLVER", "price": 1.0},
+        {"item":"ammo_revolver_express", "price": 2.0},
+        {"item":"AMMO_RIFLE", "price": 1.0},
+        {"item":"AMMO_RIFLE_EXPRESS", "price": 2.0}
+    ],
+
+    "provisions" : [
+        {"item":"consumable_peach", "price": 1.0},
+        {"item":"consumable_apple", "price": 1.0},
+        {"item":"consumable_chocolate_bar", "price": 2.0},
+        {"item":"kit_gun_oil", "price": 1.0},
+        {"item":"consumable_coffee", "price": 1.0},
+        {"item":"consumable_horse_reviver", "price": 1.0},
+        {"item":"consumable_potent_medicine", "price": 1.0},
+        {"item":"consumable_cigarette_box", "price": 1.0}
     ],
 
     "clothingCharacters": [
@@ -38,7 +68,8 @@
     "butcherLocations" : [
         [-338.943, 767.395, 116.568, 98.4, "U_M_M_VALBUTCHER_01", 0],
         [-1752.908, -392.782, 156.246, 183.260,  "S_M_M_UNIBUTCHERS_01", 10],
-        [1334.472, -7013.892, 53.801, 18.055,  "A_M_M_GUATOWNFOLK_01", 0]
+        [1334.472, -7013.892, 53.801, 18.055,  "A_M_M_GUATOWNFOLK_01", 0],
+        [-753.241, -1284.61, 43.497, 267.411,  "S_M_M_UNIBUTCHERS_01", 9]
     ],
 
     "butcherPrices" : {
