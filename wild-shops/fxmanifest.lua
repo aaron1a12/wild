@@ -24,4 +24,4 @@ files
 	"pedDrawables.json"
 }
 
-this_is_a_map "no" -- set to "no" when debugging for fast reload
+this_is_a_map "yes" -- set to "no" when debugging for fast reload
