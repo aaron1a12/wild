@@ -112,7 +112,16 @@ function GetItemQuality(item)
     if InventoryIsInventoryItemFlagEnabled(item, ITEM_FLAG_QUALITY_RUINED) then return 0 end
 end
 
+local lastToastItem = 0
+local lastToastTime = 0
+
 function ShowInventoryToast(item, quantity, bAdding)
+    if GetGameTimer()-lastToastTime < 3000 and item == lastToastItem then -- don't show too many toasts
+        return
+    end
+
+    lastToastTime = GetGameTimer()
+    lastToastItem = item
 	local itemUi = GetItemUiFallback(item)
 
     local str1 = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", itemUi.name .. " (x"..tostring(quantity)..")", Citizen.ResultAsLong())

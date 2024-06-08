@@ -32,7 +32,8 @@
         {"item":"kit_gun_oil", "price": 1.0},
         {"item":"consumable_horse_reviver", "price": 1.0},
         {"item":"consumable_potent_medicine", "price": 1.0},
-        {"item":"consumable_cigarette_box", "price": 1.0}
+        {"item":"consumable_cigarette_box", "price": 1.0},
+        {"item":"consumable_hair_grease", "price": 1.0}
     ],
 
     "clothingCharacters": [
