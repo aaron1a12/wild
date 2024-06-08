@@ -176,6 +176,15 @@ local function OnPedCreated(ped)
             name = DecorGetInt(ped, "npc")
         end
 
+        -- previous ped, fix double butcher in mp session?
+        if DoesEntityExist(W.NpcManager.ClientPool[name].Ped) then
+            if NetworkHasControlOfEntity(W.NpcManager.ClientPool[name].Ped) then
+                DeletePed(W.NpcManager.ClientPool[name].Ped)
+            end
+            
+            W.NpcManager.ClientPool[name].Params:onDeactivate()
+        end
+
         W.NpcManager.ClientPool[name].Ped = ped
 
         local bOwned = NetworkHasControlOfEntity(ped)
@@ -205,9 +214,9 @@ RegisterNetEvent("wild:npcManager:cl_onDeletePed")
 AddEventHandler("wild:npcManager:cl_onDeletePed", function(name)
     local params = W.NpcManager.ClientPool[name].Params
 
-    print("Setting ped to zero... (cl_onDeletePed)")
-    W.NpcManager.ClientPool[name].Ped = 0
-    params.Ped = 0
+    --print("Setting ped to zero... (cl_onDeletePed)")
+    --W.NpcManager.ClientPool[name].Ped = 0
+    --params.Ped = 0
 
     if params.onDeactivate ~= nil then
         ---params:onDeactivate()

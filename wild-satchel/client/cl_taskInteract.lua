@@ -286,7 +286,7 @@ function PlayTaskInteract(item, interactionTypeTag)
         SetCustomTexturesOnObject(itemEntity, texture, 0, 0)
 
         N_0xcf69ea05cd9c33c9()
-        TaskItemInteraction_2(ped, item, itemEntity, `PrimaryItem`,  action, 1, 0, -1.0)
+        TaskItemInteraction_2(ped, item, itemEntity, `PrimaryItem`,  action, 1, 0, -1.0) -- TODO: could _SET_CARRIABLE_CARRY_ACTION_PROMPT_OVERRIDE (native 0xF666EF30F4F0AC4E) help us create custom prompts for item?
 
         Citizen.Wait(500) -- Could've used HAS_ANIM_EVENT_FIRED but I don't know the event hash
         SetEntityVisible(itemEntity, true)

@@ -397,6 +397,8 @@ function GetInventoryWithFilter(itemArray, filter)
 
         -- Get items
 
+        -- TODO: investigate FIND_ALL_ATTACHED_CARRIABLE_ENTITIES (0xB5ACE8B23A438EC0) or
+        -- GET_CARRIED_ATTACHED_INFO_FOR_SLOT (0x608BC6A6AACD5036) to get other side stowed items?
         local entityStowed = GetFirstEntityPedIsCarrying(mount)
         local entityAsItem = GetCarriableFromEntity(entityStowed)
 
@@ -421,7 +423,6 @@ function GetInventoryWithFilter(itemArray, filter)
                 end
 
                 pelts[pelt] = pelts[pelt] + 1 
-                --ClearPeltFromHorse(mount, peltId)
             else
                 break
             end

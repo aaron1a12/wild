@@ -405,18 +405,21 @@ end)
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)	
-        local playerPed = PlayerPedId()
 
-		if IsControlJustPressed(0, `INPUT_WHISTLE`) then
+        -- near horse
+        if Citizen.InvokeNative(0x0501D52D24EA8934, 1, Citizen.ResultAsInteger()) ~= 0 then
+            local playerPed = PlayerPedId()
+            if IsControlJustPressed(0, `INPUT_INTERACT_HORSE_BRUSH`) and not IsPedOnMount(playerPed) then
+                OnBrush()
+            end
+
+            if IsControlJustPressed(0, `INPUT_INTERACT_HORSE_FEED`) and not IsPedOnMount(playerPed) then
+                OnFeed()
+            end
+        end
+
+        if IsControlJustPressed(0, `INPUT_WHISTLE`) then
             OnWhistle()
-        end
-
-        if IsControlJustPressed(0, `INPUT_INTERACT_HORSE_BRUSH`) and not IsPedOnMount(playerPed) then
-            OnBrush()
-        end
-
-        if IsControlJustPressed(0, `INPUT_INTERACT_HORSE_FEED`) and not IsPedOnMount(playerPed) then
-            OnFeed()
         end
 
         if IsControlJustPressed(0, `INPUT_HORSE_COMMAND_FOLLOW`) then

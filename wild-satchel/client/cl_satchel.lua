@@ -148,7 +148,7 @@ function SatchelAddItem(item, quantity, bNoUpdate)
 end
 W.RegisterExport("Satchel", "AddItem", SatchelAddItem)
 
-function SatchelRemoveItem(item, quantity, bSuppressUi)
+function SatchelRemoveItem(item, quantity, bSuppressUi, bNoNativeChange)
     if ItemdatabaseIsKeyValid(item, 0) == 0 and not IsItemCustom(item) then
 		return false
     end
@@ -157,12 +157,71 @@ function SatchelRemoveItem(item, quantity, bSuppressUi)
         return false
     end
 
+    function updateSatchelUi(iNewQuantity)
+        if bSatchelOpen then
+            if iNewQuantity > 1 then
+                W.UI.SetPageItemEndHtml("satchel", "grid", "item_"..item, "<quantity>"..iNewQuantity.."</quantity>");
+            else
+                W.UI.SetPageItemEndHtml("satchel", "grid", "item_"..item, "");
+            end
+    
+            if iNewQuantity < 1 then
+                W.UI.DestroyPageItem("satchel", "grid", "item_"..item)
+            end
+        end
+    end
+
     -- Add to our inventory first
     local key = item
 
     -- Update current quantity
 
-    if PlayerInventory[key] == nil then
+    if PlayerInventory[key] == nil then -- might be a horse item
+
+        local mount, mountDist = PickMountForLoad(PlayerId())
+
+        -- Is it a carcass?
+
+        local entityStowed = GetFirstEntityPedIsCarrying(mount)
+
+        if DoesEntityExist(entityStowed) then
+            if not (GetIsAnimal(entityStowed) == 0 and GetIsAnimal(entityStowed) == 0) then
+                if IsEntityAPed(entityStowed) then
+                    local carcass = GetSatchelCarcassFromPed(entityStowed)
+                    if carcass == item then
+                        DeleteEntity(entityStowed)
+                        updateSatchelUi(0)
+                        return true
+                    end
+                end
+            end
+            return false
+        elseif InventoryGetInventoryItemIsAnimalPelt(item) == 1 then
+            local peltQuantity = 0
+            local quantityRemoved = 0
+
+            for i = 0, 99 do
+                local pelt = GetPeltFromHorse(mount, i)
+                
+                if pelt ~= 0 then
+                    if pelt == item then
+                        peltQuantity = peltQuantity + 1
+                    end
+                else
+                    break
+                end
+            end
+
+            peltQuantity = peltQuantity - quantity
+
+            for i = 1, quantity do
+                ClearPeltFromHorse(mount, item)
+            end
+
+            updateSatchelUi(peltQuantity)
+            return true
+        end
+
         return false
     end
     
@@ -178,17 +237,7 @@ function SatchelRemoveItem(item, quantity, bSuppressUi)
 
     local newQuantity = PlayerInventory[key][1]
 
-    if bSatchelOpen then
-        if newQuantity > 1 then
-            W.UI.SetPageItemEndHtml("satchel", "grid", "item_"..item, "<quantity>"..newQuantity.."</quantity>");
-        else
-            W.UI.SetPageItemEndHtml("satchel", "grid", "item_"..item, "");
-        end
-
-        if newQuantity < 1 then
-            W.UI.DestroyPageItem("satchel", "grid", "item_"..item)
-        end
-    end
+    updateSatchelUi(newQuantity)
 
     -- Do the same on the server
     TriggerServerEvent("wild:satchel:cl_updateItem", key, {PlayerInventory[key][1], PlayerInventory[key][2]})
@@ -201,8 +250,10 @@ function SatchelRemoveItem(item, quantity, bSuppressUi)
         ShowInventoryToast(item, quantity, false)
     end
 
-    -- Remove from native inventory
-    RemoveItemFromInventory(item, quantity)
+    if not (bNoNativeChange==true) then
+        -- Remove from native inventory
+        RemoveItemFromInventory(item, quantity)
+    end
 
     return true
 end
@@ -842,7 +893,8 @@ function SatchelUseItem(item)
         end)
     end
 
-    SatchelRemoveItem(item, 1, false)
+    -- Since we're handling EVENT_INVENTORY_ITEM_REMOVED, set bNoNativeChange=1 so we don't lose the item twice
+    SatchelRemoveItem(item, 1, false, true)
 end
 
 function SatchelDropItem(item, quantity)
@@ -979,7 +1031,7 @@ AddEventHandler("EVENT_INVENTORY_ITEM_PICKED_UP", function(data)
     SatchelAddItem(inventoryItemHash, 1)
 end)
 
--- Picking up objects in the world to place in satchel
+
 AddEventHandler("EVENT_INVENTORY_ITEM_REMOVED", function(data)
     local inventoryItemHash = data[1]
 
@@ -1088,7 +1140,7 @@ RegisterCommand('iguana', function()
 
     SetEntityHealth(ped, 0)
 end, false)
-
+]]
 RegisterCommand('deer', function() 
 	local x, y, z = table.unpack(GetEntityCoords(GetPlayerPed(PlayerId()), false))
 
@@ -1110,10 +1162,10 @@ RegisterCommand('deer', function()
     SetEntityHealth(ped, 0)
 end, false)
 
-RegisterCommand('chocolate', function() 
+--[[RegisterCommand('chocolate', function() 
 	SatchelAddItem(`consumable_chocolate_bar`, 5)
-end, false)]]
+end, false)
 
 RegisterCommand('gunoil', function() 
 	SatchelAddItem(`kit_gun_oil`, 5)
-end, false)
+end, false)]]

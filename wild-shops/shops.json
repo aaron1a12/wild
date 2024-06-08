@@ -19,20 +19,21 @@
     ],
 
     "ammo" : [
-        {"item":"AMMO_REVOLVER", "price": 1.0},
-        {"item":"ammo_revolver_express", "price": 2.0},
-        {"item":"AMMO_RIFLE", "price": 1.0},
-        {"item":"AMMO_RIFLE_EXPRESS", "price": 2.0}
+        {"item":"AMMO_REVOLVER", "price": 0.25},
+        {"item":"ammo_revolver_express", "price": 0.50},
+        {"item":"AMMO_RIFLE", "price": 0.25},
+        {"item":"AMMO_RIFLE_EXPRESS", "price": 0.50}
     ],
 
     "provisions" : [
-        {"item":"consumable_peach", "price": 1.0},
-        {"item":"consumable_apple", "price": 1.0},
-        {"item":"consumable_chocolate_bar", "price": 2.0},
-        {"item":"kit_gun_oil", "price": 1.0},
+        {"item":"consumable_apple", "price": 0.03},
+        {"item":"CONSUMABLE_BREAD_ROLL", "price": 0.25},
+        {"item":"consumable_chocolate_bar", "price": 0.30},
+        {"item":"consumable_peach", "price": 0.05},
+        {"item":"kit_gun_oil", "price": 0.75},
         {"item":"consumable_horse_reviver", "price": 1.0},
         {"item":"consumable_potent_medicine", "price": 1.0},
-        {"item":"consumable_cigarette_box", "price": 1.0},
+        {"item":"consumable_cigarette_box", "price": 0.75},
         {"item":"consumable_hair_grease", "price": 1.0}
     ],
 
