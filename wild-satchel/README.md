@@ -6,6 +6,7 @@ Public methods:
 W.Satchel.Add(item, quantity, bNoUpdate)
 W.Satchel.Remove(item, quantity, bSuppressUi)
 W.Satchel.GetItemCount(item)
+W.Satchel.GetItemMaxCount(item)
 W.Satchel.Open(bShopMode)
 ```
 
