@@ -294,8 +294,7 @@ function PukeNow()
     end)
 
     Citizen.Wait(2000)
-    
-    ShowText("shocking")
+
     AddShockingEventForEntity(`EVENT_SHOCKING_BEAT_SURPRISING`, PlayerPedId(), 5.0, -1.0, -1.0, -1.0, -1.0, 180.0, false, false, -1, -1)
 end
 

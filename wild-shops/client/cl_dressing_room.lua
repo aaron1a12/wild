@@ -114,9 +114,6 @@ function GetUserInputInMenu(defaultText)
     local kbState = UpdateOnscreenKeyboard()
     while kbState == 0 do
         Wait(0)
-
-        ShowText(tostring(kbState))
-
         kbState = UpdateOnscreenKeyboard()
     end
 

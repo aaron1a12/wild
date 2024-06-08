@@ -30,7 +30,6 @@
         {"item":"consumable_apple", "price": 1.0},
         {"item":"consumable_chocolate_bar", "price": 2.0},
         {"item":"kit_gun_oil", "price": 1.0},
-        {"item":"consumable_coffee", "price": 1.0},
         {"item":"consumable_horse_reviver", "price": 1.0},
         {"item":"consumable_potent_medicine", "price": 1.0},
         {"item":"consumable_cigarette_box", "price": 1.0}
