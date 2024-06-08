@@ -9,6 +9,7 @@ It does not use a database connection. Instead, it simply uses a local JSON file
 ```
 ensure wild-core
 start wild-interact
+start wild-satchel
 start wild-shops
 start wild-war
 start wild-guarma

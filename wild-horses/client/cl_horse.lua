@@ -26,7 +26,7 @@ function CreatePlayerHorse()
     SpawnpointsCancelSearch()
 
     -- Spawn radius (in meters)
-    local spawnRadius = 10.0 --100.0
+    local spawnRadius = 100.0 --100.0
 
     math.randomseed(123)
     local noiseX = math.random() * spawnRadius
