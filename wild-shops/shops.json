@@ -19,10 +19,10 @@
     ],
 
     "ammo" : [
-        {"item":"AMMO_REVOLVER", "price": 0.25},
-        {"item":"ammo_revolver_express", "price": 0.50},
-        {"item":"AMMO_RIFLE", "price": 0.25},
-        {"item":"AMMO_RIFLE_EXPRESS", "price": 0.50}
+        {"item":"AMMO_REVOLVER", "price": 0.50},
+        {"item":"ammo_revolver_express", "price": 1.00},
+        {"item":"AMMO_RIFLE", "price": 0.50},
+        {"item":"AMMO_RIFLE_EXPRESS", "price": 1.00}
     ],
 
     "provisions" : [
