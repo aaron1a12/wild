@@ -398,28 +398,14 @@ function GetInventoryWithFilter(itemArray, filter)
         -- Get items
 
         local entityStowed = GetFirstEntityPedIsCarrying(mount)
-
         local entityAsItem = GetCarriableFromEntity(entityStowed)
 
         if not (GetIsAnimal(entityStowed) == 0 and GetIsAnimal(entityStowed) == 0) then
             if IsEntityAPed(entityStowed) then
-
                 local carcass = GetSatchelCarcassFromPed(entityStowed)
-                --local ped = GetPedIndexFromEntityIndex(entityStowed)
-                --local struct = DataView.ArrayBuffer(512)
-
-                --local pointer = VarString(10, "LITERAL_STRING", "                              ")
-
-                --local success = Citizen.InvokeNative(0x6B89FAA36FC909A3, pointer, ped, GetPedDamageCleanliness(ped))
-                --retval, struct = ComputeSatchelItemForPedCarcass(ped, GetPedDamageCleanliness(ped), 2)
-                
-                print(carcass)
-                --TriggerServerEvent("wild:sv_dumpBuffer", ReadString(pointer), 8 * 13)
-
                 tryAddToArray(carcass, 1, 1)
             end
         end
-
 
         -- Search for pelts
 
@@ -435,7 +421,6 @@ function GetInventoryWithFilter(itemArray, filter)
                 end
 
                 pelts[pelt] = pelts[pelt] + 1 
-
                 --ClearPeltFromHorse(mount, peltId)
             else
                 break

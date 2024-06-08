@@ -26,15 +26,20 @@ AddEventHandler("EVENT_CRIME_CONFIRMED", function(data)
 	end
 end)
 
+local lastEscalatedPed = 0
+
 AddEventHandler("EVENT_PLAYER_ESCALATED_PED", function(data) 
 	local escalator = data[1]
 	local ped = data[2]
-	
+		
 	if escalator == PlayerPedId() then
+		if ped ~= lastEscalatedPed then
+			lastEscalatedPed = ped
 
-		if GetRelationshipBetweenPeds(ped, escalator) <= 3 then
-			-- Affect honor
-			W.AddPlayerHonor(W.Config.Honor["onEscalate"])    
+			if GetRelationshipBetweenPeds(ped, escalator) <= 3 then
+				-- Affect honor
+				W.AddPlayerHonor(W.Config.Honor["onEscalate"])    
+			end
 		end
 	end
 end)

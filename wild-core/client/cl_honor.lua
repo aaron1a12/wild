@@ -65,8 +65,16 @@ end
 
 local lastToastTime = 0
 local timeBetweenToastsMs = 60 * 1000
+local lostHonorTime = 0
 
 function W.AddPlayerHonor(fAmount)
+	if fAmount < 0.0 then
+		if GetGameTimer()-lostHonorTime < 10000 then
+			return
+		end
+		lostHonorTime = GetGameTimer()
+	end
+
 	local oldHonor = W.PlayerData["honor"]
 	local newHonor = oldHonor + fAmount;
 
