@@ -8,6 +8,18 @@
 W = exports["wild-core"]:Get()
 lineVariations = json.decode(LoadResourceFile(GetCurrentResourceName(), "line_variations.json"))
 
+function IsMetaPedUsingDrawable(ped, hash)
+    local n = GetNumComponentsInPed(ped);
+    
+    for i=0, n-1 do
+        local retval, drawable, albedo, normal, material = GetMetaPedAssetGuids(ped,  i)        
+        if drawable == hash then
+            return true
+        end
+    end 
+    return false
+end
+
 --------------------
 -- Begin prompt code
 -- See https://gist.github.com/umaruru/1cdbfc302dda20d8c5601f0ce8f0e03c
@@ -93,7 +105,14 @@ local speech_variations = {
 local function GetRandomGreetLine(sourcePed, targetPed)
 	local pool = {}
 	local line = ""
+	local bIsTargetArthur = IsMetaPedUsingDrawable(targetPed, 1347658592)
+	local bIsTargetDutch = IsMetaPedUsingDrawable(targetPed, -1915127302)
+	local bIsTargetSadie = IsMetaPedUsingDrawable(targetPed, 1394074183)
+	local bIsTargetAbigail = IsMetaPedUsingDrawable(targetPed, 608791149)
+	local bIsTargetHosea = IsMetaPedUsingDrawable(targetPed, 1912857542)
+	local bIsTargetJohn = IsMetaPedUsingDrawable(targetPed, -815603338)
 
+	--[[
 	if CanPlayAmbientSpeech(sourcePed, "GREET_GENERAL_FAMILIAR") then
 		table.insert(pool, "GREET_GENERAL_FAMILIAR")
 	end
@@ -121,6 +140,31 @@ local function GetRandomGreetLine(sourcePed, targetPed)
 
 	if CanPlayAmbientSpeech(sourcePed, "HOWS_IT_GOING") then
 		table.insert(pool, "HOWS_IT_GOING")
+	end
+	]]
+	
+	if CanPlayAmbientSpeech(sourcePed, "GREET_PLAYER_CASUAL") and bIsTargetArthur then
+		table.insert(pool, "GREET_PLAYER_CASUAL")
+	end
+
+	if CanPlayAmbientSpeech(sourcePed, "GREET_DUTCH") and bIsTargetDutch then
+		table.insert(pool, "GREET_DUTCH")
+	end
+
+	if CanPlayAmbientSpeech(sourcePed, "GREET_SADIE") and bIsTargetSadie then
+		table.insert(pool, "GREET_SADIE")
+	end
+
+	if CanPlayAmbientSpeech(sourcePed, "GREET_ABIGAIL") and bIsTargetAbigail then
+		table.insert(pool, "GREET_ABIGAIL")
+	end
+
+	if CanPlayAmbientSpeech(sourcePed, "GREET_HOSEA") and bIsTargetHosea then
+		table.insert(pool, "GREET_HOSEA")
+	end
+
+	if CanPlayAmbientSpeech(sourcePed, "GREET_JOHN") and bIsTargetJohn then
+		table.insert(pool, "GREET_JOHN")
 	end
 
 	if GetClockHours() > 4 and GetClockHours() < 12 then
@@ -169,7 +213,7 @@ end
 
 local function GetRandomAntagonizeLine(sourcePed, targetPed)
 	local pool = {}
-
+	
 	if CanPlayAmbientSpeech(sourcePed, "WHATS_YOUR_PROBLEM") then
 		table.insert(pool, "WHATS_YOUR_PROBLEM")
 	end
@@ -241,7 +285,7 @@ function GetRandomChatLine(ped, target)
 	end
 
 	if CanPlayAmbientSpeech(ped, "GOING_WELL") then
-		table.insert(pool, "GOING_BADLY")
+		table.insert(pool, "GOING_WELL")
 	end
 
 	if CanPlayAmbientSpeech(ped, "GOING_BADLY") then
@@ -379,6 +423,8 @@ Citizen.CreateThread(function()
 					lastLine = line
 					lastVar = var
 
+					--Possible lockup fix? - ray
+					--StopCurrentPlayingAmbientSpeech(playerPed, 0)
 					TriggerServerEvent('sv_speak', playerPed_net, targetPed_net, bAntagonize, GetGameTimer(), line, var)
 				end
 			end	
@@ -446,7 +492,8 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 	--https://raw.githubusercontent.com/femga/rdr3_discoveries/a63669efcfea34915c53dbd29724a2a7103f822f/audio/audio_banks/audio_banks.lua
 	--https://www.rdr2mods.com/wiki/speech/ambient-characters/0589_a_m_m_civ_white_13/
 
-	PlayAmbientSpeechFromEntity(sourcePed, "", line, "Speech_Params_Beat_Shouted_Clear_AllowPlayAfterDeath", var) -- 0 = random variation (different per client)
+	W.RefreshPlayerVoice()
+	PlayAmbientSpeechFromEntity(sourcePed, "", line, "speech_params_force", var)
 
 	-- Disable auto greet for a while
 
