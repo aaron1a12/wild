@@ -62,6 +62,7 @@ function BuyItem(itemStr, category)
             end
         else
             ShowText("You can't fit any more of this item.")
+            -- Solution: see cl_satchel.lua:1205
         end
     end
 end

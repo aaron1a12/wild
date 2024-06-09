@@ -153,8 +153,31 @@ function AddItemToInventory(item, quantity)
 
     -- Get the default placement for this item
     local inventoryGuid, slotId = GetItemInventoryInfo(item)
-    
+
     local itemGuid = DataView.ArrayBuffer(8 * 13)
+
+    -- See catalog_mp.ymt
+    local info = DataView.ArrayBuffer(8 * 7)
+    Citizen.InvokeNative(0xFE90ABBCBFDC13B2, item, info:Buffer())
+    local group = info:GetInt32(16) -- weapon, provision, consumable, etc
+    local category = info:GetInt32(8) -- Note that categories are actually a subset of "group"
+
+    --[[if category == `ci_category_weapon_thrown` then
+        GiveWeaponToPed(PlayerPedId(), 
+        item, 
+        quantity, 
+        false, --on horse
+        false, -- holster
+        0, 
+        false, 
+        0, 
+        0, 
+        `ADD_REASON_LOADOUT`, 
+        true, 
+        0.5, 
+        true)
+        return true
+    end]]
 
     -- _INVENTORY_ADD_ITEM_WITH_GUID
     local ret = Citizen.InvokeNative(0xCB5D11F9508A928D, 1, itemGuid:Buffer(), inventoryGuid, item, slotId, quantity, `ADD_REASON_DEFAULT`);
@@ -167,7 +190,7 @@ function AddItemToInventory(item, quantity)
     Citizen.InvokeNative(0x734311E2852760D0, 1, itemGuid, true)
 
     -- Weapons get added to your horse by default. Here, we equip it manually
-    if GetItemGroup(item) == `WEAPON` then
+    if group == `WEAPON` then
         -- Method A
         -- SET_CURRENT_PED_WEAPON_BY_GUID
         --Citizen.InvokeNative(0x12FB95FE3D579238, PlayerPedId(), itemGuid, 1, 0, 0 ,0)

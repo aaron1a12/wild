@@ -8,8 +8,8 @@ It does not use a database connection. Instead, it simply uses a local JSON file
 2. In your `server.cfg` file, disable the `spawnmanager` and `basic-gamemode` default resources. Add the following lines:
 ```
 ensure wild-core
+ensure wild-satchel
 start wild-interact
-start wild-satchel
 start wild-shops
 start wild-war
 start wild-guarma

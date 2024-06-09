@@ -787,7 +787,7 @@ function StartDigestion()
 
             if digestingLeft > maxDigestible then
                 digestingLeft = 0.0
-                Citizen.Wait(2000)
+                Wait(5000)
                 PukeNow()
             end
         end
@@ -797,6 +797,8 @@ end
 
 ClearPedTasks(PlayerPedId())
 local lastSoundTime = 0
+
+local itemBeingRemoved = 0
 
 function SatchelUseItem(item)
     local ped = PlayerPedId()
@@ -893,8 +895,9 @@ function SatchelUseItem(item)
         end)
     end
 
-    -- Since we're handling EVENT_INVENTORY_ITEM_REMOVED, set bNoNativeChange=1 so we don't lose the item twice
-    SatchelRemoveItem(item, 1, false, true)
+    -- Since we're handling EVENT_INVENTORY_ITEM_REMOVED, avoid losing the item twice
+    itemBeingRemoved = item
+    SatchelRemoveItem(item, 1)
 end
 
 function SatchelDropItem(item, quantity)
@@ -1033,9 +1036,12 @@ end)
 
 
 AddEventHandler("EVENT_INVENTORY_ITEM_REMOVED", function(data)
+    print("native item removed...")
     local inventoryItemHash = data[1]
 
-    SatchelRemoveItem(inventoryItemHash, 1)
+    if inventoryItemHash ~= itemBeingRemoved then
+        SatchelRemoveItem(inventoryItemHash, 1)
+    end
 end)
 
 
@@ -1058,8 +1064,8 @@ AddEventHandler("EVENT_ITEM_PROMPT_INFO_REQUEST", function(data)
         struct:SetInt32(8*4, 0)
         struct:SetInt32(8*5, 0)
         struct:SetInt32(8*6, 1 | 2 | 16) -- enable prompt, just 3 also works
-
         
+        -- Custom items
         if DecorExistOn(entity, "item") then
             inventoryItem = DecorGetInt(entity, "item")
             struct:SetInt32(8*1, inventoryItem)
@@ -1164,8 +1170,64 @@ end, false)
 
 --[[RegisterCommand('chocolate', function() 
 	SatchelAddItem(`consumable_chocolate_bar`, 5)
+end, false)]]
+RegisterCommand('sleep', function() 
+    TaskStartScenarioInPlaceHash(PlayerPedId(), `WORLD_PLAYER_SLEEP_GROUND`, -1, 1, ``, -1.0, 0)
 end, false)
 
-RegisterCommand('gunoil', function() 
-	SatchelAddItem(`kit_gun_oil`, 5)
-end, false)]]
+
+RegisterCommand('cleartasks', function() 
+    ClearPedTasks(PlayerPedId())
+end, false)
+
+--
+-- Ammo updates
+-- Normally, bullets get removed from clip but not from native inventory. Here, we fix that.
+--
+
+local ammoUpdateTime = 0
+local ammoUpdateWeapon = 0
+
+local ammoUpdateQueue = {}
+
+CreateThread(function()
+    while true do
+        local ped = PlayerPedId()
+        if TimeSincePedLastShot(ped) < 0.025 then ------- Shot fired
+            local weaponObj = GetCurrentPedWeaponEntityIndex(ped, 0)
+
+            if DoesEntityExist(weaponObj) then
+                local _, primaryWeaponHash = GetCurrentPedWeapon(ped, true, 0, false)
+                local ammoType = GetCurrentPedWeaponAmmoType(ped, weaponObj)
+                local ammoCount = GetPedAmmoByType(ped, ammoType)
+
+                ammoUpdateQueue[ammoType] = ammoCount
+            else
+                -- Unmanaged thrown weapons.
+                -- IsWeaponThrowable() == 1 then
+                -- TODO: find associated ammo type for thrown weapon and update.
+                -- Alternative solution: continuously monitor all ammo counts 
+            end
+        end
+        Wait(0)
+    end
+end)
+
+CreateThread(function()
+    while true do
+        for ammo, count in pairs(ammoUpdateQueue) do
+            local countNow = SatchelGetItemCount(ammo)
+            local nRemove = countNow-count
+
+            if nRemove <= countNow and nRemove > 0 then
+                -- Weird hacky way to sync ammo with inventory
+                SatchelRemoveItem(ammo, nRemove)--, true, true)
+                SatchelAddItem(ammo, nRemove)--, true, true)
+            end
+
+            ammoUpdateQueue[ammo] = nil
+        end
+
+        Wait(3210)
+    end
+end)
