@@ -94,7 +94,7 @@ function SatchelGetItemMaxCount(item)
 end
 W.RegisterExport("Satchel", "GetItemMaxCount", SatchelGetItemMaxCount)
 
-function SatchelAddItem(item, quantity, bNoUpdate)
+function SatchelAddItem(item, quantity, bNoUpdate, bSuppressUi)
     local customItem = nil
 
     if ItemdatabaseIsKeyValid(item, 0) == 0 then
@@ -136,7 +136,9 @@ function SatchelAddItem(item, quantity, bNoUpdate)
         -- Do the same on the server
         TriggerServerEvent("wild:satchel:cl_add", key, quantity)
         
-        ShowInventoryToast(item, quantity, true)
+        if not (bSuppressUi==true) then
+            ShowInventoryToast(item, quantity, true)
+        end
     end
 
     if not customItem then
@@ -148,7 +150,7 @@ function SatchelAddItem(item, quantity, bNoUpdate)
 end
 W.RegisterExport("Satchel", "AddItem", SatchelAddItem)
 
-function SatchelRemoveItem(item, quantity, bSuppressUi, bNoNativeChange)
+function SatchelRemoveItem(item, quantity, bSuppressUi, bNoNativeChange, bNoServerUpdate)
     if ItemdatabaseIsKeyValid(item, 0) == 0 and not IsItemCustom(item) then
 		return false
     end
@@ -239,8 +241,10 @@ function SatchelRemoveItem(item, quantity, bSuppressUi, bNoNativeChange)
 
     updateSatchelUi(newQuantity)
 
-    -- Do the same on the server
-    TriggerServerEvent("wild:satchel:cl_updateItem", key, {PlayerInventory[key][1], PlayerInventory[key][2]})
+    if not bNoServerUpdate then
+        -- Do the same on the server
+        TriggerServerEvent("wild:satchel:cl_updateItem", key, {PlayerInventory[key][1], PlayerInventory[key][2]})
+    end
 
     if newQuantity < 1 then
         PlayerInventory[key] = nil
@@ -1034,7 +1038,7 @@ AddEventHandler("EVENT_INVENTORY_ITEM_PICKED_UP", function(data)
     SatchelAddItem(inventoryItemHash, 1)
 end)
 
-
+-- Removal of items ()
 AddEventHandler("EVENT_INVENTORY_ITEM_REMOVED", function(data)
     print("native item removed...")
     local inventoryItemHash = data[1]
@@ -1185,31 +1189,32 @@ end, false)
 -- Normally, bullets get removed from clip but not from native inventory. Here, we fix that.
 --
 
-local ammoUpdateTime = 0
-local ammoUpdateWeapon = 0
-
+local ammoCounts = {}
 local ammoUpdateQueue = {}
+local bInitialLoad = true
+
+for i, ammoHash in ipairs(ammoTypes) do
+    ammoCounts[ammoHash] = 0
+end
 
 CreateThread(function()
     while true do
         local ped = PlayerPedId()
-        if TimeSincePedLastShot(ped) < 0.025 then ------- Shot fired
-            local weaponObj = GetCurrentPedWeaponEntityIndex(ped, 0)
 
-            if DoesEntityExist(weaponObj) then
-                local _, primaryWeaponHash = GetCurrentPedWeapon(ped, true, 0, false)
-                local ammoType = GetCurrentPedWeaponAmmoType(ped, weaponObj)
-                local ammoCount = GetPedAmmoByType(ped, ammoType)
+        for ammoHash, cachedCount in pairs(ammoCounts) do
+            local newCount = GetPedAmmoByType(ped, ammoHash)
 
-                ammoUpdateQueue[ammoType] = ammoCount
-            else
-                -- Unmanaged thrown weapons.
-                -- IsWeaponThrowable() == 1 then
-                -- TODO: find associated ammo type for thrown weapon and update.
-                -- Alternative solution: continuously monitor all ammo counts 
+            if cachedCount ~= newCount then
+                if not bInitialLoad and TimeSincePedLastShot(ped) < 2.0 then
+                    ammoUpdateQueue[ammoHash] = newCount
+                end
+                ammoCounts[ammoHash] = newCount
             end
         end
-        Wait(0)
+
+        bInitialLoad = false
+
+        Wait(1200)
     end
 end)
 
@@ -1221,8 +1226,8 @@ CreateThread(function()
 
             if nRemove <= countNow and nRemove > 0 then
                 -- Weird hacky way to sync ammo with inventory
-                SatchelRemoveItem(ammo, nRemove)--, true, true)
-                SatchelAddItem(ammo, nRemove)--, true, true)
+                SatchelRemoveItem(ammo, nRemove, true)
+                SatchelAddItem(ammo, nRemove, false, true)
             end
 
             ammoUpdateQueue[ammo] = nil
@@ -1230,4 +1235,21 @@ CreateThread(function()
 
         Wait(3210)
     end
+end)
+
+-- Picking up ammo pickups
+AddEventHandler("EVENT_PLAYER_COLLECTED_AMBIENT_PICKUP", function(data)
+    local pickupHash = data[1]
+    local unk1 = data[2] --(??? pickup entity id)
+    local playerId = data[3]
+    local pickupModelHash = data[4]
+    local unk4 = data[5]
+    local unk5 = data[6]
+    local inventoryItemQuantity = data[7]
+    local inventoryItemHash = data[8]
+
+    -- Weird hacky way to sync ammo with inventory
+    -- The item will get added to our inventory anyway.
+    SatchelAddItem(inventoryItemHash, inventoryItemQuantity, true)
+    SatchelRemoveItem(inventoryItemHash, inventoryItemQuantity, true)
 end)

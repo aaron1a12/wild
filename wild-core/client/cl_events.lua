@@ -94,7 +94,12 @@ W.EventDataInfo = {
         name = "EVENT_PLAYER_PROMPT_TRIGGERED",
         size = 10,
         members = {"Int32", "Int32", "Int32", "Int32", "Float32", "Float32", "Float32", "Int32", "Int32", "Int32"} -- prompt type id | unknown | target entity id | unknown (??? discovered inventory item) | player coord x | player coord y | player  coord z | discoverable entity type id ( list ) | unknown | kit_emote_action hash ( list )
-    }
+    },
+    [`EVENT_PLAYER_COLLECTED_AMBIENT_PICKUP`] = {
+        name = "EVENT_PLAYER_COLLECTED_AMBIENT_PICKUP",
+        size = 8,
+        members = {"Int32", "Int32", "Int32", "Int32","Int32", "Int32", "Int32", "Int32"} -- pickup name hash | unknown (??? pickup entity id) | player id | pickup model hash | unknown | unknown | collected inventory item quantity | inventory item hash
+    },
 }
 
 Citizen.CreateThread(function()
