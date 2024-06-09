@@ -11,6 +11,11 @@ server_script {
 	'server/sv_speak.lua',
 }
 
+files
+{
+	"line_variations.json",
+}
+
 dependencies {
     'wild-core'
 }

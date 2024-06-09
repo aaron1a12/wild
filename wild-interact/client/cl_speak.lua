@@ -6,6 +6,7 @@
 -- ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 W = exports["wild-core"]:Get()
+lineVariations = json.decode(LoadResourceFile(GetCurrentResourceName(), "line_variations.json"))
 
 --------------------
 -- Begin prompt code
@@ -265,6 +266,9 @@ local focusedPed = 0
 local bDisableEmoteWheel = true
 local promptDisableTime = 0
 
+local lastLine = ""
+local lastVar = 0
+
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
@@ -346,7 +350,36 @@ Citizen.CreateThread(function()
 						line = GetRandomAntagonizeLine(playerPed, entity)
 					end
 
-					TriggerServerEvent('sv_speak', playerPed_net, targetPed_net, bAntagonize, GetGameTimer(), line)
+					--
+					-- Line syncing
+					--
+
+					--line = "INSULT_RESPONSE_ANNOYED"
+					local var = 0
+					local voiceGroup = lineVariations[W.GetPlayerVoice()]
+    
+					if voiceGroup then
+						if voiceGroup[line] then
+							local nVars = voiceGroup[line]
+							var = GetRandomIntInRange(1, nVars+1)
+
+							-- repeat the random code a bit to avoid random line repeating
+							if (line == lastLine and var == lastVar) then
+								var = GetRandomIntInRange(1, nVars+1)
+							end
+							if (line == lastLine and var == lastVar) then
+								var = GetRandomIntInRange(1, nVars+1)
+							end
+							if (line == lastLine and var == lastVar) then
+								var = GetRandomIntInRange(1, nVars+1)
+							end
+						end
+					end
+
+					lastLine = line
+					lastVar = var
+
+					TriggerServerEvent('sv_speak', playerPed_net, targetPed_net, bAntagonize, GetGameTimer(), line, var)
 				end
 			end	
 
@@ -391,7 +424,7 @@ end)
 --
 
 RegisterNetEvent("cl_speak")
-AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, seed, line)
+AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, seed, line, var)
 	-- Theoretically, any random number generated right after should be the same on all clients
 	math.randomseed(seed)
 
@@ -413,7 +446,7 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 	--https://raw.githubusercontent.com/femga/rdr3_discoveries/a63669efcfea34915c53dbd29724a2a7103f822f/audio/audio_banks/audio_banks.lua
 	--https://www.rdr2mods.com/wiki/speech/ambient-characters/0589_a_m_m_civ_white_13/
 
-	PlayAmbientSpeechFromEntity(sourcePed, "", line, "Speech_Params_Beat_Shouted_Clear_AllowPlayAfterDeath", 0) -- 0 = random variation (different per client)
+	PlayAmbientSpeechFromEntity(sourcePed, "", line, "Speech_Params_Beat_Shouted_Clear_AllowPlayAfterDeath", var) -- 0 = random variation (different per client)
 
 	-- Disable auto greet for a while
 
@@ -580,7 +613,11 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 				end)
 			end
 		end
-		
 	end
-
 end)
+
+
+
+RegisterCommand('test', function() 
+
+end, false)
