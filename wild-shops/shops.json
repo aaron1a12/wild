@@ -29,7 +29,6 @@
         {"item":"weapon_repeater_carbine", "price": 10.0},
         {"item":"weapon_repeater_evans", "price": 12.0},
         {"item":"weapon_repeater_henry", "price": 15.0},
-        {"item":"weapon_repeater_lancaster", "price": 12.0},
         {"item":"weapon_sniperrifle_carcano", "price": 25.0},
         {"item":"weapon_sniperrifle_rollingblock", "price": 10.0},
         {"item":"weapon_shotgun_doublebarrel", "price": 12.0},
@@ -45,6 +44,7 @@
         {"item":"ammo_revolver_express", "price": 1.00},
         {"item":"AMMO_RIFLE", "price": 0.50},
         {"item":"AMMO_RIFLE_EXPRESS", "price": 1.00},
+        {"item":"AMMO_22", "price": 0.25},
         {"item":"AMMO_REPEATER", "price": 0.50},
         {"item":"AMMO_SHOTGUN", "price": 1.00}
     ],
