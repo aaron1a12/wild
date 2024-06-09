@@ -12,29 +12,61 @@
 
     "guns" : [
         {"item":"weapon_melee_knife", "price": 2.0},
+        {"item":"weapon_melee_machete", "price": 3.0},
+        {"item":"weapon_thrown_tomahawk", "price": 1.0},
         {"item":"weapon_revolver_cattleman", "price": 10.0},
-        {"item":"weapon_revolver_schofield", "price": 10.0},
-        {"item":"weapon_lasso_reinforced", "price": 10.0},
-        {"item":"weapon_rifle_boltaction", "price": 10.0}
+        {"item":"weapon_revolver_doubleaction", "price": 15.0},
+        {"item":"weapon_revolver_schofield", "price": 15.0},
+        {"item":"weapon_revolver_lemat", "price": 18.0},
+        {"item":"weapon_revolver_navy", "price": 20.0},
+        {"item":"weapon_pistol_semiauto", "price": 15.0},
+        {"item":"weapon_lasso_reinforced", "price": 12.0},
+        {"item":"weapon_lasso", "price": 5.0},
+        {"item":"weapon_melee_davy_lantern", "price": 2.0},
+        {"item":"weapon_rifle_boltaction", "price": 15.0},
+        {"item":"weapon_rifle_varmint", "price": 15.0},
+        {"item":"weapon_rifle_springfield", "price": 10.0},
+        {"item":"weapon_repeater_carbine", "price": 10.0},
+        {"item":"weapon_repeater_evans", "price": 12.0},
+        {"item":"weapon_repeater_henry", "price": 15.0},
+        {"item":"weapon_repeater_lancaster", "price": 12.0},
+        {"item":"weapon_sniperrifle_carcano", "price": 25.0},
+        {"item":"weapon_sniperrifle_rollingblock", "price": 10.0},
+        {"item":"weapon_shotgun_doublebarrel", "price": 12.0},
+        {"item":"weapon_shotgun_pump", "price": 20.0},
+        {"item":"weapon_shotgun_semiauto", "price": 25.0},
+        {"item":"weapon_thrown_dynamite", "price": 4.0},
+        {"item":"weapon_thrown_molotov", "price": 4.0},
+        {"item":"weapon_thrown_poisonbottle", "price": 0.25}
     ],
 
     "ammo" : [
         {"item":"AMMO_REVOLVER", "price": 0.50},
         {"item":"ammo_revolver_express", "price": 1.00},
         {"item":"AMMO_RIFLE", "price": 0.50},
-        {"item":"AMMO_RIFLE_EXPRESS", "price": 1.00}
+        {"item":"AMMO_RIFLE_EXPRESS", "price": 1.00},
+        {"item":"AMMO_REPEATER", "price": 0.50},
+        {"item":"AMMO_SHOTGUN", "price": 1.00}
     ],
 
     "provisions" : [
+        {"item":"kit_gun_oil", "price": 0.75},
         {"item":"consumable_apple", "price": 0.03},
         {"item":"CONSUMABLE_BREAD_ROLL", "price": 0.25},
         {"item":"consumable_chocolate_bar", "price": 0.30},
         {"item":"consumable_peach", "price": 0.05},
-        {"item":"kit_gun_oil", "price": 0.75},
+        {"item":"consumable_peaches_can", "price": 0.10},
+        {"item":"consumable_pineapples_can", "price": 0.5},
+        {"item":"consumable_rum", "price": 4.0},
+        {"item":"weapon_kit_binoculars", "price": 1.0},
+        {"item":"weapon_moonshinejug_mp", "price": 0.50},
         {"item":"consumable_horse_reviver", "price": 1.0},
+        {"item":"consumable_horse_medicine", "price": 1.0},
         {"item":"consumable_potent_medicine", "price": 1.0},
+        {"item":"consumable_cocaine_chewing_gum", "price": 1.0},
         {"item":"consumable_cigarette_box", "price": 0.75},
-        {"item":"consumable_hair_grease", "price": 1.0}
+        {"item":"consumable_hair_grease", "price": 1.0},
+        {"item":"consumable_predator_bait", "price": 1.0}
     ],
 
     "clothingCharacters": [
