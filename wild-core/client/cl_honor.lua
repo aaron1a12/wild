@@ -69,7 +69,7 @@ local lostHonorTime = 0
 
 function W.AddPlayerHonor(fAmount)
 	if fAmount < 0.0 then
-		if GetGameTimer()-lostHonorTime < 10000 then
+		if GetGameTimer()-lostHonorTime < 4000 then
 			return
 		end
 		lostHonorTime = GetGameTimer()
