@@ -1040,15 +1040,12 @@ end)
 
 -- Removal of items ()
 AddEventHandler("EVENT_INVENTORY_ITEM_REMOVED", function(data)
-    print("native item removed...")
     local inventoryItemHash = data[1]
 
     if inventoryItemHash ~= itemBeingRemoved then
         SatchelRemoveItem(inventoryItemHash, 1)
     end
 end)
-
-
 
 -- Fired when the game wants information for a prompt. Use to set item names!
 AddEventHandler("EVENT_ITEM_PROMPT_INFO_REQUEST", function(data)
@@ -1128,57 +1125,13 @@ AddEventHandler("EVENT_LOOT_COMPLETE", function(data)
 	end
 end)
 
---[[
-
-RegisterCommand('iguana', function() 
-	local x, y, z = table.unpack(GetEntityCoords(GetPlayerPed(PlayerId()), false))
-
-    local model = `A_C_Possum_01`
-
-    RequestModel(model)
-
-    while not HasModelLoaded(model) do
-        RequestModel(model)
-        Citizen.Wait(0)
-    end
-
-    local ped = CreatePed(model, x, y+1.0, z, 45.0, true, true, true)
-    SetEntityInvincible(ped, true)
-    SetPedKeepTask(ped)
-    SetPedAsNoLongerNeeded(ped)
-    SetRandomOutfitVariation(ped)
-
-    SetEntityHealth(ped, 0)
-end, false)
-]]
-RegisterCommand('deer', function() 
-	local x, y, z = table.unpack(GetEntityCoords(GetPlayerPed(PlayerId()), false))
-
-    local model = `A_C_deer_01`
-
-    RequestModel(model)
-
-    while not HasModelLoaded(model) do
-        RequestModel(model)
-        Citizen.Wait(0)
-    end
-
-    local ped = CreatePed(model, x, y+1.0, z, 45.0, true, true, true)
-    SetEntityInvincible(ped, true)
-    SetPedKeepTask(ped)
-    SetPedAsNoLongerNeeded(ped)
-    SetRandomOutfitVariation(ped)
-
-    SetEntityHealth(ped, 0)
-end, false)
-
 --[[RegisterCommand('chocolate', function() 
 	SatchelAddItem(`consumable_chocolate_bar`, 5)
 end, false)]]
+
 RegisterCommand('sleep', function() 
     TaskStartScenarioInPlaceHash(PlayerPedId(), `WORLD_PLAYER_SLEEP_GROUND`, -1, 1, ``, -1.0, 0)
 end, false)
-
 
 RegisterCommand('cleartasks', function() 
     ClearPedTasks(PlayerPedId())
