@@ -210,8 +210,8 @@ function PlayAmbientSpeechFromEntity(entity_id, sound_ref_string, sound_name_str
 	struct:SetInt64(24, speech_params_BigInt:GetInt64(0)) -- speechParamHash
 	struct:SetInt32(32, 0) -- listenerPed
 	struct:SetInt32(40, 1) -- syncOverNetwork
-	struct:SetInt32(48, 0) -- v7
-	struct:SetInt32(56, 0) -- v8
+	struct:SetInt32(48, 1) -- v7
+	struct:SetInt32(56, 1) -- v8
 	
 	return Citizen.InvokeNative(0x8E04FEDD28D42462, entity_id, struct:Buffer());
 end

@@ -81,10 +81,7 @@ function W.SetPedOutfit(ped, outfit)
     end
     
     -- Voice
-    if outfit.voice ~= nil then
-        SetAmbientVoiceName(ped, outfit.voice)
-        N_0xd47d47efbf103fb8(ped, 3)
-    end
+    W.RefreshPlayerVoice()
 
     SetPedBlackboardBool(ped, "MP_Style_Casual", false, -1)
     SetPedBlackboardBool(ped, "MP_Style_Crazy", false, -1)
@@ -155,6 +152,16 @@ function W.GetPlayerVoice()
     return outfit.voice
 end
 
+function W.RefreshPlayerVoice()
+    RefreshPlayerData()
+    local outfit = W.PlayerOutfitData["outfits"][W.PlayerData["currentOutfit"]]
+
+    if outfit.voice ~= nil then
+        local pPed = PlayerPedId()
+        SetAmbientVoiceName(pPed, outfit.voice)
+        --N_0xd47d47efbf103fb8(pPed, 3)
+    end
+end
 
 --
 -- Outfit Switch Menu
