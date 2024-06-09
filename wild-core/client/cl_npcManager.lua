@@ -179,7 +179,7 @@ local function OnPedCreated(ped)
         -- previous ped, fix double butcher in mp session?
         if DoesEntityExist(W.NpcManager.ClientPool[name].Ped) then
             if NetworkHasControlOfEntity(W.NpcManager.ClientPool[name].Ped) then
-                DeletePed(W.NpcManager.ClientPool[name].Ped)
+                --DeletePed(W.NpcManager.ClientPool[name].Ped)
             end
             
             W.NpcManager.ClientPool[name].Params:onDeactivate()

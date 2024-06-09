@@ -91,3 +91,7 @@ end, false)
 RegisterNetEvent('wild:satchel:cl_setItemPickable', function(objNetId)
     TriggerClientEvent('wild:satchel:cl_setItemPickable', -1, objNetId)
 end)
+
+RegisterNetEvent('wild:sv_triggerPuking', function(pedId)
+    TriggerClientEvent('wild:cl_triggerPuking', -1, pedId)
+end)

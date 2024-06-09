@@ -271,41 +271,45 @@ function IsItemCustom(item)
     return (customItemCatalog[item])
 end
 
-
 function PukeNow()
+    TriggerServerEvent("wild:sv_triggerPuking", PedToNet(PlayerPedId()))
+end
+
+RegisterNetEvent("wild:cl_triggerPuking", function(pedIdNet)
+    local ped = NetToPed(pedIdNet)
+
     local animScene = CreateAnimScene("script@MPSTORY@MP_PoisonHerb@IG@IG1_CommonBullrush@IG1_CommonBullrush", 0, "Herb_PL", false, true)
     LoadAnimScene(animScene)
 
+    while IsAnimSceneLoaded(animScene, true, false) == 0 and IsAnimSceneMetadataLoaded(animScene, false) == 0 do
+        Citizen.Wait(0)
+    end
+    
+    if IsPedMale(ped) then
+        SetAnimSceneEntity(animScene, "MP_Male", ped, 0)
+    else
+        SetAnimSceneEntity(animScene, "MP_Female", ped, 0)
+    end
+    
+    StartAnimScene(animScene)
+    
     Citizen.CreateThread(function()
-        while IsAnimSceneLoaded(animScene, true, false) == 0 and IsAnimSceneMetadataLoaded(animScene, false) == 0 do
+        while IsAnimSceneRunning(animScene) == 1 do
             Citizen.Wait(0)
         end
-        
-        if IsPedMale(PlayerPedId()) then
-            SetAnimSceneEntity(animScene, "MP_Male", PlayerPedId(), 0)
+    
+        if IsPedMale(ped) then
+            RemoveAnimSceneEntity(animScene, "MP_Male", ped)
         else
-            SetAnimSceneEntity(animScene, "MP_Female", PlayerPedId(), 0)
+            RemoveAnimSceneEntity(animScene, "MP_Female", ped)
         end
-        
-        StartAnimScene(animScene)
-        
-        Citizen.CreateThread(function()
-            while IsAnimSceneRunning(animScene) == 1 do
-                Citizen.Wait(0)
-            end
-        
-            if IsPedMale(PlayerPedId()) then
-                RemoveAnimSceneEntity(animScene, "MP_Male", PlayerPedId())
-            else
-                RemoveAnimSceneEntity(animScene, "MP_Female", PlayerPedId())
-            end
-        end)
     end)
 
-    Citizen.Wait(2000)
-
-    AddShockingEventForEntity(`EVENT_SHOCKING_BEAT_SURPRISING`, PlayerPedId(), 5.0, -1.0, -1.0, -1.0, -1.0, 180.0, false, false, -1, -1)
-end
+    if ped == PlayerPedId() then
+        Citizen.Wait(2000)
+        AddShockingEventForEntity(`EVENT_SHOCKING_BEAT_SURPRISING`, PlayerPedId(), 5.0, -1.0, -1.0, -1.0, -1.0, 180.0, false, false, -1, -1)
+    end
+end)
 
 
 function ItemdatabaseGetTagOfType(item, tagType)

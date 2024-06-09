@@ -149,6 +149,12 @@ function W.SwitchPlayerOutfitAtIndex(index)
     TriggerEvent('wild:cl_onNewPlayerPed')
 end
 
+function W.GetPlayerVoice()
+    RefreshPlayerData()
+    local outfit = W.PlayerOutfitData["outfits"][W.PlayerData["currentOutfit"]]
+    return outfit.voice
+end
+
 
 --
 -- Outfit Switch Menu

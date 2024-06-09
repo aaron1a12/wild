@@ -76,7 +76,8 @@ function CreatePlayerHorse()
     mount = CreatePed(model, x, y+1.0, z, 45.0, true, true, true)
     SetEntityInvincible(mount, true)
     SetPedKeepTask(mount)
-    SetPedAsNoLongerNeeded(mount)
+    --SetPedAsNoLongerNeeded(mount)
+    SetEntityAsMissionEntity(mount, true, true)
 
     SetRandomOutfitVariation(mount)
     SetPedRandomComponentVariation(mount, 1)
@@ -287,6 +288,7 @@ function OnWhistle()
         Citizen.Wait(1000)
         BlipRemoveModifier(mountBlip, `BLIP_MODIFIER_PLAYER_HORSE_IN_RANGE_WHISTLE`)
 
+        SetEntityAsMissionEntity(mount, true, true)
     end
 end
 
@@ -377,6 +379,7 @@ function OnFlee()
     Citizen.Wait(1000)
     ClearPedTasks(mount, true, true)
     TaskFleePed(mount, PlayerPedId(), 4, 524292, -1082130432, -1, 0)
+    SetPedAsNoLongerNeeded(mount)
 end
 
 
