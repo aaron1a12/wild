@@ -22,7 +22,13 @@ end
 
 function W.GetPlayerCurrentOutfit()
     RefreshPlayerData()
-    return W.PlayerOutfitData["outfits"][W.PlayerData["currentOutfit"]]
+    local outfit = W.PlayerOutfitData["outfits"][W.PlayerData["currentOutfit"]]
+
+    if outfit then
+        return outfit
+    else
+        return W.PlayerOutfitData["outfits"][1]
+    end
 end
 
 function W.GetPlayerCurrentOutfitIndex()
@@ -57,6 +63,8 @@ end
 
 function W.DeletePlayerOutfit(index)
     W.PlayerOutfitData["outfits"][index] = nil
+    table.remove(W.PlayerOutfitData["outfits"], index)
+
     TriggerServerEvent("wild:sv_deletePlayerOutfit", GetPlayerName(PlayerId()), index)
 end
 
@@ -149,17 +157,26 @@ end
 function W.GetPlayerVoice()
     RefreshPlayerData()
     local outfit = W.PlayerOutfitData["outfits"][W.PlayerData["currentOutfit"]]
-    return outfit.voice
+
+    if outfit then
+        return outfit.voice
+    else
+        return 0
+    end
 end
 
 function W.RefreshPlayerVoice()
     RefreshPlayerData()
     local outfit = W.PlayerOutfitData["outfits"][W.PlayerData["currentOutfit"]]
 
-    if outfit.voice ~= nil then
-        local pPed = PlayerPedId()
-        SetAmbientVoiceName(pPed, outfit.voice)
-        --N_0xd47d47efbf103fb8(pPed, 3)
+    if outfit then
+        if outfit.voice ~= nil then
+            local pPed = PlayerPedId()
+            SetAmbientVoiceName(pPed, outfit.voice)
+            --N_0xd47d47efbf103fb8(pPed, 3)
+        end
+    else
+        return 0
     end
 end
 

@@ -151,8 +151,10 @@ end
 
 function DeleteOpenOutfit()
     W.DeletePlayerOutfit(editingOutfit)
-    --bSkipSavingNow
     RepopulateOutfitList()
+
+    -- Stops from re-saving the selected outfit
+    editingOutfit = 0
     W.UI.GoBack()
 end
 
@@ -399,7 +401,6 @@ function RepopulateOutfitList()
     for i=1, W.GetPlayerOutfitCount() do
 
         local outfit = W.GetPlayerOutfitAtIndex(i)
-
         local btnEditOutfit = {}
 
         if outfit.name then
@@ -849,7 +850,7 @@ AddEventHandler("wild:cl_onSelectPageItem", function(menu, page, item)
         end
 
         if string.sub(item, 1, 6) == "outfit" and dressingCam ~= 0 then
-            lastSelectedOutfit = tonumber(string.sub(item, 7, 7))
+            lastSelectedOutfit = tonumber(string.sub(item, 7, 999))
 
             if editingOutfit ~= lastSelectedOutfit then
                 OpenOutfitForEditing(lastSelectedOutfit)
