@@ -165,10 +165,13 @@ function SpawnPlayer()
     local playerPed = PlayerPedId()
 
     -- Ped preset
+    W.SetPedOutfit(playerPed, playerOutfit)
+    --[[
     if not bPlayerAlreadySpawnedOnce then
         ---EquipMetaPedOutfitPreset(PlayerPedId(), 3, 0)
         W.SetPedOutfit(playerPed, playerOutfit)
     end
+    --]]
 
     --SetEntityCoordsNoOffset(ped, spawnCoords.x, spawnCoords.y, spawnCoords.z, false, false, false, true)
     SetEntityCoordsAndHeadingNoOffset(playerPed, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnHeading, 1, 1)

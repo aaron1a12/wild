@@ -374,7 +374,7 @@ Citizen.CreateThread(function()
             -- Squared dist for optimization
             local distSqr = GetVectorDistSqr(playerCoords, currentLocationCoords)
 
-            if distSqr*0.1 < 1.0 then
+            if distSqr*0.1 < 2.0 then
                 bInValidAreas = true
                 currentLocation = butcherLocations[i]
                 break
