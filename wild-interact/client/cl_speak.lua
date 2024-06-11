@@ -112,7 +112,7 @@ local function GetRandomGreetLine(sourcePed, targetPed)
 	local bIsTargetHosea = IsMetaPedUsingDrawable(targetPed, 1912857542)
 	local bIsTargetJohn = IsMetaPedUsingDrawable(targetPed, -815603338)
 
-	--[[
+	
 	if CanPlayAmbientSpeech(sourcePed, "GREET_GENERAL_FAMILIAR") then
 		table.insert(pool, "GREET_GENERAL_FAMILIAR")
 	end
@@ -141,7 +141,6 @@ local function GetRandomGreetLine(sourcePed, targetPed)
 	if CanPlayAmbientSpeech(sourcePed, "HOWS_IT_GOING") then
 		table.insert(pool, "HOWS_IT_GOING")
 	end
-	]]
 	
 	if CanPlayAmbientSpeech(sourcePed, "GREET_PLAYER_CASUAL") and bIsTargetArthur then
 		table.insert(pool, "GREET_PLAYER_CASUAL")
@@ -284,12 +283,12 @@ function GetRandomChatLine(ped, target)
 		table.insert(pool, "CHAT_STORY_WNT4")
 	end
 
-	if CanPlayAmbientSpeech(ped, "GOING_WELL") then
-		table.insert(pool, "GOING_WELL")
-	end
-
 	if CanPlayAmbientSpeech(ped, "GOING_BADLY") then
 		table.insert(pool, "GOING_BADLY")
+	end
+
+	if CanPlayAmbientSpeech(ped, "GOING_WELL") then
+		table.insert(pool, "GOING_WELL")
 	end
 
 	if CanPlayAmbientSpeech(ped, "COMMENT_WORKING_HARD") then
@@ -302,7 +301,6 @@ function GetRandomChatLine(ped, target)
 		return "NONE"
 	end
 end
-
 
 local bIsFocusingOnPed = false
 local focusedPed = 0
@@ -371,6 +369,7 @@ Citizen.CreateThread(function()
 
 				-- R to greet, F to antagonize
 				if IsControlJustPressed(0, 'INPUT_INTERACT_LOCKON_POS') or IsControlJustPressed(0, 'INPUT_INTERACT_LOCKON_NEG') then
+					math.randomseed(GetGameTimer()/7)
 					local bAntagonize = IsControlJustPressed(0, 'INPUT_INTERACT_LOCKON_NEG')
 		
 					local playerModel = GetEntityModel(playerPed)
