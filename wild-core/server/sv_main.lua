@@ -266,6 +266,7 @@ end)
 
 RegisterNetEvent('wild:sv_deletePlayerOutfit', function(strPlayerName, outfitIndex)
     PlayerOutfits[strPlayerName]["outfits"][outfitIndex] = nil
+    table.remove(PlayerOutfits[strPlayerName]["outfits"], outfitIndex)
     --SaveData()
     SaveResourceFile(GetCurrentResourceName(), "player_outfits.json", json.encode(PlayerOutfits), -1)
 end)
