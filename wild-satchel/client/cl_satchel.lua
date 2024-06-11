@@ -1177,7 +1177,9 @@ CreateThread(function()
             local countNow = SatchelGetItemCount(ammo)
             local nRemove = countNow-count
 
-            if nRemove <= countNow and nRemove > 0 then
+            if count <= 0 then
+                SatchelRemoveItem(ammo, countNow, true)
+            elseif nRemove <= countNow and nRemove > 0 then
                 -- Weird hacky way to sync ammo with inventory
                 SatchelRemoveItem(ammo, nRemove, true)
                 SatchelAddItem(ammo, nRemove, false, true)
