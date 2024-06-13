@@ -20,6 +20,9 @@ function IsMetaPedUsingDrawable(ped, hash)
     return false
 end
 
+--local function IsTargetCampMember
+	
+
 --------------------
 -- Begin prompt code
 -- See https://gist.github.com/umaruru/1cdbfc302dda20d8c5601f0ce8f0e03c
@@ -111,68 +114,95 @@ local function GetRandomGreetLine(sourcePed, targetPed)
 	local bIsTargetAbigail = IsMetaPedUsingDrawable(targetPed, 608791149)
 	local bIsTargetHosea = IsMetaPedUsingDrawable(targetPed, 1912857542)
 	local bIsTargetJohn = IsMetaPedUsingDrawable(targetPed, -815603338)
-
-	
-	if CanPlayAmbientSpeech(sourcePed, "GREET_GENERAL_FAMILIAR") then
-		table.insert(pool, "GREET_GENERAL_FAMILIAR")
-	end
+	local bIsCampMember = (bIsTargetArthur or bIsTargetDutch or bIsTargetSadie or bIsTargetAbigail or bIsTargetHosea or bIsTargetJohn)
 
 	-- For Arthur peds
-	if not CanPlayAmbientSpeech(sourcePed, "GREET_GENERAL_FAMILIAR") then
-		if IsPedMale(targetPed) then
+
+	if (bIsCampMember and CanPlayAmbientSpeech(sourcePed, "GREET_SADIE")) or (bIsCampMember and CanPlayAmbientSpeech(sourcePed, "GREET_ABIGAIL")) then
+		if CanPlayAmbientSpeech(sourcePed, "GREET_PLAYER_CASUAL") and bIsTargetArthur then
+			table.insert(pool, "GREET_PLAYER_CASUAL")
+		end
+		if bIsTargetDutch then
+			if CanPlayAmbientSpeech(sourcePed, "GREET_DUTCH") then
+				table.insert(pool, "GREET_DUTCH")
+			end
+			if CanPlayAmbientSpeech(sourcePed, "GREET_DUTCH_UPBEAT") then
+				table.insert(pool, "GREET_DUTCH_UPBEAT")
+			end
+		end
+		if bIsTargetSadie then
+			if CanPlayAmbientSpeech(sourcePed, "GREET_SADIE") then
+				table.insert(pool, "GREET_SADIE")
+			end
+			if CanPlayAmbientSpeech(sourcePed, "GREET_SADIE_UPBEAT") then
+				table.insert(pool, "GREET_SADIE_UPBEAT")
+			end
+		end
+		if bIsTargetAbigail then
+			if CanPlayAmbientSpeech(sourcePed, "GREET_ABIGAIL") then
+				table.insert(pool, "GREET_ABIGAIL")
+			end
+
+			if CanPlayAmbientSpeech(sourcePed, "GREET_ABIGAIL_UPBEAT") then
+				table.insert(pool, "GREET_ABIGAIL_UPBEAT")
+			end
+		end
+		if bIsTargetHosea then
+			if CanPlayAmbientSpeech(sourcePed, "GREET_HOSEA") then
+				table.insert(pool, "GREET_HOSEA")
+			end
+
+			if CanPlayAmbientSpeech(sourcePed, "GREET_HOSEA_UPBEAT") then
+				table.insert(pool, "GREET_HOSEA_UPBEAT")
+			end
+		end
+		if bIsTargetJohn then
+			if CanPlayAmbientSpeech(sourcePed, "GREET_JOHN") then
+				table.insert(pool, "GREET_JOHN")
+			end
+
+			if CanPlayAmbientSpeech(sourcePed, "GREET_JOHN_UPBEAT") then
+				table.insert(pool, "GREET_JOHN_UPBEAT")
+			end
+		end
+	else
+
+		if not CanPlayAmbientSpeech(sourcePed, "GREET_GENERAL_FAMILIAR") then
+			if IsPedMale(targetPed) then
+				table.insert(pool, "GREET_MALE")
+			else
+				table.insert(pool, "GREET_FEMALE")
+			end
+		end
+
+		if CanPlayAmbientSpeech(sourcePed, "GREET_GENERAL_FAMILIAR") then
+			table.insert(pool, "GREET_GENERAL_FAMILIAR")
+		end
+
+		if CanPlayAmbientSpeech(sourcePed, "GREET_GENERAL_STRANGER")  then
+			table.insert(pool, "GREET_GENERAL_STRANGER")
+		end
+	
+		if CanPlayAmbientSpeech(sourcePed, "GREET_MALE") and IsPedMale(targetPed) then
 			table.insert(pool, "GREET_MALE")
-		else
+		end
+	
+		if CanPlayAmbientSpeech(sourcePed, "GREET_FEMALE") and not IsPedMale(targetPed) then
 			table.insert(pool, "GREET_FEMALE")
 		end
-	end
-
-	if CanPlayAmbientSpeech(sourcePed, "GREET_GENERAL_STRANGER")  then
-		table.insert(pool, "GREET_GENERAL_STRANGER")
-	end
-
-	if CanPlayAmbientSpeech(sourcePed, "GREET_MALE") and IsPedMale(targetPed) then
-		table.insert(pool, "GREET_MALE")
-	end
-
-	if CanPlayAmbientSpeech(sourcePed, "GREET_FEMALE") and not IsPedMale(targetPed) then
-		table.insert(pool, "GREET_FEMALE")
-	end
-
-	if CanPlayAmbientSpeech(sourcePed, "HOWS_IT_GOING") then
-		table.insert(pool, "HOWS_IT_GOING")
-	end
 	
-	if CanPlayAmbientSpeech(sourcePed, "GREET_PLAYER_CASUAL") and bIsTargetArthur then
-		table.insert(pool, "GREET_PLAYER_CASUAL")
-	end
-
-	if CanPlayAmbientSpeech(sourcePed, "GREET_DUTCH") and bIsTargetDutch then
-		table.insert(pool, "GREET_DUTCH")
-	end
-
-	if CanPlayAmbientSpeech(sourcePed, "GREET_SADIE") and bIsTargetSadie then
-		table.insert(pool, "GREET_SADIE")
-	end
-
-	if CanPlayAmbientSpeech(sourcePed, "GREET_ABIGAIL") and bIsTargetAbigail then
-		table.insert(pool, "GREET_ABIGAIL")
-	end
-
-	if CanPlayAmbientSpeech(sourcePed, "GREET_HOSEA") and bIsTargetHosea then
-		table.insert(pool, "GREET_HOSEA")
-	end
-
-	if CanPlayAmbientSpeech(sourcePed, "GREET_JOHN") and bIsTargetJohn then
-		table.insert(pool, "GREET_JOHN")
-	end
-
-	if GetClockHours() > 4 and GetClockHours() < 12 then
-		if CanPlayAmbientSpeech(sourcePed, "GREET_MORNING") then
-			table.insert(pool, "GREET_MORNING")
+		if CanPlayAmbientSpeech(sourcePed, "HOWS_IT_GOING") then
+			table.insert(pool, "HOWS_IT_GOING")
 		end
-	elseif GetClockHours() > 16 then
-		if CanPlayAmbientSpeech(sourcePed, "GREET_EVENING") then
-			table.insert(pool, "GREET_EVENING")
+		
+		if GetClockHours() > 4 and GetClockHours() < 12 then
+			if CanPlayAmbientSpeech(sourcePed, "GREET_MORNING") then
+				table.insert(pool, "GREET_MORNING")
+			end
+		elseif GetClockHours() > 16 then
+			if CanPlayAmbientSpeech(sourcePed, "GREET_EVENING") then
+				table.insert(pool, "GREET_EVENING")
+			end
 		end
 	end
 
@@ -180,6 +210,8 @@ local function GetRandomGreetLine(sourcePed, targetPed)
 	if #pool > 0 then
 		line = pool[math.random(#pool)]
 	end
+
+	
 
 	-- Initiate a chat if already greeted
 	if DecorExistOn(targetPed, DECOR_PLAYER_GREETED) and not DecorExistOn(targetPed, DECOR_PLAYER_CHAT_PROGRESS) then	
@@ -213,36 +245,81 @@ end
 local function GetRandomAntagonizeLine(sourcePed, targetPed)
 	local pool = {}
 	
-	if CanPlayAmbientSpeech(sourcePed, "WHATS_YOUR_PROBLEM") then
-		table.insert(pool, "WHATS_YOUR_PROBLEM")
-	end
+	local bIsTargetDutch = IsMetaPedUsingDrawable(targetPed, -1915127302)
+	local bIsTargetSadie = IsMetaPedUsingDrawable(targetPed, 1394074183)
+	local bIsTargetAbigail = IsMetaPedUsingDrawable(targetPed, 608791149)
+	local bIsTargetHosea = IsMetaPedUsingDrawable(targetPed, 1912857542)
+	local bIsTargetJohn = IsMetaPedUsingDrawable(targetPed, -815603338)
+	local bIsCampMember = (bIsTargetArthur or bIsTargetDutch or bIsTargetSadie or bIsTargetAbigail or bIsTargetHosea or bIsTargetJohn)
 
-	if CanPlayAmbientSpeech(sourcePed, "INSULT_MALE_CONV_PART1") and IsPedMale(targetPed) then
-		table.insert(pool, "INSULT_MALE_CONV_PART1")
-	end
+	
+	if (bIsCampMember and CanPlayAmbientSpeech(sourcePed, "INSULT_DUTCH_CONV_PART1")) then
+		if CanPlayAmbientSpeech(sourcePed, "GREET_PLAYER_CASUAL") and bIsTargetArthur then
+			table.insert(pool, "GREET_PLAYER_CASUAL")
+		end
+	
+		if bIsTargetDutch then
+			if CanPlayAmbientSpeech(sourcePed, "INSULT_DUTCH_CONV_PART1") then
+				table.insert(pool, "INSULT_DUTCH_CONV_PART1")
+			end
+		end
+	
+		if bIsTargetSadie then
+			if CanPlayAmbientSpeech(sourcePed, "INSULT_SADIE_CONV_PART1") then
+				table.insert(pool, "INSULT_SADIE_CONV_PART1")
+			end
+		end
+		
+		if bIsTargetAbigail then
+			if CanPlayAmbientSpeech(sourcePed, "INSULT_ABIGAIL_CONV_PART1") then
+				table.insert(pool, "INSULT_ABIGAIL_CONV_PART1")
+			end
+		end
+	
+		if bIsTargetHosea then
+			if CanPlayAmbientSpeech(sourcePed, "INSULT_HOSEA_CONV_PART1") then
+				table.insert(pool, "INSULT_HOSEA_CONV_PART1")
+			end
+		end
+	
+		if bIsTargetJohn then
+			if CanPlayAmbientSpeech(sourcePed, "INSULT_JOHN_CONV_PART1") then
+				table.insert(pool, "INSULT_JOHN_CONV_PART1")
+			end
+		end
+		
+	else
+		if CanPlayAmbientSpeech(sourcePed, "WHATS_YOUR_PROBLEM") then
+			table.insert(pool, "WHATS_YOUR_PROBLEM")
+		end
 
-	if CanPlayAmbientSpeech(sourcePed, "INSULT_FEMALE_CONV_PART1") and not IsPedMale(targetPed) then
-		table.insert(pool, "INSULT_FEMALE_CONV_PART1")
-	end
+		if CanPlayAmbientSpeech(sourcePed, "INSULT_MALE_CONV_PART1") and IsPedMale(targetPed) then
+			table.insert(pool, "INSULT_MALE_CONV_PART1")
+		end
 
-	if CanPlayAmbientSpeech(sourcePed, "GENERIC_ANTISOCIAL_MALE_EVENT_COMMENT") then
-		table.insert(pool, "GENERIC_ANTISOCIAL_MALE_EVENT_COMMENT")
-	end
+		if CanPlayAmbientSpeech(sourcePed, "INSULT_FEMALE_CONV_PART1") and not IsPedMale(targetPed) then
+			table.insert(pool, "INSULT_FEMALE_CONV_PART1")
+		end
 
-	if CanPlayAmbientSpeech(sourcePed, "GENERIC_INSULT_MED_NEUTRAL")  then
-		table.insert(pool, "GENERIC_INSULT_MED_NEUTRAL")
-	end
+		if CanPlayAmbientSpeech(sourcePed, "GENERIC_ANTISOCIAL_MALE_EVENT_COMMENT") then
+			table.insert(pool, "GENERIC_ANTISOCIAL_MALE_EVENT_COMMENT")
+		end
 
-	if CanPlayAmbientSpeech(sourcePed, "GENERIC_INSULT_HIGH_NEUTRAL")  then
-		table.insert(pool, "GENERIC_INSULT_HIGH_NEUTRAL")
-	end
+		if CanPlayAmbientSpeech(sourcePed, "GENERIC_INSULT_MED_NEUTRAL")  then
+			table.insert(pool, "GENERIC_INSULT_MED_NEUTRAL")
+		end
 
-	if CanPlayAmbientSpeech(sourcePed, "GENERIC_MOCK") then
-		table.insert(pool, "GENERIC_MOCK")
-	end
+		if CanPlayAmbientSpeech(sourcePed, "GENERIC_INSULT_HIGH_NEUTRAL")  then
+			table.insert(pool, "GENERIC_INSULT_HIGH_NEUTRAL")
+		end
 
-	if CanPlayAmbientSpeech(sourcePed, "PROVOKE_GENERIC") then
-		table.insert(pool, "PROVOKE_GENERIC")
+		if CanPlayAmbientSpeech(sourcePed, "GENERIC_MOCK") then
+			table.insert(pool, "GENERIC_MOCK")
+		end
+
+		if CanPlayAmbientSpeech(sourcePed, "PROVOKE_GENERIC") then
+			table.insert(pool, "PROVOKE_GENERIC")
+		end
 	end
 
 	if #pool > 0 then
@@ -251,6 +328,30 @@ local function GetRandomAntagonizeLine(sourcePed, targetPed)
 		return "NONE"
 	end
 end
+
+function GetRandomPedAntagonizeResponse(ped)
+	local pool = {}
+
+	if CanPlayAmbientSpeech(ped, "GENERIC_INSULT_HIGH") then
+		table.insert(pool, "GENERIC_INSULT_HIGH")
+	end
+
+	if CanPlayAmbientSpeech(ped, "GENERIC_INSULT_HIGH_NEUTRAL") then
+		table.insert(pool, "GENERIC_INSULT_HIGH_NEUTRAL")
+	end
+
+	if CanPlayAmbientSpeech(ped, "INSULT_RESPONSE") then
+		table.insert(pool, "INSULT_RESPONSE")
+	end
+
+	if #pool > 0 then
+		return pool[math.random(#pool)]
+	else
+		return "NONE"
+	end
+end
+
+
 
 function GetRandomChatLine(ped, target)
 	local pool = {}
@@ -301,6 +402,8 @@ function GetRandomChatLine(ped, target)
 		return "NONE"
 	end
 end
+
+
 
 local bIsFocusingOnPed = false
 local focusedPed = 0
@@ -617,8 +720,9 @@ AddEventHandler("cl_speak", function(playerPed_net, targetPed_net, bAntagonize, 
 				Citizen.InvokeNative(0xCB9401F918CB0F75, targetPed, "IsCombat", true, 5000) 
 				SetPedMotivation(targetPed, 3, 1.0, sourcePed)
 						
-				PlayAmbientSpeechFromEntity(targetPed, "", "GENERIC_INSULT_HIGH", "Speech_Params_Beat_Shouted_Clear_AllowPlayAfterDeath", 0)
-				PlayAmbientSpeechFromEntity(targetPed, "", "GENERIC_INSULT_HIGH_NEUTRAL", "Speech_Params_Beat_Shouted_Clear_AllowPlayAfterDeath", 0)
+				
+				PlayAmbientSpeechFromEntity(targetPed, "", GetRandomPedAntagonizeResponse(targetPed), "speech_params_force", 0)
+				
 				
 				local x,y,z =  table.unpack(GetEntityCoords(sourcePed))
 				TaskReact(targetPed, sourcePed, x, y, z, "DEFAULT_SHOCKED", 5.0, 10.0, 4)

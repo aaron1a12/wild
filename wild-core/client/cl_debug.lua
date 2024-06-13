@@ -469,7 +469,7 @@ Citizen.CreateThread(function()
     
                 if dist < 10.0 then
                     --DrawTextAtCoord(coords, "Ped ID: " .. ped .. "\nNet: "..netId.."\nRelation: " .. GetPedRelationshipGroupHash(ped) .. "\nIsNPC: "..tostring(DecorExistOn(ped, "npc")) .. "\nManaged: "..tostring(bManaged), 0.25, 255, 255, 255, 255)
-                    DrawTextAtCoord(coords, "Ped ID: " .. ped .. "\nHealth: "..tostring(GetEntityHealth(ped)), 0.25, 255, 255, 255, 255)
+                    DrawTextAtCoord(coords, "Ped ID: " .. ped .. "\nHealth: "..tostring(GetEntityHealth(ped)) .."\nModel: "..tostring(GetEntityModel(ped)), 0.25, 255, 255, 255, 255)
                 end
 
             end
