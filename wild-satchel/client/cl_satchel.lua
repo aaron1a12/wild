@@ -187,7 +187,7 @@ function SatchelRemoveItem(item, quantity, bSuppressUi, bNoNativeChange, bNoServ
         local entityStowed = GetFirstEntityPedIsCarrying(mount)
 
         if DoesEntityExist(entityStowed) then
-            if not (GetIsAnimal(entityStowed) == 0 and GetIsAnimal(entityStowed) == 0) then
+            if not (GetIsAnimal(entityStowed) == 0) then
                 if IsEntityAPed(entityStowed) then
                     local carcass = GetSatchelCarcassFromPed(entityStowed)
                     if carcass == item then
@@ -197,8 +197,9 @@ function SatchelRemoveItem(item, quantity, bSuppressUi, bNoNativeChange, bNoServ
                     end
                 end
             end
-            return false
-        elseif InventoryGetInventoryItemIsAnimalPelt(item) == 1 then
+	end
+		
+        if InventoryGetInventoryItemIsAnimalPelt(item) == 1 then
             local peltQuantity = 0
             local quantityRemoved = 0
 
