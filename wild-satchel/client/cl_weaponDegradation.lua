@@ -43,7 +43,7 @@ local flowblock = DataView.ArrayBuffer(8 * 136)
 local itemLabel = 0
 
 function UpdateGunOilPrompt()
-    local nGunOil = InventoryGetInventoryItemCountWithItemid(1, `kit_gun_oil`, false)
+    local nGunOil = SatchelGetItemCount(`kit_gun_oil`) -- InventoryGetInventoryItemCountWithItemid(1, `kit_gun_oil`, false)
 
     if nGunOil > 0 then
         SetPedBlackboardBool(PlayerPedId(), "GENERIC_WEAPON_CLEAN_PROMPT_AVAILABLE", true, -1)
@@ -111,7 +111,7 @@ Citizen.CreateThread(function()
         if IsPedRunningInspectionTask(playerPed) == 1 then
             if IsControlJustPressed(0, `INPUT_CONTEXT_X`) and GetItemInteractionPromptProgress(playerPed, `INPUT_CONTEXT_X`) == 0 then
                 -- remove gun oil 
-                RemoveItemFromInventory(`kit_gun_oil`, 1)
+                SatchelRemoveItem(`kit_gun_oil`, 1)
      
                 UpdateGunOilPrompt()
             end
