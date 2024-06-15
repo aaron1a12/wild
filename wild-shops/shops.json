@@ -42,6 +42,8 @@
         {"item":"weapon_shotgun_doublebarrel", "price": 12.0},
         {"item":"weapon_shotgun_pump", "price": 20.0},
         {"item":"weapon_shotgun_semiauto", "price": 25.0},
+        {"item":"weapon_bow", "price": 5.0},
+        {"item":"weapon_bow_improved", "price": 10.0},
         {"item":"weapon_thrown_dynamite", "price": 4.0},
         {"item":"weapon_thrown_molotov", "price": 4.0},
         {"item":"weapon_thrown_poisonbottle", "price": 0.25}
@@ -54,7 +56,14 @@
         {"item":"AMMO_RIFLE_EXPRESS", "price": 1.00},
         {"item":"AMMO_22", "price": 0.10},
         {"item":"AMMO_REPEATER", "price": 0.50},
-        {"item":"AMMO_SHOTGUN", "price": 1.00}
+        {"item":"AMMO_ARROW", "price": 0.50},
+        {"item":"AMMO_ARROW_SMALL_GAME", "price": 0.50},
+        {"item":"AMMO_DYNAMITE", "price": 2.00},
+        {"item":"AMMO_BOLAS", "price": 4.00},
+        {"item":"AMMO_MOONSHINEJUG_MP", "price": 0.50},
+        {"item":"AMMO_POISONBOTTLE", "price": 1.00},
+        {"item":"AMMO_THROWING_KNIVES", "price": 0.25},
+        {"item":"AMMO_TOMAHAWK", "price": 0.50}
     ],
 
     "provisions" : [

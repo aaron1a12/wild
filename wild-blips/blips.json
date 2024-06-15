@@ -36,7 +36,6 @@
 	{"style":"BLIP_STYLE_SHOP", "sprite":"blip_hotel_bed", "name":"Hotel", "coords": [-1817.35, -372.39, 163.31], "city":"Strawberry"},
 	{"style":"BLIP_STYLE_SHOP", "sprite":"blip_special_series_1", "name":"Sheriff", "coords": [-1807.17, -348.24, 164.65], "city":"Strawberry"},
 	{"style":"BLIP_STYLE_SHOP", "sprite":"blip_special_series_1", "name":"Sheriff", "coords": [1361.36, -1302.96, 77.76], "city":"Rhodes"},
-	{"style":"BLIP_STYLE_SHOP", "sprite":"blip_shop_store", "name":"General Store", "coords": [1330.00, -1294.40, 77.02], "city":"Rhodes"},
 	{"style":"BLIP_STYLE_SHOP", "sprite":"blip_shop_gunsmith", "name":"Gunsmith", "coords": [1322.59, -1323.35, 77.88], "city":"Rhodes"},
 	{"style":"BLIP_STYLE_SHOP", "sprite":"blip_proc_bank", "name":"Bank", "coords": [1291.04, -1303.55, 77.04], "city":"Rhodes"}
 ]
