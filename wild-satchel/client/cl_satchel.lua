@@ -126,6 +126,12 @@ function SatchelAddItem(item, quantity, bNoUpdate, bSuppressUi)
         local inventoryGuid, slotId = GetItemInventoryInfo(item)
         local maxCount = GetItemSlotMaxCount(item, slotId)
 
+        -- Some items can fit unlimited slot counts (jewelry).
+        -- Still limit since more than 99 looks gross on the satchel ui.
+        if maxCount == -1 then
+            maxCount = 99
+        end
+
         if not customItem and PlayerInventory[key][1] + quantity > maxCount then
             ShowHelpText("Satchel is full for this type of item.")
             return
