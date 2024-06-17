@@ -379,9 +379,21 @@ function GetInventoryWithFilter(itemArray, filter)
         end
 
         if bIsAllowed then 
-            table.insert(itemArray, {
-                item = itemHash, quantity = quantity, ui = itemUi, location = iLocation
-            })
+            local iExistingIndex = 0
+            for i=1, #itemArray do
+                if itemArray[i].item == itemHash then
+                    iExistingIndex = i
+                    break
+                end
+            end
+
+            if iExistingIndex ~= 0 then
+                itemArray[iExistingIndex].quantity = itemArray[iExistingIndex].quantity + quantity
+            else
+                table.insert(itemArray, {
+                    item = itemHash, quantity = quantity, ui = itemUi, location = iLocation
+                })
+            end
         end
     end
 
@@ -418,19 +430,29 @@ function GetInventoryWithFilter(itemArray, filter)
 
     if mount ~= 0 and mountDist < 30.0 then
 
-        -- Get items
+        -- Get attached items
 
-        -- TODO: investigate FIND_ALL_ATTACHED_CARRIABLE_ENTITIES (0xB5ACE8B23A438EC0) or
-        -- GET_CARRIED_ATTACHED_INFO_FOR_SLOT (0x608BC6A6AACD5036) to get other side stowed items?
-        local entityStowed = GetFirstEntityPedIsCarrying(mount)
-        local entityAsItem = GetCarriableFromEntity(entityStowed)
+        local set = CreateItemset(true)
+        FindAllAttachedCarriableEntities(mount, set)
 
-        if not (GetIsAnimal(entityStowed) == 0 and GetIsAnimal(entityStowed) == 0) then
-            if IsEntityAPed(entityStowed) then
-                local carcass = GetSatchelCarcassFromPed(entityStowed)
-                tryAddToArray(carcass, 1, 1)
+        for i=0, GetItemsetSize(set)-1 do
+            local attachedEnt = GetIndexedItemInItemset(i, set)
+
+            -- In my testing, 0x31FEF6A20F00B963 native seems to only return the item when it's a pelt carriable.
+            local attachedEntAsPelt = GetCarriableFromEntity(attachedEnt)
+
+            if attachedEntAsPelt ~= 0 then
+                tryAddToArray(attachedEntAsPelt, 1, 1)
+            else
+                local carcass = GetSatchelCarcassFromPed(attachedEnt)
+
+                if carcass ~= 0 then
+                    tryAddToArray(carcass, 1, 1)
+                end
             end
         end
+
+        DestroyItemset(set)
 
         -- Search for pelts
 

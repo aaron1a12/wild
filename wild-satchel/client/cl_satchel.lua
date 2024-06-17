@@ -188,22 +188,38 @@ function SatchelRemoveItem(item, quantity, bSuppressUi, bNoNativeChange, bNoServ
 
         local mount, mountDist = PickMountForLoad(PlayerId())
 
-        -- Is it a carcass?
+        -- Is it attached?
 
-        local entityStowed = GetFirstEntityPedIsCarrying(mount)
+        local set = CreateItemset(true)
+        FindAllAttachedCarriableEntities(mount, set)
 
-        if DoesEntityExist(entityStowed) then
-            if not (GetIsAnimal(entityStowed) == 0) then
-                if IsEntityAPed(entityStowed) then
-                    local carcass = GetSatchelCarcassFromPed(entityStowed)
-                    if carcass == item then
-                        DeleteEntity(entityStowed)
-                        updateSatchelUi(0)
-                        return true
-                    end
+        local entitiesDeleted = 0
+        local entityQuantity = 0
+
+        for i=0, GetItemsetSize(set)-1 do
+            local attachedEnt = GetIndexedItemInItemset(i, set)
+            local attachedItem = GetCarriableFromEntity(attachedEnt)
+
+            if attachedItem == 0 then
+                attachedItem = GetSatchelCarcassFromPed(attachedEnt)
+            end
+
+            if attachedItem == item then                
+                entityQuantity = entityQuantity + 1
+                
+                if entitiesDeleted < quantity then
+                    DeleteEntity(attachedEnt)
+                    entitiesDeleted = entitiesDeleted + 1
+                    entityQuantity = entityQuantity - 1
                 end
             end
-	end
+        end
+
+        DestroyItemset(set)
+
+        if entitiesDeleted > 0 then
+            updateSatchelUi(entityQuantity)
+        end
 		
         if InventoryGetInventoryItemIsAnimalPelt(item) == 1 then
             local peltQuantity = 0
@@ -483,6 +499,8 @@ end)
      -- ITEM_FLAG_QUALITY_PRISTINE
 ]]
 
+local gridItems = {}
+
 function RepopulateGrid()
     if bPopulatingNow then
         return
@@ -492,9 +510,9 @@ function RepopulateGrid()
     W.UI.EmptyPage("satchel", "grid")
     CreateFilters()
     W.UI.SelectPageFilterIcon("satchel", "grid", filterIndex-1)
-
-    local gridItems = {}
     
+    gridItems = {}
+
     GetCustomInventoryWithFilter(gridItems, filters[filterIndex])
     GetInventoryWithFilter(gridItems, filters[filterIndex])
 
@@ -648,6 +666,18 @@ function UpdatePrompts()
             UiPromptSetEnabled(W.UI.GetActivePrompt(), false)
         end
 
+        -- Disable dropping items if on horse
+        -- (prevents picking up later and having entire deers stored in your satchel, lol)
+        for i=1, #gridItems do
+            if gridItems[i].item == item then
+                if gridItems[i].location ~= 1 then
+                    UiPromptSetEnabled(promptDrop, true) 
+                else
+                    UiPromptSetEnabled(promptDrop, false) 
+                end
+            end
+        end
+
     else -- Shop mode
         UiPromptSetText(W.UI.GetActivePrompt(), CreateVarString(10, "LITERAL_STRING", "Sell"))
 
@@ -664,6 +694,7 @@ function UpdatePrompts()
         local count = SatchelGetItemCount(item)
         local totalSale = count*SatchelGetItemValue(item)
 
+        -- The promptDrop is being hacked here to function as a 'Sell All' prompt
         if count > 1 then
             UiPromptSetVisible(promptDrop, true) 
             UiPromptSetEnabled(promptDrop, true) 
