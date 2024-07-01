@@ -17,4 +17,16 @@ start wild-horses
 start wild-emote
 start wild-blips
 ```
-3. Go to `wild-core` and rename `_config.json` and `_players.json` to `config.json` and `players.json`
+
+3. Rename the following files in their respective folders:
+
+| Folder          | Current Filename            | New Filename                |
+|-----------------|-----------------------------|-----------------------------|
+| wild-core       | `_config.json`              | `config.json`               |
+|                 | `_honor.json`               | `honor.json`                |
+|                 | `_npcs.json`                | `npcs.json`                 |
+|                 | `_player_outfits.json`      | `player_outfits.json`       |
+|                 | `_players.json`             | `players.json`              |
+| wild-horses     | `_player_horses.json`       | `player_horses.json`        |
+| wild-war        | `_factions.json`            | `factions.json`             |
+| wild-satchel    | `_player_inventories.json`  | `player_inventories.json`   |

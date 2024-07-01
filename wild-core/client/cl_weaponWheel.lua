@@ -54,15 +54,14 @@ Citizen.CreateThread(function()
                         name = faction
                     end
 
-                    local str = CreateVarString(10, "LITERAL_STRING", text)
+                    local str = CreateVarString(10, "LITERAL_STRING", name)
                     SetTextColor(255, 255, 255, 255)
                     BgSetTextColor(255, 255, 255, 255)
                     SetTextFontForCurrentCommand(6)
                     SetTextDropshadow(2, 128, 128, 128, 255)
                     SetTextScale(0.7, 0.7)
                     SetTextCentre(true)
-                
-                    DisplayText(name, 0.85, 0.1)
+                    DisplayText(str, 0.85, 0.1)
                 end
             end
         end
